@@ -23,6 +23,7 @@ dependencies = [
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
 black = "^25.1.0"
+pylint = "^3.3.7"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

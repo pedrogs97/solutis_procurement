@@ -21,9 +21,8 @@ class BaseAPIView(GenericAPIView):
     def get_serializer_class(self):
         if not self.serializer_class_out and not self.serializer_class_in:
             assert self.serializer_class is not None, (
-                "'%s' should include a `serializer_class` attribute when "
+                f"'{self.__class__.__name__}' should include a `serializer_class` attribute when "
                 "`serializer_class_in` and `serializer_class_out` are not provided."
-                % self.__class__.__name__
             )
             return self.serializer_class
 
@@ -45,9 +44,8 @@ class BaseAPIView(GenericAPIView):
             return self.serializer_class
 
         raise AssertionError(
-            "'%s' must define either `serializer_class`, or both "
+            f"'{self.__class__.__name__}' must define either `serializer_class`, or both "
             "`serializer_class_in` and `serializer_class_out` attributes."
-            % self.__class__.__name__
         )
 
     def get(self, request, *args, **kwargs):

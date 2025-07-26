@@ -31,6 +31,11 @@ from src.supplier.models.domain import (
 
 
 class Contract(TimestampedModel):
+    """
+    Model representing a contract associated with suppliers.
+    Contains contract details such as object, activities, start and end dates.
+    """
+
     object_contract = models.CharField(max_length=255, help_text="Objeto do Contrato")
     executed_activities = models.TextField(help_text="Atividades Executadas")
     contract_start_date = models.DateField(help_text="Data de Início do Contrato")
@@ -40,6 +45,10 @@ class Contract(TimestampedModel):
         return f"Contrato: {self.object_contract} - {self.contract_start_date} a {self.contract_end_date}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for Contract model.
+        """
+
         db_table = "contract"
         verbose_name = "Contrato"
         verbose_name_plural = "Contratos"
@@ -47,6 +56,11 @@ class Contract(TimestampedModel):
 
 
 class PaymentDetails(TimestampedModel):
+    """
+    Model representing payment details for supplier contracts.
+    Contains payment information including frequencies, dates, and values.
+    """
+
     payment_frequency = models.CharField(
         max_length=50, help_text="Periodicidade do Pagamento"
     )
@@ -76,6 +90,10 @@ class PaymentDetails(TimestampedModel):
         return f"Pagamento: {self.payment_frequency} - {self.payment_date}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for PaymentDetails model.
+        """
+
         db_table = "payment_details"
         verbose_name = "Detalhes de Pagamento"
         verbose_name_plural = "Detalhes de Pagamento"
@@ -83,6 +101,11 @@ class PaymentDetails(TimestampedModel):
 
 
 class OrganizationalDetails(TimestampedModel):
+    """
+    Model representing organizational details of suppliers.
+    Contains cost center, business unit, and other organizational information.
+    """
+
     cost_center = models.CharField(max_length=50, help_text="Centro de Custo")
     business_unit = models.CharField(
         max_length=100, help_text="BU (Unidade de Negócio)"
@@ -120,6 +143,10 @@ class OrganizationalDetails(TimestampedModel):
         return f"Organizacional: {self.cost_center} - {self.business_unit}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for OrganizationalDetails model.
+        """
+
         db_table = "organizational_details"
         verbose_name = "Detalhes Organizacionais"
         verbose_name_plural = "Detalhes Organizacionais"
@@ -127,6 +154,11 @@ class OrganizationalDetails(TimestampedModel):
 
 
 class FiscalDetails(TimestampedModel):
+    """
+    Model representing fiscal details for suppliers.
+    Contains tax-related information including ISS, withholding tax, and cooperative details.
+    """
+
     # Campos Fiscais - ISS
     iss_withholding = models.ForeignKey(
         DomIssWithholding,
@@ -158,6 +190,10 @@ class FiscalDetails(TimestampedModel):
         return f"Fiscal: ISS {self.iss_withholding} - Simples Nacional {self.simples_nacional_participant}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for FiscalDetails model.
+        """
+
         db_table = "fiscal_details"
         verbose_name = "Detalhes Fiscais"
         verbose_name_plural = "Detalhes Fiscais"
@@ -165,6 +201,11 @@ class FiscalDetails(TimestampedModel):
 
 
 class CompanyInformation(TimestampedModel):
+    """
+    Model representing company information for suppliers.
+    Contains company size, tax details, and classification information.
+    """
+
     company_size = models.ForeignKey(
         DomCompanySize,
         on_delete=models.DO_NOTHING,
@@ -211,6 +252,10 @@ class CompanyInformation(TimestampedModel):
         return f"Empresa: {self.company_size} - ICMS {self.icms_taxpayer}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for CompanyInformation model.
+        """
+
         db_table = "company_information"
         verbose_name = "Informações da Empresa"
         verbose_name_plural = "Informações da Empresa"
@@ -218,6 +263,11 @@ class CompanyInformation(TimestampedModel):
 
 
 class Supplier(TimestampedModel):
+    """
+    Model representing a supplier in the procurement system.
+    Contains basic supplier information and relationships to detailed information.
+    """
+
     trade_name = models.CharField(max_length=255, help_text="Nome fantasia")
     legal_name = models.CharField(max_length=255, unique=True, help_text="Razão Social")
     tax_id = models.CharField(max_length=16, unique=True, help_text="CPF/CNPJ")
@@ -274,6 +324,10 @@ class Supplier(TimestampedModel):
         return self.trade_name
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for Supplier model.
+        """
+
         db_table = "supplier"
         verbose_name = "Supplier"
         verbose_name_plural = "Suppliers"

@@ -15,6 +15,10 @@ from src.utils.upload import supplier_attachment_upload_path
 
 
 class SupplierAttachment(TimestampedModel):
+    """
+    Model representing an attachment for a supplier.
+    """
+
     attachment_type = models.ForeignKey(
         DomAttachmentType,
         on_delete=models.DO_NOTHING,
@@ -59,6 +63,10 @@ class SupplierAttachment(TimestampedModel):
         return None
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta options for the SupplierAttachment model.
+        """
+
         db_table = "supplier_attachment"
         verbose_name = "Supplier Attachment"
         verbose_name_plural = "Supplier Attachments"

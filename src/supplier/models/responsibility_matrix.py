@@ -155,6 +155,10 @@ class ResponsibilityMatrix(TimestampedModel):
         return f"Matriz de Responsabilidade - {self.supplier.trade_name}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta options for the ResponsibilityMatrix model.
+        """
+
         db_table = "responsibility_matrix"
         verbose_name = "Matriz de Responsabilidade"
         verbose_name_plural = "Matrizes de Responsabilidade"

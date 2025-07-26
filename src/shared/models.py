@@ -7,14 +7,26 @@ from django.db import models
 
 
 class TimestampedModel(models.Model):
+    """
+    Abstract model that adds created_at and updated_at fields.
+    """
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """
+        Meta options for the TimestampedModel.
+        """
+
         abstract = True
 
 
 class Address(TimestampedModel):
+    """
+    Model representing an address.
+    """
+
     street = models.CharField(max_length=255)
     city = models.CharField(max_length=150)
     state = models.CharField(max_length=100)
@@ -27,6 +39,10 @@ class Address(TimestampedModel):
         return f"{self.street}, {self.city}/{self.state} - {self.postal_code}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta options for the Address model.
+        """
+
         db_table = "address"
         verbose_name = "Address"
         verbose_name_plural = "Addresses"
@@ -34,6 +50,10 @@ class Address(TimestampedModel):
 
 
 class Contact(TimestampedModel):
+    """
+    Model representing a contact.
+    """
+
     email = models.EmailField(blank=True, unique=True)
     phone = models.CharField(max_length=11, blank=True)
 
@@ -41,6 +61,10 @@ class Contact(TimestampedModel):
         return f"{self.email} / {self.phone}"
 
     class Meta(TimestampedModel.Meta):
+        """
+        Meta options for the Contact model.
+        """
+
         db_table = "contact"
         verbose_name = "Contact"
         verbose_name_plural = "Contacts"
@@ -48,10 +72,18 @@ class Contact(TimestampedModel):
 
 
 class DomType(models.Model):
+    """
+    Model representing a domain type.
+    """
+
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
+        """
+        Meta options for the DomType model.
+        """
+
         abstract = True

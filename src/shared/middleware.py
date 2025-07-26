@@ -30,6 +30,10 @@ class SnakeCaseMiddleware(MiddlewareMixin):
         return dict_data
 
     def process_request(self, request):
+        """
+        Process the request to convert JSON body keys to snake_case.
+        This is applied only for POST, PUT, and PATCH requests with JSON content type.
+        """
         if (
             request.method in ["POST", "PUT", "PATCH"]
             and request.content_type == "application/json"

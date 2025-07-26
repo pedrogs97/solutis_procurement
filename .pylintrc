@@ -1,0 +1,47 @@
+[MASTER]
+# Arquivos e pastas a serem ignorados pelo pylint
+ignore=manage.py,config,migrations,tests
+
+# Padrões de arquivos de teste a serem ignorados
+ignore-patterns=test_.*\.py,.*_test\.py
+
+[MESSAGES CONTROL]
+# Desabilitar algumas mensagens específicas
+disable=
+    C0103,  # invalid-name (para migrations do Django)
+    C0301,  # line-too-long (será tratado pelo black)
+    R0903,  # too-few-public-methods
+    R0914,  # too-many-locals
+    W0212,  # protected-access (para Django é comum)
+    W0613,  # unused-argument (comum em Django views)
+    W0718,  # broad-exception-caught
+    W0707,  # raise-missing-from
+    W1113,  # keyword-arg-before-vararg
+    E0401,  # import-error (pode ocorrer em alguns casos específicos)
+    E1101,  # no-member (Django models têm membros dinâmicos)
+    E1102,  # not-callable (serializers podem não ser detectados)
+    E0307,  # invalid-str-returned (Django models podem retornar outros tipos)
+    W0622,  # redefined-builtin
+
+[FORMAT]
+# Configurações de formatação (delegadas ao black)
+max-line-length=88
+indent-string='    '
+
+[BASIC]
+# Nomes considerados bons (variáveis de uma letra, etc.)
+good-names=i,j,k,ex,Run,_,pk,id,db
+
+[DESIGN]
+# Configurações de design
+max-args=7
+max-locals=15
+max-returns=6
+max-branches=12
+max-statements=50
+max-attributes=10
+
+[TYPECHECK]
+# Ignorar membros específicos que podem não ser encontrados
+ignored-modules=django,rest_framework
+generated-members=objects,DoesNotExist,id,pk,save,delete

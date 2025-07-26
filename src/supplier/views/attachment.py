@@ -117,8 +117,6 @@ class SupplierAttachmentUploadView(BaseAPIView):
     def post(self, request, supplier_id=None, *args, **kwargs):
         """
         Upload a new attachment file.
-        POST /api/supplier-attachments/upload/
-        POST /api/suppliers/{supplier_id}/attachments/
         """
         # Adiciona o supplier_id aos dados se fornecido na URL
         data = request.data.copy()

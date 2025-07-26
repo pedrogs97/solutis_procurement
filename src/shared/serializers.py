@@ -19,9 +19,24 @@ from src.shared.models import Address, Contact
 from src.shared.validation import BaseValidationError
 
 
-class AddressSerializer(
+class BaseSerializer(
     SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
 ):
+    """
+    Base serializer class for shared models.
+    Converts field names to camelCase representation.
+    """
+
+    class Meta:
+        """
+        Meta options for the base serializer.
+        """
+
+        fields = "__all__"
+        read_only_fields = ("id", "created_at", "updated_at")
+
+
+class AddressSerializer(BaseSerializer):
     """
     Serializer for Address model.
     Converts field names to camelCase representation.
@@ -29,7 +44,11 @@ class AddressSerializer(
 
     _LIST_SERVICES = [WebService.APICEP, WebService.VIACEP, WebService.OPENCEP]
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta options for the Address serializer.
+        """
+
         model = Address
         fields = [
             "id",
@@ -40,6 +59,16 @@ class AddressSerializer(
         read_only_fields = ("id",)
 
     def __validate_postal_code(self, value: str) -> Dict:
+        """
+        Validate the postal code and return address details.
+        Tries multiple services to get the address from the postal code.
+
+        Args:
+            value (str): The postal code to validate.
+
+        Returns:
+            Dict: Address details if found.
+        """
         for service in self._LIST_SERVICES:
             try:
                 return get_address_from_cep(value, service)
@@ -50,7 +79,17 @@ class AddressSerializer(
             message="Não foi possível conectar ao serviço de CEP.",
         )
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict) -> Dict:
+        """
+        Validate the address fields.
+        Validates the postal code and retrieves address details.
+
+        Args:
+            attrs (Dict): The attributes to validate.
+
+        Returns:
+            Dict: Validated attributes with address details.
+        """
         attrs = super().validate(attrs)
         postal_code = attrs.get("postal_code", "")
         try:
@@ -59,30 +98,42 @@ class AddressSerializer(
             attrs["neighbourhood"] = address.get("district", "")
             attrs["city"] = address.get("city", "")
             attrs["state"] = address.get("uf", "")
-        except InvalidCEP:
+        except InvalidCEP as exc:
             raise BaseValidationError(
                 "postal_code",
                 message="Formato de CEP inválido.",
-            )
-        except CEPNotFound:
-            raise BaseValidationError("postal_code", message="CEP não encontrado.")
+            ) from exc
+        except CEPNotFound as exc:
+            raise BaseValidationError(
+                "postal_code", message="CEP não encontrado."
+            ) from exc
         return attrs
 
 
-class ContactSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class ContactSerializer(BaseSerializer):
     """
     Serializer for Contact model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta options for the Contact serializer.
+        """
+
         model = Contact
         fields = ["id", "email", "phone"]
         read_only_fields = ("id",)
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict) -> Dict:
+        """
+        Validate the contact fields.
+
+        Args:
+            attrs (Dict): The attributes to validate.
+        Returns:
+            Dict: Validated attributes.
+        """
         attrs = super().validate(attrs)
         email = attrs.get("email", "")
         if email and not serializers.EmailField().run_validation(email):

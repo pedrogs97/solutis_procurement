@@ -3,6 +3,8 @@ Serializer for Supplier model.
 This module provides serializers for input representations of the Supplier model.
 """
 
+from typing import Dict
+
 from rest_framework import serializers
 
 from src.shared.mixins import SerializerCamelCaseRepresentationMixin
@@ -27,6 +29,10 @@ class ContractInSerializer(
     """
 
     class Meta:
+        """
+        Meta options for the Contract model serializer.
+        """
+
         model = Contract
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
@@ -41,6 +47,10 @@ class PaymentDetailsInSerializer(
     """
 
     class Meta:
+        """
+        Meta options for the PaymentDetails model serializer.
+        """
+
         model = PaymentDetails
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
@@ -55,6 +65,10 @@ class OrganizationalDetailsInSerializer(
     """
 
     class Meta:
+        """
+        Meta options for the OrganizationalDetails model serializer.
+        """
+
         model = OrganizationalDetails
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
@@ -69,6 +83,10 @@ class FiscalDetailsInSerializer(
     """
 
     class Meta:
+        """
+        Meta options for the FiscalDetails model serializer.
+        """
+
         model = FiscalDetails
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
@@ -83,6 +101,10 @@ class CompanyInformationInSerializer(
     """
 
     class Meta:
+        """
+        Meta options for the CompanyInformation model serializer.
+        """
+
         model = CompanyInformation
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
@@ -105,14 +127,24 @@ class SupplierInSerializer(
     company_information = CompanyInformationInSerializer()
 
     class Meta:
+        """
+        Meta options for the Supplier model serializer.
+        """
+
         model = Supplier
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
-    def validate(self, attrs):
-        return super().validate(attrs)
+    def create(self, validated_data: Dict) -> Supplier:
+        """
+        Create a new Supplier instance with related objects.
+        This method handles the creation of related objects like Address, Contact, etc.
 
-    def create(self, validated_data: dict) -> Supplier:
+        Args:
+            validated_data (Dict): The validated data for the Supplier.
+        Returns:
+            Supplier: The created Supplier instance.
+        """
         address_data = validated_data.pop("address")
         contact_data = validated_data.pop("contact")
         payment_details_data = validated_data.pop("payment_details")

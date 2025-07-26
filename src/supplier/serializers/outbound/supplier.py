@@ -3,10 +3,7 @@ Serializer for Supplier model.
 This module provides serializers for output representations of the Supplier model.
 """
 
-from rest_framework import serializers
-
-from src.shared.mixins import SerializerCamelCaseRepresentationMixin
-from src.shared.serializers import AddressSerializer, ContactSerializer
+from src.shared.serializers import AddressSerializer, BaseSerializer, ContactSerializer
 from src.supplier.models.supplier import (
     CompanyInformation,
     Contract,
@@ -39,23 +36,23 @@ from src.supplier.serializers.outbound.domain import (
 )
 
 
-class ContractOutSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class ContractOutSerializer(BaseSerializer):
     """
     Serializer for Contract model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for ContractOutSerializer.
+        """
+
         model = Contract
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class PaymentDetailsOutSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class PaymentDetailsOutSerializer(BaseSerializer):
     """
     Serializer for PaymentDetails model.
     Converts field names to camelCase representation.
@@ -64,15 +61,17 @@ class PaymentDetailsOutSerializer(
     payment_method = DomPaymentMethodSerializer()
     pix_key_type = DomPixTypeSerializer()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for PaymentDetailsOutSerializer.
+        """
+
         model = PaymentDetails
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class OrganizationalDetailsOutSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class OrganizationalDetailsOutSerializer(BaseSerializer):
     """
     Serializer for OrganizationalDetails model.
     Converts field names to camelCase representation.
@@ -83,15 +82,17 @@ class OrganizationalDetailsOutSerializer(
     taxpayer_classification = DomTaxpayerClassificationSerializer()
     public_entity = DomPublicEntitySerializer()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for OrganizationalDetailsOutSerializer.
+        """
+
         model = OrganizationalDetails
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class FiscalDetailsOutSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class FiscalDetailsOutSerializer(BaseSerializer):
     """
     Serializer for FiscalDetails model.
     Converts field names to camelCase representation.
@@ -101,15 +102,17 @@ class FiscalDetailsOutSerializer(
     iss_regime = DomIssRegimeSerializer()
     withholding_tax_nature = DomWithholdingTaxSerializer()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for FiscalDetailsOutSerializer.
+        """
+
         model = FiscalDetails
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class CompanyInformationOutSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class CompanyInformationOutSerializer(BaseSerializer):
     """
     Serializer for CompanyInformation model.
     Converts field names to camelCase representation.
@@ -122,15 +125,17 @@ class CompanyInformationOutSerializer(
     customer_type = DomCustomerTypeSerializer()
     taxation_regime = DomTaxationRegimeSerializer()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for CompanyInformationOutSerializer.
+        """
+
         model = CompanyInformation
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class SupplierOutSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class SupplierOutSerializer(BaseSerializer):
     """
     Serializer for Supplier model.
     Converts field names to camelCase representation.
@@ -149,7 +154,11 @@ class SupplierOutSerializer(
     type = DomTypeSupplierSerializer()
     situation = DomSupplierSituationSerializer()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for SupplierOutSerializer.
+        """
+
         model = Supplier
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")

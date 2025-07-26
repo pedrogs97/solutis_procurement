@@ -28,10 +28,14 @@ class SupplierFilters(FilterSet):
         if "," in value:
             values = [int(v.strip()) for v in value.split(",") if v.strip()]
             return queryset.filter(situation__in=values)
-        else:
-            return queryset.filter(situation=int(value))
+
+        return queryset.filter(situation=int(value))
 
     class Meta:
+        """
+        Meta options for the Supplier filter.
+        """
+
         model = Supplier
         fields = ["situation"]
 
@@ -42,6 +46,10 @@ class SupplierAttachmentFilters(FilterSet):
     """
 
     class Meta:
+        """
+        Meta options for the SupplierAttachment filter.
+        """
+
         model = SupplierAttachment
         fields = {
             "supplier": ["exact"],

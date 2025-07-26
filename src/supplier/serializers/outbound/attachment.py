@@ -20,6 +20,10 @@ class SupplierAttachmentOutSerializer(serializers.ModelSerializer):
     file_name = serializers.ReadOnlyField()
 
     class Meta:
+        """
+        Meta options for the SupplierAttachment model serializer.
+        """
+
         model = SupplierAttachment
         fields = [
             "id",
@@ -42,6 +46,10 @@ class SupplierAttachmentBasicOutSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
 
     class Meta:
+        """
+        Meta options for the SupplierAttachment basic serializer.
+        """
+
         model = SupplierAttachment
         fields = [
             "id",

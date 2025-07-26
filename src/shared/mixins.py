@@ -13,6 +13,8 @@ class SerializerCamelCaseRepresentationMixin:
     """
 
     def to_representation(self, instance) -> Any:
+        """
+        Convert the serializer's representation to camelCase."""
         representation = super().to_representation(instance)
         return self._convert_to_camel_case(representation)
 
@@ -25,6 +27,6 @@ class SerializerCamelCaseRepresentationMixin:
                 to_camel_case(key): self._convert_to_camel_case(value)
                 for key, value in data.items()
             }
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return [self._convert_to_camel_case(item) for item in data]
         return data

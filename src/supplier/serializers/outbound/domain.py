@@ -39,6 +39,10 @@ class DomClassificationSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomClassificationSerializer.
+        """
+
         model = DomClassification
         fields = "__all__"
         read_only_fields = ("id",)
@@ -53,6 +57,10 @@ class DomCategorySerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomCategorySerializer.
+        """
+
         model = DomCategory
         fields = "__all__"
         read_only_fields = ("id",)
@@ -67,6 +75,10 @@ class DomRiskLevelSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomRiskLevelSerializer.
+        """
+
         model = DomRiskLevel
         fields = "__all__"
         read_only_fields = ("id",)
@@ -81,6 +93,10 @@ class DomTypeSupplierSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomTypeSupplierSerializer.
+        """
+
         model = DomTypeSupplier
         fields = "__all__"
         read_only_fields = ("id",)
@@ -95,6 +111,10 @@ class DomSupplierSituationSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomSupplierSituationSerializer.
+        """
+
         model = DomSupplierSituation
         fields = "__all__"
         read_only_fields = ("id",)
@@ -109,6 +129,10 @@ class DomPixTypeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomPixTypeSerializer.
+        """
+
         model = DomPixType
         fields = "__all__"
         read_only_fields = ("id",)
@@ -123,6 +147,10 @@ class DomPaymentMethodSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomPaymentMethodSerializer.
+        """
+
         model = DomPaymentMethod
         fields = "__all__"
         read_only_fields = ("id",)
@@ -137,6 +165,10 @@ class DomPayerTypeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomPayerTypeSerializer.
+        """
+
         model = DomPayerType
         fields = "__all__"
         read_only_fields = ("id",)
@@ -151,6 +183,10 @@ class DomBusinessSectorSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomBusinessSectorSerializer.
+        """
+
         model = DomBusinessSector
         fields = "__all__"
         read_only_fields = ("id",)
@@ -165,6 +201,10 @@ class DomTaxpayerClassificationSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomTaxpayerClassificationSerializer.
+        """
+
         model = DomTaxpayerClassification
         fields = "__all__"
         read_only_fields = ("id",)
@@ -179,6 +219,10 @@ class DomPublicEntitySerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomPublicEntitySerializer.
+        """
+
         model = DomPublicEntity
         fields = "__all__"
         read_only_fields = ("id",)
@@ -193,6 +237,10 @@ class DomIssWithholdingSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomIssWithholdingSerializer.
+        """
+
         model = DomIssWithholding
         fields = "__all__"
         read_only_fields = ("id",)
@@ -207,6 +255,10 @@ class DomIssRegimeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomIssRegimeSerializer.
+        """
+
         model = DomIssRegime
         fields = "__all__"
         read_only_fields = ("id",)
@@ -221,6 +273,10 @@ class DomWithholdingTaxSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomWithholdingTaxSerializer.
+        """
+
         model = DomWithholdingTax
         fields = "__all__"
         read_only_fields = ("id",)
@@ -235,6 +291,10 @@ class DomCompanySizeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomCompanySizeSerializer.
+        """
+
         model = DomCompanySize
         fields = "__all__"
         read_only_fields = ("id",)
@@ -249,6 +309,10 @@ class DomIcmsTaxpayerSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomIcmsTaxpayerSerializer.
+        """
+
         model = DomIcmsTaxpayer
         fields = "__all__"
         read_only_fields = ("id",)
@@ -263,6 +327,10 @@ class DomIncomeTypeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomIncomeTypeSerializer.
+        """
+
         model = DomIncomeType
         fields = "__all__"
         read_only_fields = ("id",)
@@ -277,6 +345,10 @@ class DomTaxationMethodSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomTaxationMethodSerializer.
+        """
+
         model = DomTaxationMethod
         fields = "__all__"
         read_only_fields = ("id",)
@@ -291,6 +363,10 @@ class DomCustomerTypeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomCustomerTypeSerializer.
+        """
+
         model = DomCustomerType
         fields = "__all__"
         read_only_fields = ("id",)
@@ -305,6 +381,10 @@ class DomTaxationRegimeSerializer(
     """
 
     class Meta:
+        """
+        Meta configuration for DomTaxationRegimeSerializer.
+        """
+
         model = DomTaxationRegime
         fields = "__all__"
         read_only_fields = ("id",)
