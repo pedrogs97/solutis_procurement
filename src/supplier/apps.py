@@ -1,3 +1,5 @@
+"""Supplier management application configuration for the procurement service."""
+
 from django.apps import AppConfig
 
 

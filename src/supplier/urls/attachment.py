@@ -1,3 +1,7 @@
+"""
+URL patterns for supplier attachment-related views.
+"""
+
 from django.urls import path
 
 from src.supplier.views.attachment import (

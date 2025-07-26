@@ -1,3 +1,8 @@
+"""
+FilterSet for Supplier and SupplierAttachment models.
+This module provides filtering capabilities for supplier-related data.
+"""
+
 from django_filters.rest_framework import CharFilter, FilterSet
 
 from src.supplier.models.attachments import SupplierAttachment

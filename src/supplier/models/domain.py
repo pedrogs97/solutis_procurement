@@ -1,3 +1,8 @@
+"""
+Domain models for the supplier management in procurement service.
+This module contains domain models used specifically for supplier-related functionalities.
+"""
+
 from src.shared.models import DomType
 
 

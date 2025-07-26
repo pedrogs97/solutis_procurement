@@ -1,3 +1,7 @@
+"""
+Utility functions for file uploads.
+"""
+
 import os
 
 

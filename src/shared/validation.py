@@ -1,3 +1,8 @@
+"""
+Validation module for the shared app in Django.
+This module contains custom validation error classes used across the application.
+"""
+
 from typing import Optional
 
 from rest_framework.exceptions import ValidationError

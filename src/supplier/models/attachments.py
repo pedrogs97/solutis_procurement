@@ -1,6 +1,11 @@
+"""
+Attachment model for supplier management in procurement service.
+This model represents attachments related to suppliers, including file storage and metadata.
+It includes fields for attachment type, file, description, and the supplier it is associated with.
+"""
+
 import os
 
-from django.conf import settings
 from django.db import models
 
 from src.shared.models import TimestampedModel

@@ -1,3 +1,8 @@
+"""
+Serializer for SupplierAttachment model.
+This module provides serializers for output representations of the SupplierAttachment model.
+"""
+
 from rest_framework import serializers
 
 from src.shared.mixins import SerializerCamelCaseRepresentationMixin

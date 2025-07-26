@@ -1,3 +1,9 @@
+"""
+Serializer for SupplierAttachment model.
+This module provides serializers for creating and updating supplier attachments,
+including validation for supplier and attachment type existence, file size, and type.
+"""
+
 from rest_framework import serializers
 
 from src.supplier.models.attachments import SupplierAttachment

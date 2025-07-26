@@ -1,7 +1,11 @@
+"""
+Serializer for SupplierAttachment model.
+This module provides serializers for output representations of the SupplierAttachment model.
+"""
+
 from rest_framework import serializers
 
 from src.supplier.models.attachments import SupplierAttachment
-from src.supplier.serializers.outbound.supplier import SupplierOutSerializer
 
 
 class SupplierAttachmentOutSerializer(serializers.ModelSerializer):

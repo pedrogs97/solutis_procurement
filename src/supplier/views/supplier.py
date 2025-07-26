@@ -1,3 +1,8 @@
+"""
+Views for supplier-related operations in the procurement service.
+This module defines views for managing suppliers, including listing and retrieving supplier details.
+"""
+
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response

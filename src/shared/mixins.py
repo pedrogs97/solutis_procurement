@@ -1,3 +1,7 @@
+"""
+Mixins for the shared app in Django.
+"""
+
 from typing import Any
 
 from src.utils.parse import to_camel_case

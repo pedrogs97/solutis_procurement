@@ -1,3 +1,8 @@
+"""
+View for handling supplier attachments in a procurement service.
+This module provides views for creating, updating, deleting, listing, downloading,
+"""
+
 import mimetypes
 import os
 

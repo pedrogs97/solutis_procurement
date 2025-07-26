@@ -1,3 +1,7 @@
+"""
+Middleware for the shared app in Django.
+"""
+
 import json
 
 from django.utils.deprecation import MiddlewareMixin
@@ -6,6 +10,11 @@ from src.utils.parse import to_snake_case
 
 
 class SnakeCaseMiddleware(MiddlewareMixin):
+    """
+    Middleware to convert request data keys to snake_case.
+    This is useful for ensuring consistent naming conventions in APIs.
+    """
+
     def __dict_to_snake_case(self, data: dict) -> dict:
         dict_data = {}
         for k, v in data.items():

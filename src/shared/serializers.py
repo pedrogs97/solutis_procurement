@@ -1,3 +1,8 @@
+"""
+Serializers for the shared app in Django.
+This module contains serializers for common models used across the application.
+"""
+
 from typing import Dict
 
 from brazilcep.client import WebService, get_address_from_cep

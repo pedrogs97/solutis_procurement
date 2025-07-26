@@ -1,3 +1,7 @@
+"""
+URL patterns for supplier-related views.
+"""
+
 from django.urls import path
 
 from src.supplier.views.supplier import SupplierListView, SupplierView

@@ -1,3 +1,8 @@
+"""
+Responsibility matrix for supplier management in procurement service.
+This module defines the responsibility matrix model used to manage supplier-related activities and their respective responsibilities.
+"""
+
 from django.db import models
 
 from src.shared.models import TimestampedModel

@@ -1,3 +1,8 @@
+"""
+Models for the shared app in Django.
+This module contains common models used across the application.
+"""
+
 from django.db import models
 
 

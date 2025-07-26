@@ -1,3 +1,8 @@
+"""
+Base API view for shared functionality in Django applications.
+This module provides a base view that can be extended for specific functionalities.
+"""
+
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response

@@ -1,3 +1,8 @@
+"""
+Supplier management models for procurement service.
+This module contains models related to suppliers.
+"""
+
 from django.db import models
 
 from src.shared.models import Address, Contact, TimestampedModel

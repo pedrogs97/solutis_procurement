@@ -1,3 +1,5 @@
+"""Procurement app configuration for Django."""
+
 from django.apps import AppConfig
 
 
