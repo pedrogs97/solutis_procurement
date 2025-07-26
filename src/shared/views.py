@@ -19,6 +19,12 @@ class BaseAPIView(GenericAPIView):
     serializer_class_out = None
 
     def get_serializer_class(self):
+        """
+        Determine the serializer class to use based on the request method.
+        If `serializer_class_in` is provided, it will be used for POST, PUT, and PATCH requests.
+        If `serializer_class_out` is provided, it will be used for GET, HEAD, and OPTIONS requests.
+        If neither is provided, it will fall back to `serializer_class`.
+        """
         if not self.serializer_class_out and not self.serializer_class_in:
             assert self.serializer_class is not None, (
                 f"'{self.__class__.__name__}' should include a `serializer_class` attribute when "

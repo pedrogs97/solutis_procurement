@@ -39,6 +39,7 @@ class SupplierListView(ListAPIView):
     search_fields = ["trade_name", "legal_name", "tax_id"]
 
     def get(self, request, *args, **kwargs):
+        """Handle GET requests for listing suppliers."""
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)

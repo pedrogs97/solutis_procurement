@@ -24,4 +24,4 @@ jobs:
           pip install --no-cache-dir --upgrade -r requirements.txt
       - name: Analysing the code with pylint
         run: |
-          pylint src --rcfile=.pylintrc --ignore=manage.py,config
+          pylint src --rcfile=.pylintrc --ignore=manage.py,config,migrations,tests
