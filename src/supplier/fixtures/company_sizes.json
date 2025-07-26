@@ -1,0 +1,30 @@
+[
+    {
+        "model": "supplier.domcompanysize",
+        "pk": 1,
+        "fields": {
+            "name": "NORMAL"
+        }
+    },
+    {
+        "model": "supplier.domcompanysize",
+        "pk": 2,
+        "fields": {
+            "name": "ME - MICRO EMPRESA"
+        }
+    },
+    {
+        "model": "supplier.domcompanysize",
+        "pk": 3,
+        "fields": {
+            "name": "EPP - EMPRESA PEQUENO PORTE"
+        }
+    },
+    {
+        "model": "supplier.domcompanysize",
+        "pk": 4,
+        "fields": {
+            "name": "MEI - MICRO EMPREENDEDOR INDIVIDUAL"
+        }
+    }
+]

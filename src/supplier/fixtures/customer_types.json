@@ -1,0 +1,93 @@
+[
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 1,
+        "fields": {
+            "name": "CONSUMIDOR CATIVO"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 2,
+        "fields": {
+            "name": "CONSUMIDOR LIVRE"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 3,
+        "fields": {
+            "name": "CONSUMIDOR ESPECIAL"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 4,
+        "fields": {
+            "name": "CONSUMIDOR PARCIALMENTE LIVRE"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 5,
+        "fields": {
+            "name": "COMERCIAL"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 6,
+        "fields": {
+            "name": "INDUSTRIAL"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 7,
+        "fields": {
+            "name": "RESIDENCIAL/PESSOA FÍSICA"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 8,
+        "fields": {
+            "name": "PRODUTOR RURAL"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 9,
+        "fields": {
+            "name": "ÓRGÃO DA ADMINISTRAÇÃO PÚBLICA ESTADUAL"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 10,
+        "fields": {
+            "name": "PRESTADOR DE SERVIÇO DE TELECOMUNICAÇÃO"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 11,
+        "fields": {
+            "name": "MISSÕES DIPLOMÁTICAS, REPARTIÇÕES CONSULARES E ORG. INTERNACIONAIS"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 12,
+        "fields": {
+            "name": "IGREJAS E TEMPLOS DE QUALQUER NATUREZA"
+        }
+    },
+    {
+        "model": "supplier.domcustomertype",
+        "pk": 13,
+        "fields": {
+            "name": "OUTROS NÃO ESPECIFICADOS ANTERIORMENTE"
+        }
+    }
+]

@@ -1,0 +1,23 @@
+[
+    {
+        "model": "supplier.dompayertype",
+        "pk": 1,
+        "fields": {
+            "name": "NÃO SE APLICA"
+        }
+    },
+    {
+        "model": "supplier.dompayertype",
+        "pk": 2,
+        "fields": {
+            "name": "CESSÃO DE MÃO DE OBRA"
+        }
+    },
+    {
+        "model": "supplier.dompayertype",
+        "pk": 3,
+        "fields": {
+            "name": "CONSTRUÇÃO CIVIL"
+        }
+    }
+]

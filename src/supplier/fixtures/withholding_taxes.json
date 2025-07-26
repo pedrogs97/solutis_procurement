@@ -1,0 +1,44 @@
+[
+    {
+        "model": "supplier.domwithholdingtax",
+        "pk": 1,
+        "fields": {
+            "name": "RETENÇÃO POR ÓRGÃOS, AUTARQUIAS E FUNDAÇÕES FEDERAIS"
+        }
+    },
+    {
+        "model": "supplier.domwithholdingtax",
+        "pk": 2,
+        "fields": {
+            "name": "RETENÇÃO POR OUTRAS ENTIDADES DA ADMINISTRAÇÃO PÚBLICA FEDERAL"
+        }
+    },
+    {
+        "model": "supplier.domwithholdingtax",
+        "pk": 3,
+        "fields": {
+            "name": "RETENÇÃO POR PESSOAS JURÍDICAS DE DIREITO PRIVADO"
+        }
+    },
+    {
+        "model": "supplier.domwithholdingtax",
+        "pk": 4,
+        "fields": {
+            "name": "RECOLHIMENTO POR SOCIEDADE COOPERATIVA"
+        }
+    },
+    {
+        "model": "supplier.domwithholdingtax",
+        "pk": 5,
+        "fields": {
+            "name": "RETENÇÃO POR FABRICANTE DE MÁQUINAS E VEÍCULOS"
+        }
+    },
+    {
+        "model": "supplier.domwithholdingtax",
+        "pk": 6,
+        "fields": {
+            "name": "OUTRAS RETENÇÕES"
+        }
+    }
+]

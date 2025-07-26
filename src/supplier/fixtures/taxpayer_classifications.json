@@ -1,0 +1,86 @@
+[
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 1,
+        "fields": {
+            "name": "DISTRIBUIDOR"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 2,
+        "fields": {
+            "name": "REFINARIA"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 3,
+        "fields": {
+            "name": "NENHUM"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 4,
+        "fields": {
+            "name": "ARMAZENADOR"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 5,
+        "fields": {
+            "name": "CONSUMIDOR FINAL"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 6,
+        "fields": {
+            "name": "CENTRAL PETROQUÍMICA"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 7,
+        "fields": {
+            "name": "FORMULADOR"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 8,
+        "fields": {
+            "name": "IMPORTADOR"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 9,
+        "fields": {
+            "name": "POSTO VAREJISTA"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 10,
+        "fields": {
+            "name": "TRANSP/REV. RETALHISTA"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 11,
+        "fields": {
+            "name": "USINA"
+        }
+    },
+    {
+        "model": "supplier.domtaxpayerclassification",
+        "pk": 12,
+        "fields": {
+            "name": "VAREJISTA DE GLP"
+        }
+    }
+]

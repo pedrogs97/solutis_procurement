@@ -1,0 +1,30 @@
+[
+    {
+        "model": "supplier.dompublicentity",
+        "pk": 1,
+        "fields": {
+            "name": "NÃO SE APLICA"
+        }
+    },
+    {
+        "model": "supplier.dompublicentity",
+        "pk": 2,
+        "fields": {
+            "name": "FEDERAL"
+        }
+    },
+    {
+        "model": "supplier.dompublicentity",
+        "pk": 3,
+        "fields": {
+            "name": "ESTADUAL"
+        }
+    },
+    {
+        "model": "supplier.dompublicentity",
+        "pk": 4,
+        "fields": {
+            "name": "MUNICIPAL"
+        }
+    }
+]

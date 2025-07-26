@@ -1,0 +1,23 @@
+[
+    {
+        "model": "supplier.domicmstaxpayer",
+        "pk": 1,
+        "fields": {
+            "name": "NÃO CONTRIBUINTE, PODE OU NÃO POSSUIR IE NO CADASTRO DE CONTRIBUINTES DO ICMS"
+        }
+    },
+    {
+        "model": "supplier.domicmstaxpayer",
+        "pk": 2,
+        "fields": {
+            "name": "CONTRIBUINTE ICMS"
+        }
+    },
+    {
+        "model": "supplier.domicmstaxpayer",
+        "pk": 3,
+        "fields": {
+            "name": "CONTRIBUINTE ISENTO DE INSCRIÇÃO NO CADASTRO DE CONTRIBUINTES DO ICMS"
+        }
+    }
+]

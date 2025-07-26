@@ -1,0 +1,163 @@
+[
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 1,
+        "fields": {
+            "name": "CONTRATO ASSINADO"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 2,
+        "fields": {
+            "name": "CONTRATO SOCIAL E ÚLTIMAS ALTERAÇÕES"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 3,
+        "fields": {
+            "name": "CARTÃO CNPJ"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 4,
+        "fields": {
+            "name": "COMPROVANTE DE ENDEREÇO"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 5,
+        "fields": {
+            "name": "INSCRIÇÃO ESTADUAL (SE APLICÁVEL)"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 6,
+        "fields": {
+            "name": "INSCRIÇÃO MUNICIPAL (SE APLICÁVEL)"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 7,
+        "fields": {
+            "name": "CERTIDÕES NEGATIVAS - RECEITA FEDERAL"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 8,
+        "fields": {
+            "name": "CERTIDÕES NEGATIVAS - ESTADUAL/MUNICIPAL"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 9,
+        "fields": {
+            "name": "CERTIDÕES NEGATIVAS - FGTS"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 10,
+        "fields": {
+            "name": "CERTIDÕES NEGATIVAS - INSS"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 11,
+        "fields": {
+            "name": "CERTIDÕES NEGATIVAS - JUSTIÇA DO TRABALHO"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 12,
+        "fields": {
+            "name": "CERTIFICADO DE REGULARIDADE DO SIMPLES NACIONAL"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 13,
+        "fields": {
+            "name": "COMPROVANTE DE CONTA BANCÁRIA"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 14,
+        "fields": {
+            "name": "LICENÇAS ESPECÍFICAS"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 15,
+        "fields": {
+            "name": "ACEITE DO CÓDIGO DE CONDUTA"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 16,
+        "fields": {
+            "name": "ACEITE DA POLÍTICA DE SEGURANÇA"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 17,
+        "fields": {
+            "name": "QUESTIONÁRIO DE DUE DILIGENCE"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 18,
+        "fields": {
+            "name": "ATESTADO DE CAPACIDADE TÉCNICA"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 19,
+        "fields": {
+            "name": "TERMO DE COMPROMISSO"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 20,
+        "fields": {
+            "name": "TERMO DE RESPONSABILIDADE"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 21,
+        "fields": {
+            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 22,
+        "fields": {
+            "name": "RELATÓRIO DE AUDITORIA OU CERTIFICAÇÕES ISO (QUANDO APLICÁVEL)"
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 23,
+        "fields": {
+            "name": "DOCUMENTOS DIVERSOS"
+        }
+    }
+]

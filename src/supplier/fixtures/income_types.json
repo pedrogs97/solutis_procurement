@@ -1,0 +1,135 @@
+[
+    {
+        "model": "supplier.domincometype",
+        "pk": 1,
+        "fields": {
+            "name": "NENHUM TIPO DE RENDIMENTO DEFINIDO"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 2,
+        "fields": {
+            "name": "RENDAS DE PROPRIEDADE IMOBILIÁRIA"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 3,
+        "fields": {
+            "name": "RENDAS DE TRANSPORTE INTERNACIONAL"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 4,
+        "fields": {
+            "name": "LUCROS E DIVIDENDOS DISTRIBUÍDOS"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 5,
+        "fields": {
+            "name": "JUROS"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 6,
+        "fields": {
+            "name": "ROYALTIES"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 7,
+        "fields": {
+            "name": "GANHOS DE CAPITAL"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 8,
+        "fields": {
+            "name": "RENDAS TRABALHO SEM VÍNCULO EMPREGATÍCIO"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 9,
+        "fields": {
+            "name": "RENDAS TRABALHO COM VÍNCULO EMPREGATÍCIO"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 10,
+        "fields": {
+            "name": "REMUNERAÇÃO DE ADMINISTRADORES"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 11,
+        "fields": {
+            "name": "RENDA ARTISTAS E ESPORTISTAS"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 12,
+        "fields": {
+            "name": "PENSÕES"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 13,
+        "fields": {
+            "name": "PAGAMENTOS GOVERNAMENTAIS"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 14,
+        "fields": {
+            "name": "RENDAS DE PROFESSORES E PESQUISADORES"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 15,
+        "fields": {
+            "name": "RENDAS DE ESTUDANTES E APRENDIZES"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 16,
+        "fields": {
+            "name": "OUTRAS RENDAS"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 17,
+        "fields": {
+            "name": "RENDAS DE EMPREGADOS OU CONTRATADOS - COPA"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 18,
+        "fields": {
+            "name": "PRÊMIOS DE ÁRBITROS, JOGADORES DE FUT E MEMB.DAS DELEGAÇÕES - COPA"
+        }
+    },
+    {
+        "model": "supplier.domincometype",
+        "pk": 19,
+        "fields": {
+            "name": "DEMAIS RENDAS TRIBUTÁVEIS/ISENTOS DE DECLARAÇÃO OBRIGATÓRIA"
+        }
+    }
+]

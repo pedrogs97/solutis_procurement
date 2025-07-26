@@ -1,0 +1,51 @@
+[
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 1,
+        "fields": {
+            "name": "IR PESSOA FÍSICA"
+        }
+    },
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 2,
+        "fields": {
+            "name": "IRRF - 1,5%"
+        }
+    },
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 3,
+        "fields": {
+            "name": "IRRF - 1%"
+        }
+    },
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 4,
+        "fields": {
+            "name": "IRRF SEM ALÍQUOTA"
+        }
+    },
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 5,
+        "fields": {
+            "name": "IRRF - 4,8%"
+        }
+    },
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 6,
+        "fields": {
+            "name": "IRRF - 1,2%"
+        }
+    },
+    {
+        "model": "supplier.domtaxationregime",
+        "pk": 7,
+        "fields": {
+            "name": "SEM IR"
+        }
+    }
+]

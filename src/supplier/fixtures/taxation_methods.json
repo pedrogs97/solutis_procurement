@@ -1,0 +1,86 @@
+[
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 1,
+        "fields": {
+            "name": "NENHUMA FORMA DE TRIBUTAÇÃO DEFINIDA"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 2,
+        "fields": {
+            "name": "RETENÇÃO DO IRRF - ALÍQUOTA PADRÃO"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 3,
+        "fields": {
+            "name": "RETENÇÃO DO IRRF - ALÍQUOTA DA TABELA PROGRESSIVA"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 4,
+        "fields": {
+            "name": "RETENÇÃO DO IRRF - ALÍQUOTA DIFERENCIADA (PAÍSES COM TRIBUTAÇÃO FAVORECIDA)"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 5,
+        "fields": {
+            "name": "RETENÇÃO DO IRRF - ALÍQUOTA LIMITADA CONFORME CLÁUSULA EM CONVÊNIO"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 6,
+        "fields": {
+            "name": "RETENÇÃO DO IRRF - OUTRAS HIPÓTESES"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 7,
+        "fields": {
+            "name": "NÃO RETENÇÃO DO IRRF - ISENÇÃO ESTABELECIDA EM CONVÊNIO"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 8,
+        "fields": {
+            "name": "NÃO RETENÇÃO DO IRRF - ISENÇÃO PREVISTA EM LEI INTERNA"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 9,
+        "fields": {
+            "name": "NÃO RETENÇÃO DO IRRF - ALÍQUOTA ZERO PREVISTA EM LEI INTERNA"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 10,
+        "fields": {
+            "name": "NÃO RETENÇÃO DO IRRF - PAGAMENTO ANTECIPADO DO IMPOSTO"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 11,
+        "fields": {
+            "name": "NÃO RETENÇÃO DO IRRF - MEDIDA JUDICIAL"
+        }
+    },
+    {
+        "model": "supplier.domtaxationmethod",
+        "pk": 12,
+        "fields": {
+            "name": "NÃO RETENÇÃO DO IRRF - OUTRAS HIPÓTESES"
+        }
+    }
+]

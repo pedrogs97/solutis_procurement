@@ -1,0 +1,29 @@
+[project]
+name = "solutis-procurement"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Pedro Gustavo Santana",email = "pedro.parametrize@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "django (==5.2.4)",
+    "pytest (>=8.4.1,<9.0.0)",
+    "pydantic (>=2.11.7,<3.0.0)",
+    "brazilcep (>=7.0.0,<8.0.0)",
+    "validate-docbr (>=1.11.1,<2.0.0)",
+    "djangorestframework (>=3.16.0,<4.0.0)",
+    "django-filter (>=25.1,<26.0)",
+    "django-cors-headers (>=4.7.0,<5.0.0)"
+]
+
+[tool.poetry]
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

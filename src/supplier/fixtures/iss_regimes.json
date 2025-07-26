@@ -1,0 +1,100 @@
+[
+    {
+        "model": "supplier.domissregime",
+        "pk": 1,
+        "fields": {
+            "name": "NENHUM"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 2,
+        "fields": {
+            "name": "CONSTRUÇÃO CIVIL"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 3,
+        "fields": {
+            "name": "DEPÓSITO JUDICIAL"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 4,
+        "fields": {
+            "name": "ESTIMATIVA"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 5,
+        "fields": {
+            "name": "IMUNE"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 6,
+        "fields": {
+            "name": "ISENTA ISSQN"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 7,
+        "fields": {
+            "name": "SOCIEDADE PROFISSIONAL"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 8,
+        "fields": {
+            "name": "INCENTIVO À CULTURA"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 9,
+        "fields": {
+            "name": "MICRO EMPRESA"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 10,
+        "fields": {
+            "name": "DESOBRIGADO LEGALMENTE"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 11,
+        "fields": {
+            "name": "PROPAGANDA E PUB./INTERMED."
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 12,
+        "fields": {
+            "name": "PROFISSIONAL AUTÔNOMO"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 13,
+        "fields": {
+            "name": "COOPERATIVA"
+        }
+    },
+    {
+        "model": "supplier.domissregime",
+        "pk": 14,
+        "fields": {
+            "name": "MICROEMPRESÁRIO OU EPP"
+        }
+    }
+]
