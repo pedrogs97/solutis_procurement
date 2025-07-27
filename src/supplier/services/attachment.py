@@ -1,8 +1,9 @@
 """Service for handling supplier attachment operations."""
 
-from typing import Dict, Any
-from rest_framework import serializers
+from typing import Any, Dict
+
 from django.db.transaction import atomic
+from rest_framework import serializers
 
 from src.supplier.models.attachments import SupplierAttachment
 

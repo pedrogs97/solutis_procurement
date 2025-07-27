@@ -34,6 +34,9 @@ from src.supplier.serializers.outbound.domain import (
     DomTypeSupplierSerializer,
     DomWithholdingTaxSerializer,
 )
+from src.supplier.serializers.outbound.responsibility_matrix import (
+    ResponsibilityMatrixOutSerializer,
+)
 
 
 class ContractOutSerializer(BaseSerializer):
@@ -153,6 +156,7 @@ class SupplierOutSerializer(BaseSerializer):
     risk_level = DomRiskLevelSerializer()
     type = DomTypeSupplierSerializer()
     situation = DomSupplierSituationSerializer()
+    responsibility_matrix = ResponsibilityMatrixOutSerializer(read_only=True)
 
     class Meta(BaseSerializer.Meta):
         """

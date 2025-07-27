@@ -21,12 +21,16 @@ from django.contrib import admin
 from django.urls import include, path
 
 from src.supplier.urls.attachment import urlpatterns as attachment_urls
+from src.supplier.urls.responsibility_matrix import (
+    urlpatterns as responsibility_matrix_urls,
+)
 from src.supplier.urls.supplier import urlpatterns as supplier_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(supplier_urls)),
     path("api/", include(attachment_urls)),
+    path("api/", include(responsibility_matrix_urls)),
 ]
 
 # Serve media files during development

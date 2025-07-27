@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Supplier Tests",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"manage.py",
+				"test",
+				"src.supplier.tests",
+				"--verbosity=2"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

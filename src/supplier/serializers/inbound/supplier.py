@@ -5,6 +5,7 @@ This module provides serializers for input representations of the Supplier model
 
 from typing import Dict
 
+from django.db.transaction import atomic
 from rest_framework import serializers
 
 from src.shared.mixins import SerializerCamelCaseRepresentationMixin
@@ -135,6 +136,7 @@ class SupplierInSerializer(
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
 
+    @atomic
     def create(self, validated_data: Dict) -> Supplier:
         """
         Create a new Supplier instance with related objects.
@@ -165,12 +167,12 @@ class SupplierInSerializer(
         )
         contract = Contract.objects.create(**contract_data)
         # Create the Supplier instance with related objects
-        validated_data["address_id"] = address
-        validated_data["contact_id"] = contact
-        validated_data["payment_details_id"] = payment_details
-        validated_data["organizational_details_id"] = organizational_details
-        validated_data["fiscal_details_id"] = fiscal_details
-        validated_data["company_information_id"] = company_information
-        validated_data["contract_id"] = contract
+        validated_data["address"] = address
+        validated_data["contact"] = contact
+        validated_data["payment_details"] = payment_details
+        validated_data["organizational_details"] = organizational_details
+        validated_data["fiscal_details"] = fiscal_details
+        validated_data["company_information"] = company_information
+        validated_data["contract"] = contract
 
         return super().create(validated_data)

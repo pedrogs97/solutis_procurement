@@ -29,15 +29,15 @@ repos:
       - id: black # Python code auto formatter
         additional_dependencies: ["click==8.0.4"]
         exclude: "__init__.py"
-  # TODO trocar pelo pytest
-  # - repo: local
-  #   hooks:
-  #     - id: pytest
-  #       name: pytest
-  #       entry: pytest
-  #       language: system
-  #       pass_filenames: false
-  #       always_run: true
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: poetry run python manage.py test
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: ["--verbosity=1"]
   - repo: local
     hooks:
       - id: restricted-filenames

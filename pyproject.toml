@@ -24,6 +24,7 @@ dependencies = [
 pre-commit = "^4.2.0"
 black = "^25.1.0"
 pylint = "^3.3.7"
+model-bakery = "^1.19.5"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
