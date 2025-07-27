@@ -71,3 +71,7 @@ class SupplierAttachment(TimestampedModel):
         verbose_name = "Supplier Attachment"
         verbose_name_plural = "Supplier Attachments"
         abstract = False
+        unique_together = (
+            "supplier",
+            "attachment_type",
+        )

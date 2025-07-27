@@ -5,7 +5,6 @@ This module provides filtering capabilities for supplier-related data.
 
 from django_filters.rest_framework import CharFilter, FilterSet
 
-from src.supplier.models.attachments import SupplierAttachment
 from src.supplier.models.supplier import Supplier
 
 
@@ -38,22 +37,3 @@ class SupplierFilters(FilterSet):
 
         model = Supplier
         fields = ["situation"]
-
-
-class SupplierAttachmentFilters(FilterSet):
-    """
-    FilterSet for SupplierAttachment model to allow filtering by various fields.
-    """
-
-    class Meta:
-        """
-        Meta options for the SupplierAttachment filter.
-        """
-
-        model = SupplierAttachment
-        fields = {
-            "supplier": ["exact"],
-            "attachment_type": ["exact"],
-            "created_at": ["gte", "lte", "exact"],
-            "updated_at": ["gte", "lte", "exact"],
-        }

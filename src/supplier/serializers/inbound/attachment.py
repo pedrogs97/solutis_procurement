@@ -63,36 +63,3 @@ class SupplierAttachmentInSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Tipo de arquivo não permitido.")
 
         return value
-
-
-class SupplierAttachmentUpdateSerializer(serializers.ModelSerializer):
-    """
-    Serializer for updating SupplierAttachment.
-    Allows partial updates and optional file replacement.
-    """
-
-    file = serializers.FileField(required=False)
-
-    class Meta:
-        """
-        Meta options for the SupplierAttachment update serializer.
-        """
-
-        model = SupplierAttachment
-        fields = [
-            "attachment_type",
-            "file",
-            "description",
-        ]
-
-    def validate_file(self, value):
-        """Validate the uploaded file if provided."""
-        if value:
-            # Validação de tamanho máximo (ex: 10MB)
-            max_size = 10 * 1024 * 1024  # 10MB in bytes
-            if value.size > max_size:
-                raise serializers.ValidationError(
-                    "Arquivo muito grande. Tamanho máximo: 10MB."
-                )
-
-        return value

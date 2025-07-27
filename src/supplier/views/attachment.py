@@ -9,123 +9,63 @@ import os
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.shared.views import BaseAPIView
-from src.supplier.filters import SupplierAttachmentFilters
 from src.supplier.models.attachments import SupplierAttachment
 from src.supplier.serializers.inbound.attachment import SupplierAttachmentInSerializer
 from src.supplier.serializers.outbound.attachment import SupplierAttachmentOutSerializer
-
-
-class SupplierAttachmentView(BaseAPIView):
-    """
-    A view for handling supplier attachment CRUD operations.
-    """
-
-    queryset = SupplierAttachment.objects.all()
-    serializer_class_out = SupplierAttachmentOutSerializer
-    serializer_class_in = SupplierAttachmentInSerializer
-    parser_classes = (MultiPartParser, FormParser)
-
-    def put(self, request, *args, **kwargs):
-        """
-        Replace an existing attachment file completely.
-        """
-        attachment = self.get_object()
-
-        # Remove o arquivo anterior se existir
-        if attachment.file:
-            try:
-                attachment.file.delete(save=False)
-            except Exception:
-                pass  # Ignora erros ao deletar arquivo anterior
-
-        serializer = self.get_serializer(attachment, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        updated_attachment = serializer.save()
-
-        return_data = self.serializer_class_out(updated_attachment).data
-        return Response(return_data, status=status.HTTP_200_OK)
-
-    def patch(self, request, *args, **kwargs):
-        """
-        Update attachment metadata or replace file.
-        PATCH /api/supplier-attachments/{id}/
-        """
-        attachment = self.get_object()
-
-        # Se um novo arquivo foi enviado, remove o anterior
-        if "file" in request.data and attachment.file:
-            try:
-                attachment.file.delete(save=False)
-            except Exception:
-                pass  # Ignora erros ao deletar arquivo anterior
-
-        serializer = self.get_serializer(attachment, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        updated_attachment = serializer.save()
-
-        return_data = self.serializer_class_out(updated_attachment).data
-        return Response(return_data, status=status.HTTP_200_OK)
-
-    def delete(self, request, *args, **kwargs):
-        """
-        Delete attachment and its file.
-        DELETE /api/supplier-attachments/{id}/
-        """
-        attachment = self.get_object()
-
-        # Remove o arquivo do sistema de arquivos
-        if attachment.file:
-            try:
-                attachment.file.delete(save=False)
-            except Exception:
-                pass  # Ignora erros ao deletar arquivo
-
-        attachment.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+from src.supplier.services.attachment import AttachmentService
 
 
 class SupplierAttachmentListView(ListAPIView):
     """
-    A view to list all supplier attachments with filtering support.
-    GET /api/supplier-attachments/
+    A view to list all supplier attachments.
     """
 
     queryset = SupplierAttachment.objects.all()
     serializer_class = SupplierAttachmentOutSerializer
-    filterset_class = SupplierAttachmentFilters
-    search_fields = ["description", "file", "attachment_type__name"]
-    ordering_fields = ["created_at", "updated_at", "attachment_type"]
-    ordering = ["-created_at"]
+
+    def get(self, request, supplier_id=None, *args, **kwargs):
+        """
+        Handle GET requests for listing attachments.
+        If `supplier_id` is provided, filter attachments by supplier.
+        """
+        queryset = self.get_queryset()
+
+        if not supplier_id:
+            return Response(
+                {"error": "supplier_id is required for this endpoint"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if supplier_id:
+            queryset = queryset.filter(supplier_id=supplier_id)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
-class SupplierAttachmentUploadView(BaseAPIView):
+class SupplierAttachmentUploadView(CreateAPIView):
     """
     Specialized view for file upload operations.
     """
 
     queryset = SupplierAttachment.objects.all()
     serializer_class_out = SupplierAttachmentOutSerializer
-    serializer_class_in = SupplierAttachmentInSerializer
+    serializer_class = SupplierAttachmentInSerializer
     parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, supplier_id=None, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """
         Upload a new attachment file.
         """
-        # Adiciona o supplier_id aos dados se fornecido na URL
-        data = request.data.copy()
-        if supplier_id:
-            data["supplier"] = supplier_id
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        attachment = serializer.save()
+        attachment = AttachmentService.create_attachment(
+            serializer_class=self.get_serializer_class(),
+            data=request.data,
+        )
 
         return_data = self.serializer_class_out(attachment).data
         return Response(return_data, status=status.HTTP_201_CREATED)
@@ -178,67 +118,3 @@ class SupplierAttachmentDownloadView(APIView):
                 {"error": f"Erro ao baixar arquivo: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-
-class SupplierAttachmentBulkUploadView(APIView):
-    """
-    View for bulk upload of attachments.
-    """
-
-    parser_classes = (MultiPartParser, FormParser)
-
-    def post(self, request):
-        """
-        Upload multiple attachments at once.
-        POST /api/supplier-attachments/bulk-upload/
-
-        Expected format:
-        {
-            "attachments": [
-                {
-                    "supplier": 1,
-                    "attachment_type": 1,
-                    "file": file1,
-                    "description": "Description 1"
-                },
-                {
-                    "supplier": 1,
-                    "attachment_type": 2,
-                    "file": file2,
-                    "description": "Description 2"
-                }
-            ]
-        }
-        """
-        attachments_data = request.data.get("attachments", [])
-
-        if not attachments_data:
-            return Response(
-                {"error": "Campo 'attachments' é obrigatório"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        created_attachments = []
-        errors = []
-
-        for i, attachment_data in enumerate(attachments_data):
-            serializer = SupplierAttachmentInSerializer(data=attachment_data)
-            if serializer.is_valid():
-                attachment = serializer.save()
-                created_attachments.append(
-                    SupplierAttachmentOutSerializer(attachment).data
-                )
-            else:
-                errors.append({"index": i, "errors": serializer.errors})
-
-        response_data = {
-            "created": created_attachments,
-            "errors": errors,
-            "total_created": len(created_attachments),
-            "total_errors": len(errors),
-        }
-
-        if errors:
-            return Response(response_data, status=status.HTTP_207_MULTI_STATUS)
-
-        return Response(response_data, status=status.HTTP_201_CREATED)

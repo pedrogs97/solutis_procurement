@@ -5,23 +5,16 @@ URL patterns for supplier attachment-related views.
 from django.urls import path
 
 from src.supplier.views.attachment import (
-    SupplierAttachmentBulkUploadView,
     SupplierAttachmentDownloadView,
     SupplierAttachmentListView,
     SupplierAttachmentUploadView,
-    SupplierAttachmentView,
 )
 
 urlpatterns = [
     path(
-        "attachments-list/",
+        "attachments-list/<int:supplier_id>/",
         SupplierAttachmentListView.as_view(),
         name="supplier-attachment-list",
-    ),
-    path(
-        "attachments/<int:pk>/",
-        SupplierAttachmentView.as_view(),
-        name="supplier-attachment-detail",
     ),
     path(
         "attachments/<int:pk>/download/",
@@ -32,10 +25,5 @@ urlpatterns = [
         "attachments/upload/",
         SupplierAttachmentUploadView.as_view(),
         name="supplier-attachment-upload",
-    ),
-    path(
-        "attachments/bulk-upload/",
-        SupplierAttachmentBulkUploadView.as_view(),
-        name="supplier-attachment-bulk-upload",
     ),
 ]

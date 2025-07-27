@@ -4,7 +4,6 @@ This module defines views for managing suppliers, including listing and retrievi
 """
 
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from src.shared.views import BaseAPIView
@@ -34,7 +33,6 @@ class SupplierListView(ListAPIView):
     queryset = Supplier.objects.all()
     serializer_class = SupplierOutSerializer
 
-    pagination_class = PageNumberPagination
     filterset_class = SupplierFilters
     search_fields = ["trade_name", "legal_name", "tax_id"]
 
