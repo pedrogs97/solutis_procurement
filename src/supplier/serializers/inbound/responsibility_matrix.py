@@ -4,11 +4,11 @@ This module provides serializers for creating and updating supplier responsibili
 including validation for supplier existence and RACI values.
 """
 
-from rest_framework import serializers
-
 from src.shared.serializers import BaseSerializer
+from src.shared.validation import BaseValidationError
 from src.supplier.models.responsibility_matrix import RACI_CHOICES, ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
+from src.supplier.serializers.validators import validate_supplier
 
 
 class ResponsibilityMatrixInSerializer(BaseSerializer):
@@ -24,13 +24,9 @@ class ResponsibilityMatrixInSerializer(BaseSerializer):
 
         model = ResponsibilityMatrix
 
-    def validate_supplier(self, value):
+    def validate_supplier(self, value) -> Supplier:
         """Validate that the supplier exists and is active."""
-        try:
-            supplier = Supplier.objects.get(pk=value.pk)
-            return supplier
-        except Supplier.DoesNotExist as exc:
-            raise serializers.ValidationError("Fornecedor não encontrado.") from exc
+        return validate_supplier(value)
 
     def validate(self, attrs):
         """
@@ -104,15 +100,17 @@ class ResponsibilityMatrixInSerializer(BaseSerializer):
         """Validate that only one person is accountable per activity."""
         accountable_count = values.count("A") + values.count("A/R")
         if accountable_count > 1:
-            raise serializers.ValidationError(
-                f"Atividade '{activity}': Só pode haver um responsável (A ou A/R) por atividade."
+            raise BaseValidationError(
+                activity,
+                f"Atividade '{activity}': Só pode haver um responsável (A ou A/R) por atividade.",
             )
 
     def _validate_minimum_involvement(self, activity, values):
         """Validate that at least one person is involved in each activity."""
         if all(value == "-" for value in values):
-            raise serializers.ValidationError(
-                f"Atividade '{activity}': Pelo menos uma área deve estar envolvida na atividade."
+            raise BaseValidationError(
+                activity,
+                f"Atividade '{activity}': Pelo menos uma área deve estar envolvida na atividade.",
             )
 
     def validate_raci_field(self, value, field_name):
@@ -121,7 +119,8 @@ class ResponsibilityMatrixInSerializer(BaseSerializer):
         """
         valid_choices = [choice[0] for choice in RACI_CHOICES]
         if value not in valid_choices:
-            raise serializers.ValidationError(
-                f"Valor inválido para {field_name}. Escolhas válidas: {valid_choices}"
+            raise BaseValidationError(
+                field_name,
+                f"Valor inválido para {field_name}. Escolhas válidas: {valid_choices}",
             )
         return value
