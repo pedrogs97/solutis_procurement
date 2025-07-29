@@ -4,9 +4,11 @@ This module defines views for managing responsibility matrices, including creati
 """
 
 from rest_framework.exceptions import MethodNotAllowed
+from django.shortcuts import get_object_or_404
 
 from src.shared.views import BaseAPIView
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
+from src.supplier.models.supplier import Supplier
 from src.supplier.serializers.inbound.responsibility_matrix import (
     ResponsibilityMatrixInSerializer,
 )
@@ -34,6 +36,14 @@ class ResponsibilityMatrixView(BaseAPIView):
             "DELETE",
             detail="Operação DELETE não permitida para matrizes de responsabilidade.",
         )
+
+    def get_object(self):
+        """
+        Retrieve the responsibility matrix associated with the supplier.
+        """
+        supplier: Supplier = get_object_or_404(Supplier, pk=self.kwargs.get("pk"))
+        self.kwargs["pk"] = supplier.responsibility_matrix.pk
+        return super().get_object()
 
     def get_queryset(self):
         """
