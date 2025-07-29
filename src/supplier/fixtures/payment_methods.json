@@ -1,0 +1,149 @@
+[
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 1,
+        "fields": {
+            "name": "DOC (COMPE)"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 2,
+        "fields": {
+            "name": "CRÉDITO EM CONTA CORRENTE NO MESMO BANCO"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 3,
+        "fields": {
+            "name": "CHEQUE ADMINISTRATIVO"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 4,
+        "fields": {
+            "name": "TÍTULO DE COBRANÇA (BOLETO)"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 5,
+        "fields": {
+            "name": "PAGAMENTO ELETRÔNICO A CONCESSIONÁRIOS"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 6,
+        "fields": {
+            "name": "CRÉDITO EM CONTA DE POUPANÇA"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 7,
+        "fields": {
+            "name": "ORDEM DE PAGAMENTO A DISPOSIÇÃO"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 8,
+        "fields": {
+            "name": "CRÉDITO EM CONTA REAL TIME"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 9,
+        "fields": {
+            "name": "TED CIP"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 10,
+        "fields": {
+            "name": "TED STR"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 11,
+        "fields": {
+            "name": "DARF"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 12,
+        "fields": {
+            "name": "GPS"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 13,
+        "fields": {
+            "name": "DÉBITO AUTOMÁTICO"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 14,
+        "fields": {
+            "name": "CRÉDITO EM CONTA CORRENTE DE MESMA TITULARIDADE"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 15,
+        "fields": {
+            "name": "IPTU/ISS/OUTROS TRIBUTOS MUNICIPAIS"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 16,
+        "fields": {
+            "name": "DARJ"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 17,
+        "fields": {
+            "name": "GARE - SP ICMS"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 18,
+        "fields": {
+            "name": "FGTS - GFIP"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 19,
+        "fields": {
+            "name": "GNRE E TRIBUTOS ESTADUAIS COM CÓDIGO DE BARRAS"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 20,
+        "fields": {
+            "name": "PIX TRANSFERÊNCIA"
+        }
+    },
+    {
+        "model": "supplier.dompaymentmethod",
+        "pk": 21,
+        "fields": {
+            "name": "PIX QR-CODE"
+        }
+    }
+]
