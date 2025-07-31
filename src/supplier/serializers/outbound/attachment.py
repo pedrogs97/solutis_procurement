@@ -5,10 +5,11 @@ This module provides serializers for output representations of the SupplierAttac
 
 from rest_framework import serializers
 
+from src.shared.serializers import BaseSerializer
 from src.supplier.models.attachments import SupplierAttachment
 
 
-class SupplierAttachmentOutSerializer(serializers.ModelSerializer):
+class SupplierAttachmentOutSerializer(BaseSerializer):
     """
     Serializer for SupplierAttachment model output.
     Used for GET requests and responses.
@@ -19,7 +20,7 @@ class SupplierAttachmentOutSerializer(serializers.ModelSerializer):
     )
     file_name = serializers.ReadOnlyField()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the SupplierAttachment model serializer.
         """
@@ -36,7 +37,7 @@ class SupplierAttachmentOutSerializer(serializers.ModelSerializer):
         ]
 
 
-class SupplierAttachmentBasicOutSerializer(serializers.ModelSerializer):
+class SupplierAttachmentBasicOutSerializer(BaseSerializer):
     """
     Basic serializer for SupplierAttachment without nested relationships.
     Used when we don't need full supplier/attachment_type details.
@@ -45,7 +46,7 @@ class SupplierAttachmentBasicOutSerializer(serializers.ModelSerializer):
     file_name = serializers.ReadOnlyField()
     file_url = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the SupplierAttachment basic serializer.
         """

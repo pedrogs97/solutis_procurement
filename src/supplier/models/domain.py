@@ -17,8 +17,8 @@ class DomClassification(DomType):
         """
 
         db_table = "classification"
-        verbose_name = "Classification"
-        verbose_name_plural = "Classifications"
+        verbose_name = "Classificação"
+        verbose_name_plural = "Classificações"
         abstract = False
 
 
@@ -33,8 +33,8 @@ class DomCategory(DomType):
         """
 
         db_table = "category"
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
         abstract = False
 
 
@@ -49,8 +49,8 @@ class DomRiskLevel(DomType):
         """
 
         db_table = "risk_level"
-        verbose_name = "Risk Level"
-        verbose_name_plural = "Risk Levels"
+        verbose_name = "Grau de Risco"
+        verbose_name_plural = "Grau de Risco"
         abstract = False
 
 
@@ -65,8 +65,8 @@ class DomTypeSupplier(DomType):
         """
 
         db_table = "type_supplier"
-        verbose_name = "Type Supplier"
-        verbose_name_plural = "Type Suppliers"
+        verbose_name = "Tipo de Fornecedor"
+        verbose_name_plural = "Tipos de Fornecedor"
         abstract = False
 
 
@@ -81,8 +81,8 @@ class DomSupplierSituation(DomType):
         """
 
         db_table = "supplier_situation"
-        verbose_name = "Supplier Situation"
-        verbose_name_plural = "Supplier Situations"
+        verbose_name = "Situação do Fornecedor"
+        verbose_name_plural = "Situações do Fornecedor"
         abstract = False
 
 
@@ -97,8 +97,8 @@ class DomPixType(DomType):
         """
 
         db_table = "pix_type"
-        verbose_name = "Pix Type"
-        verbose_name_plural = "Pix Types"
+        verbose_name = "Tipo de Pix"
+        verbose_name_plural = "Tipos de Pix"
         abstract = False
 
 
@@ -113,8 +113,8 @@ class DomPaymentMethod(DomType):
         """
 
         db_table = "payment_method"
-        verbose_name = "Payment Method"
-        verbose_name_plural = "Payment Methods"
+        verbose_name = "Método de Pagamento"
+        verbose_name_plural = "Métodos de Pagamento"
         abstract = False
 
 
@@ -129,8 +129,8 @@ class DomPayerType(DomType):
         """
 
         db_table = "payer_type"
-        verbose_name = "Payer Type"
-        verbose_name_plural = "Payer Types"
+        verbose_name = "Tipo de Pagador"
+        verbose_name_plural = "Tipos de Pagador"
         abstract = False
 
 
@@ -145,8 +145,8 @@ class DomBusinessSector(DomType):
         """
 
         db_table = "business_sector"
-        verbose_name = "Business Sector"
-        verbose_name_plural = "Business Sectors"
+        verbose_name = "Ramo de Atividade"
+        verbose_name_plural = "Ramos de Atividade"
         abstract = False
 
 
@@ -161,8 +161,8 @@ class DomTaxpayerClassification(DomType):
         """
 
         db_table = "taxpayer_classification"
-        verbose_name = "Taxpayer Classification"
-        verbose_name_plural = "Taxpayer Classifications"
+        verbose_name = "Classificação de Contribuinte"
+        verbose_name_plural = "Classificações de Contribuintes"
         abstract = False
 
 
@@ -177,8 +177,8 @@ class DomPublicEntity(DomType):
         """
 
         db_table = "public_entity"
-        verbose_name = "Public Entity"
-        verbose_name_plural = "Public Entities"
+        verbose_name = "Entidade Pública"
+        verbose_name_plural = "Entidades Públicas"
         abstract = False
 
 
@@ -193,8 +193,8 @@ class DomIssWithholding(DomType):
         """
 
         db_table = "iss_withholding"
-        verbose_name = "ISS Withholding"
-        verbose_name_plural = "ISS Withholdings"
+        verbose_name = "ISS Retenção"
+        verbose_name_plural = "ISS Retenções"
         abstract = False
 
 
@@ -209,8 +209,8 @@ class DomIssRegime(DomType):
         """
 
         db_table = "iss_regime"
-        verbose_name = "ISS Regime"
-        verbose_name_plural = "ISS Regimes"
+        verbose_name = "Regime ISS"
+        verbose_name_plural = "Regimes ISS"
         abstract = False
 
 
@@ -225,8 +225,8 @@ class DomWithholdingTax(DomType):
         """
 
         db_table = "withholding_tax"
-        verbose_name = "Withholding Tax"
-        verbose_name_plural = "Withholding Taxes"
+        verbose_name = "Imposto Retido"
+        verbose_name_plural = "Impostos Retidos"
         abstract = False
 
 
@@ -241,8 +241,8 @@ class DomCompanySize(DomType):
         """
 
         db_table = "company_size"
-        verbose_name = "Company Size"
-        verbose_name_plural = "Company Sizes"
+        verbose_name = "Tamanho da Empresa"
+        verbose_name_plural = "Tamanhos de Empresa"
         abstract = False
 
 
@@ -257,8 +257,8 @@ class DomIcmsTaxpayer(DomType):
         """
 
         db_table = "icms_taxpayer"
-        verbose_name = "ICMS Taxpayer"
-        verbose_name_plural = "ICMS Taxpayers"
+        verbose_name = "Contribuinte ICMS"
+        verbose_name_plural = "Contribuintes ICMS"
         abstract = False
 
 
@@ -273,8 +273,8 @@ class DomIncomeType(DomType):
         """
 
         db_table = "income_type"
-        verbose_name = "Income Type"
-        verbose_name_plural = "Income Types"
+        verbose_name = "Tipo de Rendimento"
+        verbose_name_plural = "Tipos de Rendimento"
         abstract = False
 
 
@@ -289,8 +289,8 @@ class DomTaxationMethod(DomType):
         """
 
         db_table = "taxation_method"
-        verbose_name = "Taxation Method"
-        verbose_name_plural = "Taxation Methods"
+        verbose_name = "Método de Tributação"
+        verbose_name_plural = "Métodos de Tributação"
         abstract = False
 
 
@@ -305,8 +305,8 @@ class DomCustomerType(DomType):
         """
 
         db_table = "customer_type"
-        verbose_name = "Customer Type"
-        verbose_name_plural = "Customer Types"
+        verbose_name = "Tipo de Cliente"
+        verbose_name_plural = "Tipos de Cliente"
         abstract = False
 
 
@@ -321,8 +321,8 @@ class DomTaxationRegime(DomType):
         """
 
         db_table = "taxation_regime"
-        verbose_name = "Taxation Regime"
-        verbose_name_plural = "Taxation Regimes"
+        verbose_name = "Regime de Tributação"
+        verbose_name_plural = "Regimes de Tributação"
         abstract = False
 
 
@@ -337,6 +337,6 @@ class DomAttachmentType(DomType):
         """
 
         db_table = "attachment_type"
-        verbose_name = "Attachment Type"
-        verbose_name_plural = "Attachment Types"
+        verbose_name = "Tipo de Anexo"
+        verbose_name_plural = "Tipos de Anexo"
         abstract = False

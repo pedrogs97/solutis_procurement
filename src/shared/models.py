@@ -44,8 +44,8 @@ class Address(TimestampedModel):
         """
 
         db_table = "address"
-        verbose_name = "Address"
-        verbose_name_plural = "Addresses"
+        verbose_name = "Endereço"
+        verbose_name_plural = "Endereços"
         abstract = False
 
 
@@ -54,7 +54,7 @@ class Contact(TimestampedModel):
     Model representing a contact.
     """
 
-    email = models.EmailField(blank=True, unique=True)
+    email = models.EmailField(blank=True)
     phone = models.CharField(max_length=11, blank=True)
 
     def __str__(self):
@@ -66,8 +66,8 @@ class Contact(TimestampedModel):
         """
 
         db_table = "contact"
-        verbose_name = "Contact"
-        verbose_name_plural = "Contacts"
+        verbose_name = "Contato"
+        verbose_name_plural = "Contatos"
         abstract = False
 
 

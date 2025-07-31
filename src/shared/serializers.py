@@ -125,6 +125,40 @@ class ContactSerializer(BaseSerializer):
         fields = ["id", "email", "phone"]
         read_only_fields = ("id",)
 
+    def validate_email(self, value):
+        """
+        Validate email field considering the current instance.
+
+        Args:
+            value: The email value to validate.
+
+        Returns:
+            str: The validated email.
+
+        Raises:
+            ValidationError: If email already exists for a different contact.
+        """
+        if not value:
+            return value
+
+        if self.instance and self.instance.email == value:
+            return value
+
+        if (
+            self.parent
+            and self.parent.instance
+            and self.parent.instance.contact.email == value
+        ):
+            return value
+
+        existing_contact = Contact.objects.filter(email=value).first()
+        if existing_contact:
+            raise BaseValidationError(
+                "Este email já está sendo usado por outro contato."
+            )
+
+        return value
+
     def validate(self, attrs: Dict) -> Dict:
         """
         Validate the contact fields.

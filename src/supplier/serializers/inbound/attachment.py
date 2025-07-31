@@ -4,8 +4,8 @@ This module provides serializers for creating and updating supplier attachments,
 including validation for supplier and attachment type existence, file size, and type.
 """
 
-from rest_framework import serializers
 
+from src.shared.serializers import BaseSerializer
 from src.shared.validation import BaseValidationError
 from src.supplier.models.attachments import SupplierAttachment
 from src.supplier.models.domain import DomAttachmentType
@@ -13,7 +13,7 @@ from src.supplier.models.supplier import Supplier
 from src.supplier.serializers.validators import validate_supplier
 
 
-class SupplierAttachmentInSerializer(serializers.ModelSerializer):
+class SupplierAttachmentInSerializer(BaseSerializer):
     """
     Serializer for SupplierAttachment model input.
     Used for POST, PUT, and PATCH requests.
@@ -21,7 +21,7 @@ class SupplierAttachmentInSerializer(serializers.ModelSerializer):
 
     ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"]
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the SupplierAttachment input serializer.
         """

@@ -329,6 +329,6 @@ class Supplier(TimestampedModel):
         """
 
         db_table = "supplier"
-        verbose_name = "Supplier"
-        verbose_name_plural = "Suppliers"
+        verbose_name = "Fornecedor"
+        verbose_name_plural = "Fornecedores"
         abstract = False

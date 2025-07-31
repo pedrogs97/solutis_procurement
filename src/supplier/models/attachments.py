@@ -68,8 +68,8 @@ class SupplierAttachment(TimestampedModel):
         """
 
         db_table = "supplier_attachment"
-        verbose_name = "Supplier Attachment"
-        verbose_name_plural = "Supplier Attachments"
+        verbose_name = "Anexo de Fornecedor"
+        verbose_name_plural = "Anexos de Fornecedor"
         abstract = False
         unique_together = (
             "supplier",

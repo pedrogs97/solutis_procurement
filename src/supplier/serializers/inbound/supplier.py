@@ -6,11 +6,9 @@ This module provides serializers for input representations of the Supplier model
 from typing import Dict
 
 from django.db.transaction import atomic
-from rest_framework import serializers
 
-from src.shared.mixins import SerializerCamelCaseRepresentationMixin
 from src.shared.models import Address, Contact
-from src.shared.serializers import AddressSerializer, ContactSerializer
+from src.shared.serializers import AddressSerializer, BaseSerializer, ContactSerializer
 from src.supplier.models.supplier import (
     CompanyInformation,
     Contract,
@@ -21,15 +19,13 @@ from src.supplier.models.supplier import (
 )
 
 
-class ContractInSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class ContractInSerializer(BaseSerializer):
     """
     Serializer for Contract model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the Contract model serializer.
         """
@@ -39,15 +35,13 @@ class ContractInSerializer(
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class PaymentDetailsInSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class PaymentDetailsInSerializer(BaseSerializer):
     """
     Serializer for PaymentDetails model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the PaymentDetails model serializer.
         """
@@ -57,15 +51,13 @@ class PaymentDetailsInSerializer(
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class OrganizationalDetailsInSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class OrganizationalDetailsInSerializer(BaseSerializer):
     """
     Serializer for OrganizationalDetails model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the OrganizationalDetails model serializer.
         """
@@ -75,15 +67,13 @@ class OrganizationalDetailsInSerializer(
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class FiscalDetailsInSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class FiscalDetailsInSerializer(BaseSerializer):
     """
     Serializer for FiscalDetails model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the FiscalDetails model serializer.
         """
@@ -93,15 +83,13 @@ class FiscalDetailsInSerializer(
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class CompanyInformationInSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class CompanyInformationInSerializer(BaseSerializer):
     """
     Serializer for CompanyInformation model.
     Converts field names to camelCase representation.
     """
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the CompanyInformation model serializer.
         """
@@ -111,9 +99,7 @@ class CompanyInformationInSerializer(
         read_only_fields = ("id", "created_at", "updated_at")
 
 
-class SupplierInSerializer(
-    SerializerCamelCaseRepresentationMixin, serializers.ModelSerializer
-):
+class SupplierInSerializer(BaseSerializer):
     """
     Serializer for Supplier model.
     Converts field names to camelCase representation.
@@ -127,7 +113,7 @@ class SupplierInSerializer(
     fiscal_details = FiscalDetailsInSerializer()
     company_information = CompanyInformationInSerializer()
 
-    class Meta:
+    class Meta(BaseSerializer.Meta):
         """
         Meta options for the Supplier model serializer.
         """
@@ -176,3 +162,60 @@ class SupplierInSerializer(
         validated_data["contract"] = contract
 
         return super().create(validated_data)
+
+    @atomic
+    def update(self, instance: Supplier, validated_data: Dict) -> Supplier:
+        """
+        Update an existing Supplier instance with related objects.
+        This method handles the update of related objects like Address, Contact, etc.
+
+        Args:
+            instance (Supplier): The existing Supplier instance to update.
+            validated_data (Dict): The validated data for the Supplier.
+        Returns:
+            Supplier: The updated Supplier instance.
+        """
+        address_data = validated_data.pop("address", None)
+        contact_data = validated_data.pop("contact", None)
+        payment_details_data = validated_data.pop("payment_details", None)
+        contract_data = validated_data.pop("contract", None)
+        organizational_details_data = validated_data.pop("organizational_details", None)
+        fiscal_details_data = validated_data.pop("fiscal_details", None)
+        company_information_data = validated_data.pop("company_information", None)
+
+        if address_data:
+            for attr, value in address_data.items():
+                setattr(instance.address, attr, value)
+            instance.address.save()
+
+        if contact_data:
+            for attr, value in contact_data.items():
+                setattr(instance.contact, attr, value)
+            instance.contact.save()
+
+        if payment_details_data:
+            for attr, value in payment_details_data.items():
+                setattr(instance.payment_details, attr, value)
+            instance.payment_details.save()
+
+        if organizational_details_data:
+            for attr, value in organizational_details_data.items():
+                setattr(instance.organizational_details, attr, value)
+            instance.organizational_details.save()
+
+        if fiscal_details_data:
+            for attr, value in fiscal_details_data.items():
+                setattr(instance.fiscal_details, attr, value)
+            instance.fiscal_details.save()
+
+        if company_information_data:
+            for attr, value in company_information_data.items():
+                setattr(instance.company_information, attr, value)
+            instance.company_information.save()
+
+        if contract_data:
+            for attr, value in contract_data.items():
+                setattr(instance.contract, attr, value)
+            instance.contract.save()
+
+        return super().update(instance, validated_data)
