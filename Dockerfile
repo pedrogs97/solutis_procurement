@@ -2,6 +2,7 @@ FROM python:3.11-slim-bullseye
 
 # Create application directory
 RUN mkdir -p /app/src
+RUN mkdir -p /storage
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
