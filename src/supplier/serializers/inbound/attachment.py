@@ -4,7 +4,6 @@ This module provides serializers for creating and updating supplier attachments,
 including validation for supplier and attachment type existence, file size, and type.
 """
 
-
 from src.shared.serializers import BaseSerializer
 from src.shared.validation import BaseValidationError
 from src.supplier.models.attachments import SupplierAttachment
@@ -63,3 +62,18 @@ class SupplierAttachmentInSerializer(BaseSerializer):
             raise BaseValidationError("file", "Tipo de arquivo não permitido.")
 
         return value
+
+
+class SupplierAttachmentTypeSerializer(BaseSerializer):
+    """
+    Serializer for SupplierAttachment model input with attachment type.
+    Used for POST, PUT, and PATCH requests.
+    """
+
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta options for the SupplierAttachmentTypeSerializer.
+        """
+
+        model = SupplierAttachment
+        read_only_fields = ["id"]

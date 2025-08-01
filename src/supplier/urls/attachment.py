@@ -7,6 +7,7 @@ from django.urls import path
 from src.supplier.views.attachment import (
     SupplierAttachmentDownloadView,
     SupplierAttachmentListView,
+    SupplierAttachmentTypeView,
     SupplierAttachmentUploadView,
 )
 
@@ -25,5 +26,10 @@ urlpatterns = [
         "attachments/upload/",
         SupplierAttachmentUploadView.as_view(),
         name="supplier-attachment-upload",
+    ),
+    path(
+        "attachment-types/",
+        SupplierAttachmentTypeView.as_view(),
+        name="supplier-attachment-type",
     ),
 ]

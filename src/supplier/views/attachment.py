@@ -14,8 +14,12 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from src.shared.views import BaseAPIView
 from src.supplier.models.attachments import SupplierAttachment
-from src.supplier.serializers.inbound.attachment import SupplierAttachmentInSerializer
+from src.supplier.serializers.inbound.attachment import (
+    SupplierAttachmentInSerializer,
+    SupplierAttachmentTypeSerializer,
+)
 from src.supplier.serializers.outbound.attachment import SupplierAttachmentOutSerializer
 from src.supplier.services.attachment import AttachmentService
 
@@ -41,8 +45,7 @@ class SupplierAttachmentListView(ListAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if supplier_id:
-            queryset = queryset.filter(supplier_id=supplier_id)
+        queryset = queryset.filter(supplier_id=supplier_id)
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -118,3 +121,11 @@ class SupplierAttachmentDownloadView(APIView):
                 {"error": f"Erro ao baixar arquivo: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class SupplierAttachmentTypeView(BaseAPIView):
+    """
+    View for handling supplier attachment types.
+    """
+
+    serializer_class = SupplierAttachmentTypeSerializer

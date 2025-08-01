@@ -3,6 +3,8 @@ Domain models for the supplier management in procurement service.
 This module contains domain models used specifically for supplier-related functionalities.
 """
 
+from django.db import models
+
 from src.shared.models import DomType
 
 
@@ -330,6 +332,14 @@ class DomAttachmentType(DomType):
     """
     Model representing attachment types for supplier documents.
     """
+
+    risk_level = models.ForeignKey(
+        DomRiskLevel,
+        on_delete=models.CASCADE,
+        related_name="attachment_types",
+        help_text="Nível de Risco associado ao tipo de anexo",
+        null=True,
+    )
 
     class Meta(DomType.Meta):
         """
