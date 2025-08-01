@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from src.shared.views import BaseAPIView
-from src.supplier.models.attachments import SupplierAttachment
+from src.supplier.models.attachments import DomAttachmentType, SupplierAttachment
 from src.supplier.serializers.inbound.attachment import (
     SupplierAttachmentInSerializer,
     SupplierAttachmentTypeSerializer,
@@ -129,3 +129,13 @@ class SupplierAttachmentTypeView(BaseAPIView):
     """
 
     serializer_class = SupplierAttachmentTypeSerializer
+    queryset = DomAttachmentType.objects.all()
+    filterset_fields = ("risk_level",)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests for listing attachment types.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

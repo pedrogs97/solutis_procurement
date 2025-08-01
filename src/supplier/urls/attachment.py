@@ -32,4 +32,9 @@ urlpatterns = [
         SupplierAttachmentTypeView.as_view(),
         name="supplier-attachment-type",
     ),
+    path(
+        "attachment-types/<int:pk>/",
+        SupplierAttachmentTypeView.as_view(),
+        name="supplier-attachment-type-detail",
+    ),
 ]

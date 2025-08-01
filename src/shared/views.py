@@ -54,6 +54,13 @@ class BaseAPIView(GenericAPIView):
             "`serializer_class_in` and `serializer_class_out` attributes."
         )
 
+    def get_out_serializer_class(self):
+        """
+        Get the serializer class for output serialization.
+        This is used for GET, HEAD, and OPTIONS requests.
+        """
+        return self.serializer_class_out or self.serializer_class
+
     def get(self, request, *args, **kwargs):
         """
         Handle GET requests to retrieve an object.
@@ -68,7 +75,8 @@ class BaseAPIView(GenericAPIView):
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return_data = self.serializer_class_out(serializer.save()).data
+        new_instance = serializer.save()
+        return_data = self.get_out_serializer_class()(new_instance).data
         return Response(return_data, status=status.HTTP_201_CREATED)
 
     def put(self, request, *args, **kwargs):
@@ -78,7 +86,7 @@ class BaseAPIView(GenericAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
-        return_data = self.serializer_class_out(serializer.save()).data
+        return_data = self.get_out_serializer_class()(serializer.save()).data
         return Response(return_data, status=status.HTTP_200_OK)
 
     def patch(self, request, *args, **kwargs):
@@ -88,7 +96,7 @@ class BaseAPIView(GenericAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        return_data = self.serializer_class_out(serializer.save()).data
+        return_data = self.get_out_serializer_class()(serializer.save()).data
         return Response(return_data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):

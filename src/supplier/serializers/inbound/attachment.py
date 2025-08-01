@@ -75,5 +75,5 @@ class SupplierAttachmentTypeSerializer(BaseSerializer):
         Meta options for the SupplierAttachmentTypeSerializer.
         """
 
-        model = SupplierAttachment
+        model = DomAttachmentType
         read_only_fields = ["id"]

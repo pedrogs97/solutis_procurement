@@ -3,161 +3,264 @@
         "model": "supplier.domattachmenttype",
         "pk": 1,
         "fields": {
-            "name": "CONTRATO ASSINADO"
+            "name": "CONTRATO ASSINADO",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 2,
         "fields": {
-            "name": "CONTRATO SOCIAL E ÚLTIMAS ALTERAÇÕES"
+            "name": "CONTRATO SOCIAL E ÚLTIMAS ALTERAÇÕES",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 3,
         "fields": {
-            "name": "CARTÃO CNPJ"
+            "name": "CARTÃO CNPJ",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 4,
         "fields": {
-            "name": "COMPROVANTE DE ENDEREÇO"
+            "name": "COMPROVANTE DE ENDEREÇO",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 5,
         "fields": {
-            "name": "INSCRIÇÃO ESTADUAL (SE APLICÁVEL)"
+            "name": "INSCRIÇÃO ESTADUAL (SE APLICÁVEL)",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 6,
         "fields": {
-            "name": "INSCRIÇÃO MUNICIPAL (SE APLICÁVEL)"
+            "name": "INSCRIÇÃO MUNICIPAL (SE APLICÁVEL)",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 7,
         "fields": {
-            "name": "CERTIDÕES NEGATIVAS - RECEITA FEDERAL"
+            "name": "CERTIDÕES NEGATIVAS - RECEITA FEDERAL",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 8,
         "fields": {
-            "name": "CERTIDÕES NEGATIVAS - ESTADUAL/MUNICIPAL"
+            "name": "CERTIDÕES NEGATIVAS - ESTADUAL/MUNICIPAL",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 9,
         "fields": {
-            "name": "CERTIDÕES NEGATIVAS - FGTS"
+            "name": "CERTIDÕES NEGATIVAS - FGTS",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 10,
         "fields": {
-            "name": "CERTIDÕES NEGATIVAS - INSS"
+            "name": "CERTIDÕES NEGATIVAS - INSS",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 11,
         "fields": {
-            "name": "CERTIDÕES NEGATIVAS - JUSTIÇA DO TRABALHO"
+            "name": "CERTIDÕES NEGATIVAS - JUSTIÇA DO TRABALHO",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 12,
         "fields": {
-            "name": "CERTIFICADO DE REGULARIDADE DO SIMPLES NACIONAL"
+            "name": "CERTIFICADO DE REGULARIDADE DO SIMPLES NACIONAL",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 13,
         "fields": {
-            "name": "COMPROVANTE DE CONTA BANCÁRIA"
+            "name": "COMPROVANTE DE CONTA BANCÁRIA",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 14,
         "fields": {
-            "name": "LICENÇAS ESPECÍFICAS"
+            "name": "LICENÇAS ESPECÍFICAS",
+            "risk_level": null
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 15,
         "fields": {
-            "name": "ACEITE DO CÓDIGO DE CONDUTA"
+            "name": "ACEITE DO CÓDIGO DE CONDUTA",
+            "risk_level": 1
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 16,
         "fields": {
-            "name": "ACEITE DA POLÍTICA DE SEGURANÇA"
+            "name": "ACEITE DO CÓDIGO DE CONDUTA",
+            "risk_level": 2
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 17,
         "fields": {
-            "name": "QUESTIONÁRIO DE DUE DILIGENCE"
+            "name": "ACEITE DO CÓDIGO DE CONDUTA",
+            "risk_level": 3
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 18,
         "fields": {
-            "name": "ATESTADO DE CAPACIDADE TÉCNICA"
+            "name": "ACEITE DA POLÍTICA DE SEGURANÇA",
+            "risk_level": 1
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 19,
         "fields": {
-            "name": "TERMO DE COMPROMISSO"
+            "name": "ACEITE DA POLÍTICA DE SEGURANÇA",
+            "risk_level": 2
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 20,
         "fields": {
-            "name": "TERMO DE RESPONSABILIDADE"
+            "name": "ACEITE DA POLÍTICA DE SEGURANÇA",
+            "risk_level": 3
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 21,
         "fields": {
-            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO"
+            "name": "QUESTIONÁRIO DE DUE DILIGENCE",
+            "risk_level": 3
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 22,
         "fields": {
-            "name": "RELATÓRIO DE AUDITORIA OU CERTIFICAÇÕES ISO (QUANDO APLICÁVEL)"
+            "name": "ATESTADO DE CAPACIDADE TÉCNICA",
+            "risk_level": 3
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 23,
         "fields": {
-            "name": "DOCUMENTOS DIVERSOS"
+            "name": "TERMO DE COMPROMISSO",
+            "risk_level": 2
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 24,
+        "fields": {
+            "name": "TERMO DE COMPROMISSO",
+            "risk_level": 3
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 25,
+        "fields": {
+            "name": "TERMO DE RESPONSABILIDADE",
+            "risk_level": 2
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 26,
+        "fields": {
+            "name": "TERMO DE RESPONSABILIDADE",
+            "risk_level": 3
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 27,
+        "fields": {
+            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
+            "risk_level": 1
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 28,
+        "fields": {
+            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
+            "risk_level": 2
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 29,
+        "fields": {
+            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
+            "risk_level": 3
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 30,
+        "fields": {
+            "name": "RELATÓRIO DE AUDITORIA OU CERTIFICAÇÕES ISO (QUANDO APLICÁVEL)",
+            "risk_level": 3
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 31,
+        "fields": {
+            "name": "DOCUMENTOS DIVERSOS",
+            "risk_level": 1
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 32,
+        "fields": {
+            "name": "DOCUMENTOS DIVERSOS",
+            "risk_level": 2
+        }
+    },
+    {
+        "model": "supplier.domattachmenttype",
+        "pk": 33,
+        "fields": {
+            "name": "DOCUMENTOS DIVERSOS",
+            "risk_level": 3
         }
     }
 ]

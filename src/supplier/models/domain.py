@@ -328,7 +328,7 @@ class DomTaxationRegime(DomType):
         abstract = False
 
 
-class DomAttachmentType(DomType):
+class DomAttachmentType(models.Model):
     """
     Model representing attachment types for supplier documents.
     """
@@ -340,8 +340,13 @@ class DomAttachmentType(DomType):
         help_text="Nível de Risco associado ao tipo de anexo",
         null=True,
     )
+    name = models.CharField(
+        max_length=255,
+        help_text="Nome do tipo de anexo",
+        unique=False,
+    )
 
-    class Meta(DomType.Meta):
+    class Meta:
         """
         Meta options for the DomAttachmentType model.
         """
