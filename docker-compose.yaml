@@ -13,6 +13,7 @@ services:
       - /mnt/storage:/storage
       - ./logs:/app/logs
       - ./.env:/app/.env
+      - ./db.sqlite3:/app/db.sqlite3
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput --clear &&
