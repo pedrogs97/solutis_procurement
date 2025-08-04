@@ -23,7 +23,7 @@ services:
     networks:
       - agile-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/api/')"]
       interval: 30s
       timeout: 10s
       retries: 3
