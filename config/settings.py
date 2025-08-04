@@ -26,7 +26,12 @@ SECRET_KEY = "django-insecure-flg46s-b-q+xvdnjsh$j1thwh8*wa1#+qn2s@*ko^z_61(i$@_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "solutis-procurement",
+    "solutis-procurement:8001",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
