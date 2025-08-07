@@ -72,6 +72,10 @@ class PaymentDetails(TimestampedModel):
         max_digits=15, decimal_places=2, help_text="Valor Mensal do Contrato"
     )
     checking_account = models.CharField(max_length=20, help_text="Conta Corrente")
+    bank = models.CharField(max_length=50, help_text="Banco", blank=True, default="")
+    agency = models.CharField(
+        max_length=20, help_text="Agência", blank=True, default=""
+    )
     payment_method = models.ForeignKey(
         DomPaymentMethod,
         on_delete=models.DO_NOTHING,

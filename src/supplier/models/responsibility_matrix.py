@@ -151,6 +151,18 @@ class ResponsibilityMatrix(TimestampedModel):
     payment_release_integrity = create_raci_field("-", INTEGRIDADE)
     payment_release_board = create_raci_field("-", DIRETORIA)
 
+    # Atividade: Acompanhamento da execução do contrato.
+    contract_execution_monitoring_requesting_area = create_raci_field(
+        "-", AREA_SOLICITANTE
+    )
+    contract_execution_monitoring_administrative = create_raci_field(
+        "-", ADMINISTRATIVO
+    )
+    contract_execution_monitoring_legal = create_raci_field("-", JURIDICO)
+    contract_execution_monitoring_financial = create_raci_field("-", FINANCEIRO)
+    contract_execution_monitoring_integrity = create_raci_field("-", INTEGRIDADE)
+    contract_execution_monitoring_board = create_raci_field("-", DIRETORIA)
+
     def __str__(self):
         return f"Matriz de Responsabilidade - {self.supplier.trade_name}"
 

@@ -14,9 +14,11 @@ class SupplierFilters(FilterSet):
     This can be extended with more filters as needed.
     """
 
-    situation = CharFilter(method="filter_situation")
+    status = CharFilter(method="filter_status")
+    name = CharFilter(field_name="legal_name", lookup_expr="icontains")
+    cnpj = CharFilter(field_name="tax_id", lookup_expr="icontains")
 
-    def filter_situation(self, queryset, name, value):
+    def filter_status(self, queryset, name, value):
         """
         Custom filter method for situation field.
         Accepts both single value and comma-separated list of values.

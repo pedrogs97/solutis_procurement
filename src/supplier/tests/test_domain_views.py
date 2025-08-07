@@ -9,7 +9,11 @@ from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from src.supplier.models.domain import DomBusinessSector, DomCategory, DomClassification
+from src.supplier.models.domain import (
+    DomBusinessSector,
+    DomCategory,
+    DomClassification,
+)
 
 
 class TestDomainListViews(TestCase):
@@ -68,6 +72,11 @@ class TestDomainListViews(TestCase):
             "dom-business-sector-list",
             "dom-category-list",
             "dom-classification-list",
+            "dom-risk-level-list",
+            "dom-supplier-type-list",
+            "dom-payment-method-list",
+            "dom-company-size-list",
+            "dom-taxation-regime-list",
         ]
 
         for view_name in views_to_test:
@@ -99,3 +108,102 @@ class TestDomainListViews(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data), 3)  # 1 + 2 new
+
+    def test_all_domain_endpoints(self):
+        """Test all domain endpoints exist and return valid responses."""
+        # Use existing data from setUp or create with different names
+
+        domain_endpoints = [
+            "dom-business-sector-list",
+            "dom-category-list",
+            "dom-classification-list",
+            "dom-risk-level-list",
+            "dom-supplier-type-list",
+            "dom-supplier-situation-list",
+            "dom-pix-type-list",
+            "dom-payment-method-list",
+            "dom-payer-type-list",
+            "dom-taxpayer-classification-list",
+            "dom-public-entity-list",
+            "dom-iss-withholding-list",
+            "dom-iss-regime-list",
+            "dom-withholding-tax-list",
+            "dom-company-size-list",
+            "dom-icms-taxpayer-list",
+            "dom-income-type-list",
+            "dom-taxation-method-list",
+            "dom-customer-type-list",
+            "dom-taxation-regime-list",
+        ]
+
+        for endpoint in domain_endpoints:
+            with self.subTest(endpoint=endpoint):
+                url = reverse(endpoint)
+                response = self.client.get(url)
+
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                data = response.json()
+                self.assertIsInstance(data, list)
+                # Each endpoint should return a list (may be empty for some)
+
+    def test_ordered_results(self):
+        """Test that results are ordered by name."""
+        # Create data in reverse alphabetical order
+        baker.make(DomBusinessSector, name="Zebra")
+        baker.make(DomBusinessSector, name="Alpha")
+        baker.make(DomBusinessSector, name="Beta")
+
+        url = reverse("dom-business-sector-list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Should be ordered alphabetically by name
+        names = [item["name"] for item in data]
+        self.assertEqual(names, ["Alpha", "Beta", "Tecnologia", "Zebra"])
+
+    def test_serialization_format(self):
+        """Test that serialized data has correct format."""
+        baker.make(DomBusinessSector, name="Test Sector")
+
+        url = reverse("dom-business-sector-list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Should have at least one item
+        self.assertGreater(len(data), 0)
+
+        # Check data structure (camelCase from BaseSerializer)
+        item = data[0]
+        self.assertIn("id", item)
+        self.assertIn("name", item)
+        self.assertIsInstance(item["id"], int)
+        self.assertIsInstance(item["name"], str)
+
+    def test_baker_integration_with_views(self):
+        """Test that model_bakery works correctly with domain views."""
+        # Create test data using baker
+        baker.make(DomBusinessSector, _quantity=3)
+        baker.make(DomCategory, _quantity=2)
+        baker.make(DomClassification, _quantity=1)
+
+        # Test business sectors
+        url = reverse("dom-business-sector-list")
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(len(data), 4)  # 3 new + 1 from setUp
+
+        # Test categories
+        url = reverse("dom-category-list")
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(len(data), 3)  # 2 new + 1 from setUp
+
+        # Test classifications
+        url = reverse("dom-classification-list")
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(len(data), 2)  # 1 new + 1 from setUp

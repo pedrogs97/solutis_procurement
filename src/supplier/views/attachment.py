@@ -6,6 +6,7 @@ This module provides views for creating, updating, deleting, listing, downloadin
 import mimetypes
 import os
 
+from django.db.models import Q
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -131,6 +132,17 @@ class SupplierAttachmentTypeView(BaseAPIView):
     serializer_class = SupplierAttachmentTypeSerializer
     queryset = DomAttachmentType.objects.all()
     filterset_fields = ("risk_level",)
+
+    def filter_queryset(self, queryset):
+        """
+        Filter the queryset based on risk level if provided in query parameters.
+        """
+        risk_level = self.request.query_params.get("risk_level")
+        if risk_level:
+            queryset = queryset.filter(
+                Q(risk_level=risk_level) | Q(risk_level__isnull=True)
+            )
+        return queryset
 
     def get(self, request, *args, **kwargs):
         """
