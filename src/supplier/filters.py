@@ -3,7 +3,7 @@ FilterSet for Supplier and SupplierAttachment models.
 This module provides filtering capabilities for supplier-related data.
 """
 
-from django_filters.rest_framework import CharFilter, FilterSet
+from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter
 
 from src.supplier.models.supplier import Supplier
 
@@ -17,6 +17,7 @@ class SupplierFilters(FilterSet):
     status = CharFilter(method="filter_status")
     name = CharFilter(field_name="legal_name", lookup_expr="icontains")
     cnpj = CharFilter(field_name="tax_id", lookup_expr="icontains")
+    risk = NumberFilter(field_name="risk_level")
 
     def filter_status(self, queryset, name, value):
         """

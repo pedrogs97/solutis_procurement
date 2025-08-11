@@ -3,6 +3,8 @@ Supplier management models for procurement service.
 This module contains models related to suppliers.
 """
 
+from decimal import Decimal
+
 from django.db import models
 
 from src.shared.models import Address, Contact, TimestampedModel
@@ -36,10 +38,18 @@ class Contract(TimestampedModel):
     Contains contract details such as object, activities, start and end dates.
     """
 
-    object_contract = models.CharField(max_length=255, help_text="Objeto do Contrato")
-    executed_activities = models.TextField(help_text="Atividades Executadas")
-    contract_start_date = models.DateField(help_text="Data de Início do Contrato")
-    contract_end_date = models.DateField(help_text="Data Final do Contrato")
+    object_contract = models.CharField(
+        max_length=255, help_text="Objeto do Contrato", blank=True, default=""
+    )
+    executed_activities = models.TextField(
+        help_text="Atividades Executadas", blank=True, default=""
+    )
+    contract_start_date = models.DateField(
+        help_text="Data de Início do Contrato", null=True, blank=True
+    )
+    contract_end_date = models.DateField(
+        help_text="Data Final do Contrato", null=True, blank=True
+    )
 
     def __str__(self):
         return f"Contrato: {self.object_contract} - {self.contract_start_date} a {self.contract_end_date}"
@@ -62,16 +72,26 @@ class PaymentDetails(TimestampedModel):
     """
 
     payment_frequency = models.CharField(
-        max_length=50, help_text="Periodicidade do Pagamento"
+        max_length=50, help_text="Periodicidade do Pagamento", blank=True, default=""
     )
-    payment_date = models.DateField(help_text="Data de Pagamento")
+    payment_date = models.DateField(
+        help_text="Data de Pagamento", null=True, blank=True
+    )
     contract_total_value = models.DecimalField(
-        max_digits=15, decimal_places=2, help_text="Valor Total do Contrato"
+        max_digits=15,
+        decimal_places=2,
+        help_text="Valor Total do Contrato",
+        default=Decimal(0),
     )
     contract_monthly_value = models.DecimalField(
-        max_digits=15, decimal_places=2, help_text="Valor Mensal do Contrato"
+        max_digits=15,
+        decimal_places=2,
+        help_text="Valor Mensal do Contrato",
+        default=Decimal(0),
     )
-    checking_account = models.CharField(max_length=20, help_text="Conta Corrente")
+    checking_account = models.CharField(
+        max_length=20, help_text="Conta Corrente", blank=True, default=""
+    )
     bank = models.CharField(max_length=50, help_text="Banco", blank=True, default="")
     agency = models.CharField(
         max_length=20, help_text="Agência", blank=True, default=""
@@ -81,14 +101,20 @@ class PaymentDetails(TimestampedModel):
         on_delete=models.DO_NOTHING,
         related_name="payment_details",
         help_text="Forma de Pagamento",
+        null=True,
+        blank=True,
     )
     pix_key_type = models.ForeignKey(
         DomPixType,
         on_delete=models.DO_NOTHING,
         related_name="payment_details",
         help_text="Tipo de Chave PIX",
+        null=True,
+        blank=True,
     )
-    pix_key = models.CharField(max_length=255, help_text="Chave PIX")
+    pix_key = models.CharField(
+        max_length=255, help_text="Chave PIX", blank=True, default=""
+    )
 
     def __str__(self):
         return f"Pagamento: {self.payment_frequency} - {self.payment_date}"
@@ -110,12 +136,14 @@ class OrganizationalDetails(TimestampedModel):
     Contains cost center, business unit, and other organizational information.
     """
 
-    cost_center = models.CharField(max_length=50, help_text="Centro de Custo")
+    cost_center = models.CharField(
+        max_length=50, help_text="Centro de Custo", blank=True, default=""
+    )
     business_unit = models.CharField(
-        max_length=100, help_text="BU (Unidade de Negócio)"
+        max_length=100, help_text="BU (Unidade de Negócio)", blank=True, default=""
     )
     responsible_executive = models.CharField(
-        max_length=255, help_text="Executivo Responsável"
+        max_length=255, help_text="Executivo Responsável", blank=True, default=""
     )
 
     payer_type = models.ForeignKey(
@@ -123,24 +151,32 @@ class OrganizationalDetails(TimestampedModel):
         on_delete=models.DO_NOTHING,
         related_name="organizational_details",
         help_text="Tipo de Tomador",
+        null=True,
+        blank=True,
     )
     business_sector = models.ForeignKey(
         DomBusinessSector,
         on_delete=models.DO_NOTHING,
         related_name="organizational_details",
         help_text="Ramo de Atividade",
+        null=True,
+        blank=True,
     )
     taxpayer_classification = models.ForeignKey(
         DomTaxpayerClassification,
         on_delete=models.DO_NOTHING,
         related_name="organizational_details",
         help_text="Classificação do Contribuinte",
+        null=True,
+        blank=True,
     )
     public_entity = models.ForeignKey(
         DomPublicEntity,
         on_delete=models.DO_NOTHING,
         related_name="organizational_details",
         help_text="Órgão Público",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
@@ -169,12 +205,16 @@ class FiscalDetails(TimestampedModel):
         on_delete=models.DO_NOTHING,
         related_name="fiscal_details",
         help_text="Retenção de ISS",
+        null=True,
+        blank=True,
     )
     iss_regime = models.ForeignKey(
         DomIssRegime,
         on_delete=models.DO_NOTHING,
         related_name="fiscal_details",
         help_text="Regime ISS",
+        null=True,
+        blank=True,
     )
     iss_taxpayer = models.BooleanField(default=False, help_text="Contribuinte ISS")
 
@@ -188,6 +228,8 @@ class FiscalDetails(TimestampedModel):
         on_delete=models.DO_NOTHING,
         related_name="fiscal_details",
         help_text="Natureza da Retenção na Fonte",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
@@ -215,40 +257,53 @@ class CompanyInformation(TimestampedModel):
         on_delete=models.DO_NOTHING,
         related_name="company_information",
         help_text="Porte da Empresa",
+        null=True,
+        blank=True,
     )
     icms_taxpayer = models.ForeignKey(
         DomIcmsTaxpayer,
         on_delete=models.DO_NOTHING,
         related_name="company_information",
         help_text="Contribuinte ICMS",
+        null=True,
+        blank=True,
     )
     taxation_regime = models.ForeignKey(
         DomTaxationRegime,
         on_delete=models.DO_NOTHING,
         related_name="company_information",
         help_text="Regime de Tributação",
+        null=True,
+        blank=True,
     )
     income_type = models.ForeignKey(
         DomIncomeType,
         on_delete=models.DO_NOTHING,
         related_name="company_information",
         help_text="Tipo de Rendimento",
+        null=True,
+        blank=True,
     )
     taxation_method = models.ForeignKey(
         DomTaxationMethod,
         on_delete=models.DO_NOTHING,
         related_name="company_information",
         help_text="Forma de Tributação",
+        null=True,
+        blank=True,
     )
     customer_type = models.ForeignKey(
         DomCustomerType,
         on_delete=models.DO_NOTHING,
         related_name="company_information",
         help_text="Tipo de Cliente",
+        null=True,
+        blank=True,
     )
     nit = models.CharField(
         max_length=20,
         blank=True,
+        default="",
         help_text="NIT (Número de Identificação do Trabalhador)",
     )
 
@@ -272,56 +327,102 @@ class Supplier(TimestampedModel):
     Contains basic supplier information and relationships to detailed information.
     """
 
-    trade_name = models.CharField(max_length=255, help_text="Nome fantasia")
+    trade_name = models.CharField(
+        max_length=255, help_text="Nome fantasia", blank=True, default=""
+    )
     legal_name = models.CharField(max_length=255, unique=True, help_text="Razão Social")
     tax_id = models.CharField(max_length=16, unique=True, help_text="CPF/CNPJ")
     state_business_registration = models.CharField(
-        max_length=20, help_text="Inscrição Estadual"
+        max_length=20, help_text="Inscrição Estadual", blank=True, default=""
     )
     municipal_business_registration = models.CharField(
-        max_length=20, help_text="Inscrição Municipal"
+        max_length=20, help_text="Inscrição Municipal", blank=True, default=""
     )
     # One-to-one relationships
     address = models.OneToOneField(
-        Address, on_delete=models.CASCADE, related_name="supplier"
+        Address,
+        on_delete=models.CASCADE,
+        related_name="supplier",
+        null=True,
+        blank=True,
     )
     contact = models.OneToOneField(
-        Contact, on_delete=models.CASCADE, related_name="supplier"
+        Contact,
+        on_delete=models.CASCADE,
+        related_name="supplier",
+        null=True,
+        blank=True,
     )
     payment_details = models.OneToOneField(
-        PaymentDetails, on_delete=models.CASCADE, related_name="supplier"
+        PaymentDetails,
+        on_delete=models.CASCADE,
+        related_name="supplier",
+        null=True,
+        blank=True,
     )
     organizational_details = models.OneToOneField(
         OrganizationalDetails,
         on_delete=models.CASCADE,
         related_name="supplier",
+        null=True,
+        blank=True,
     )
     fiscal_details = models.OneToOneField(
-        FiscalDetails, on_delete=models.CASCADE, related_name="supplier"
+        FiscalDetails,
+        on_delete=models.CASCADE,
+        related_name="supplier",
+        null=True,
+        blank=True,
     )
     company_information = models.OneToOneField(
         CompanyInformation,
         on_delete=models.CASCADE,
         related_name="supplier",
+        null=True,
+        blank=True,
     )
     contract = models.OneToOneField(
-        Contract, on_delete=models.CASCADE, related_name="supplier"
+        Contract,
+        on_delete=models.CASCADE,
+        related_name="supplier",
+        null=True,
+        blank=True,
     )
     # Foreign key relationships
     classification = models.ForeignKey(
-        DomClassification, on_delete=models.DO_NOTHING, related_name="suppliers"
+        DomClassification,
+        on_delete=models.DO_NOTHING,
+        related_name="suppliers",
+        null=True,
+        blank=True,
     )
     category = models.ForeignKey(
-        DomCategory, on_delete=models.DO_NOTHING, related_name="suppliers"
+        DomCategory,
+        on_delete=models.DO_NOTHING,
+        related_name="suppliers",
+        null=True,
+        blank=True,
     )
     risk_level = models.ForeignKey(
-        DomRiskLevel, on_delete=models.DO_NOTHING, related_name="suppliers"
+        DomRiskLevel,
+        on_delete=models.DO_NOTHING,
+        related_name="suppliers",
+        null=True,
+        blank=True,
     )
     type = models.ForeignKey(
-        DomTypeSupplier, on_delete=models.DO_NOTHING, related_name="suppliers"
+        DomTypeSupplier,
+        on_delete=models.DO_NOTHING,
+        related_name="suppliers",
+        null=True,
+        blank=True,
     )
     situation = models.ForeignKey(
-        DomSupplierSituation, on_delete=models.DO_NOTHING, related_name="suppliers"
+        DomSupplierSituation,
+        on_delete=models.DO_NOTHING,
+        related_name="suppliers",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):

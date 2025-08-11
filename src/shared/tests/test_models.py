@@ -4,7 +4,6 @@ This module contains tests for Address, Contact and TimestampedModel.
 """
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -188,14 +187,20 @@ class TestContactModel(TestCase):
 
         self.assertEqual(str(contact), expected_str)
 
-    def test_email_unique_constraint(self):
-        """Test that email field has unique constraint."""
+    def test_email_allows_duplicates(self):
+        """Test that email field allows duplicates (unique constraint removed for supplier updates)."""
         # Create first contact
-        Contact.objects.create(email="unico@teste.com", phone="11111111111")
+        contact1 = Contact.objects.create(
+            email="duplicado@teste.com", phone="11111111111"
+        )
 
-        # Try to create second contact with same email
-        with self.assertRaises(IntegrityError):
-            Contact.objects.create(email="unico@teste.com", phone="11222222222")
+        # Create second contact with same email - should not raise error
+        contact2 = Contact.objects.create(
+            email="duplicado@teste.com", phone="11222222222"
+        )
+
+        self.assertEqual(contact1.email, contact2.email)
+        self.assertNotEqual(contact1.pk, contact2.pk)
 
     def test_email_blank_allowed(self):
         """Test that blank email is allowed."""
