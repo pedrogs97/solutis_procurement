@@ -27,12 +27,12 @@ class Address(TimestampedModel):
     Model representing an address.
     """
 
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=150)
-    state = models.CharField(max_length=100)
+    street = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=150, blank=True)
+    state = models.CharField(max_length=100, blank=True)
     neighbourhood = models.CharField(max_length=150, blank=True)
-    number = models.IntegerField()
-    postal_code = models.CharField(max_length=8)
+    number = models.IntegerField(null=True)
+    postal_code = models.CharField(max_length=8, blank=True)
     complement = models.CharField(max_length=255, blank=True)
 
     def __str__(self):

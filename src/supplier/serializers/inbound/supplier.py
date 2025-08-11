@@ -140,18 +140,34 @@ class SupplierInSerializer(BaseSerializer):
         organizational_details_data = validated_data.pop("organizational_details")
         fiscal_details_data = validated_data.pop("fiscal_details")
         company_information_data = validated_data.pop("company_information")
+
+        address = {}
+        contact = {}
+        payment_details = {}
+        contract = {}
+        organizational_details = {}
+        fiscal_details = {}
+        company_information = {}
+
         # Create related objects first
-        address = Address.objects.create(**address_data)
-        contact = Contact.objects.create(**contact_data)
-        payment_details = PaymentDetails.objects.create(**payment_details_data)
-        organizational_details = OrganizationalDetails.objects.create(
-            **organizational_details_data
-        )
-        fiscal_details = FiscalDetails.objects.create(**fiscal_details_data)
-        company_information = CompanyInformation.objects.create(
-            **company_information_data
-        )
-        contract = Contract.objects.create(**contract_data)
+        if address_data:
+            address = Address.objects.create(**address_data)
+        if contact_data:
+            contact = Contact.objects.create(**contact_data)
+        if payment_details_data:
+            payment_details = PaymentDetails.objects.create(**payment_details_data)
+        if organizational_details_data:
+            organizational_details = OrganizationalDetails.objects.create(
+                **organizational_details_data
+            )
+        if fiscal_details_data:
+            fiscal_details = FiscalDetails.objects.create(**fiscal_details_data)
+        if company_information_data:
+            company_information = CompanyInformation.objects.create(
+                **company_information_data
+            )
+        if contract_data:
+            contract = Contract.objects.create(**contract_data)
         # Create the Supplier instance with related objects
         validated_data["address"] = address
         validated_data["contact"] = contact

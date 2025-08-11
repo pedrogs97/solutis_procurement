@@ -92,6 +92,8 @@ class AddressSerializer(BaseSerializer):
         """
         attrs = super().validate(attrs)
         postal_code = attrs.get("postal_code", "")
+        if not postal_code:
+            return attrs
         try:
             address: Dict = self.__validate_postal_code(postal_code)
             attrs["street"] = address.get("street", "")
