@@ -62,6 +62,17 @@ class SupplierAttachment(TimestampedModel):
             return self.file.path
         return None
 
+    @property
+    def is_completed_files(self):
+        """Checks if all required files are uploaded."""
+        total_supplier_attachs = self.supplier.attachments.all().count()
+        total_needed_attachs = (
+            SupplierAttachment.objects.select_related("attachment_type")
+            .filter(attachment_type=self.supplier.risk_level)
+            .count()
+        )
+        return total_supplier_attachs >= total_needed_attachs
+
     class Meta(TimestampedModel.Meta):
         """
         Meta options for the SupplierAttachment model.

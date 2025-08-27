@@ -72,20 +72,49 @@ class DomTypeSupplier(DomType):
         abstract = False
 
 
-class DomSupplierSituation(DomType):
+class DomPendecyType(DomType):
+    """
+    Model representing dependency types for suppliers.
+    """
+
+    class Meta(DomType.Meta):
+        """
+        Meta options for the DomPendecyType model.
+        """
+
+        db_table = "pendecy_type"
+        verbose_name = "Tipo de Pendência"
+        verbose_name_plural = "Tipos de Pendência"
+        abstract = False
+
+
+class DomSupplierSituation(models.Model):
     """
     Model representing the situation status of suppliers.
     """
+
+    name = models.CharField(
+        max_length=255, verbose_name="Nome", help_text="Nome da Situação do Fornecedor"
+    )
+
+    pendency_type = models.ForeignKey(
+        DomPendecyType,
+        on_delete=models.DO_NOTHING,
+        related_name="supplier_situation",
+        help_text="Tipo de Pendência",
+        null=True,
+    )
 
     class Meta(DomType.Meta):
         """
         Meta options for the DomSupplierSituation model.
         """
 
-        db_table = "supplier_situation"
+        db_table = "supplier_situation_type"
         verbose_name = "Situação do Fornecedor"
         verbose_name_plural = "Situações do Fornecedor"
         abstract = False
+        unique_together = (("name", "pendency_type"),)
 
 
 class DomPixType(DomType):

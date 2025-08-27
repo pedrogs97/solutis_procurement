@@ -120,7 +120,7 @@ class SupplierInSerializer(BaseSerializer):
 
         model = Supplier
         fields = "__all__"
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = ("id", "situation", "created_at", "updated_at")
 
     @atomic
     def create(self, validated_data: Dict) -> Supplier:

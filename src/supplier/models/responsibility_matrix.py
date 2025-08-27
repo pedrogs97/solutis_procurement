@@ -6,6 +6,7 @@ This module defines the responsibility matrix model used to manage supplier-rela
 from django.db import models
 
 from src.shared.models import TimestampedModel
+from src.supplier.models.supplier import Supplier
 
 # Choices reutilizáveis para todos os campos da matriz RACI (definidas fora da classe)
 RACI_CHOICES = [
@@ -49,7 +50,7 @@ class ResponsibilityMatrix(TimestampedModel):
 
     # Relacionamento one-to-one com Supplier
     supplier = models.OneToOneField(
-        "Supplier",
+        Supplier,
         on_delete=models.CASCADE,
         related_name="responsibility_matrix",
         help_text="Fornecedor vinculado à matriz",
@@ -165,6 +166,16 @@ class ResponsibilityMatrix(TimestampedModel):
 
     def __str__(self):
         return f"Matriz de Responsabilidade - {self.supplier.trade_name}"
+
+    @property
+    def is_completed(self):
+        """Check if all contract execution monitoring fields are completed."""
+        return all(
+            getattr(self, field.name) != "-"
+            for field in self._meta.get_fields()
+            if hasattr(field, "name")
+            and field.name.startswith("contract_execution_monitoring_")
+        )
 
     class Meta(TimestampedModel.Meta):
         """

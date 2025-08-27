@@ -3,9 +3,10 @@ FilterSet for Supplier and SupplierAttachment models.
 This module provides filtering capabilities for supplier-related data.
 """
 
+from django.db.models import OuterRef, Subquery
 from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter
 
-from src.supplier.models.supplier import Supplier
+from src.supplier.models.supplier import Supplier, SupplierSituation
 
 
 class SupplierFilters(FilterSet):
@@ -27,11 +28,20 @@ class SupplierFilters(FilterSet):
         if not value:
             return queryset
 
+        subquery = Subquery(
+            SupplierSituation.objects.filter(supplier=OuterRef("pk"))
+            .order_by("-created_at")
+            .values("status")[:1]
+        )
         if "," in value:
             values = [int(v.strip()) for v in value.split(",") if v.strip()]
-            return queryset.filter(situation__in=values)
+            return queryset.annotate(latest_status=subquery).filter(
+                latest_status__in=values
+            )
 
-        return queryset.filter(situation=int(value))
+        return queryset.annotate(latest_status=subquery).filter(
+            latest_status=int(value)
+        )
 
     class Meta:
         """
@@ -39,4 +49,4 @@ class SupplierFilters(FilterSet):
         """
 
         model = Supplier
-        fields = ["situation"]
+        fields = ["name", "cnpj", "risk", "status"]

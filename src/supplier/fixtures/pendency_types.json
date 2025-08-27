@@ -1,0 +1,30 @@
+[
+    {
+        "model": "supplier.dompendecytype",
+        "pk": 1,
+        "fields": {
+            "name": "PENDÊNCIA DE CADASTRO"
+        }
+    },
+    {
+        "model": "supplier.dompendecytype",
+        "pk": 2,
+        "fields": {
+            "name": "PENDÊNCIA DE DOCUMENTAÇÃO"
+        }
+    },
+    {
+        "model": "supplier.dompendecytype",
+        "pk": 3,
+        "fields": {
+            "name": "PENDÊNCIA MATRIZ DE RESPONSABILIDADE"
+        }
+    },
+    {
+        "model": "supplier.dompendecytype",
+        "pk": 4,
+        "fields": {
+            "name": "PENDÊNCIA DE AVALIAÇÃO"
+        }
+    }
+]

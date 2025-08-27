@@ -4,6 +4,7 @@ This module contains models related to suppliers.
 """
 
 from decimal import Decimal
+from typing import Optional
 
 from django.db import models
 
@@ -30,6 +31,7 @@ from src.supplier.models.domain import (
     DomTypeSupplier,
     DomWithholdingTax,
 )
+from src.supplier.models.validators import validate_object_complete
 
 
 class Contract(TimestampedModel):
@@ -49,6 +51,30 @@ class Contract(TimestampedModel):
     )
     contract_end_date = models.DateField(
         help_text="Data Final do Contrato", null=True, blank=True
+    )
+    contract_type = models.CharField(
+        max_length=50, help_text="Tipo de Contrato", blank=True, default=""
+    )
+    contract_period = models.CharField(
+        max_length=3, help_text="Período do Contrato", blank=True, default=""
+    )
+    has_contract_renewal = models.BooleanField(
+        help_text="Renovação de Contrato", default=False
+    )
+    warning_contract_renewal = models.BooleanField(
+        help_text="Aviso de Renovação de Contrato", default=False
+    )
+    warning_contract_period = models.CharField(
+        max_length=3, help_text="Aviso Prévio de Contrato", blank=True, default=""
+    )
+    warning_on_termination = models.BooleanField(
+        help_text="Tem Aviso de Término de Contrato", default=False
+    )
+    warning_on_renewal = models.BooleanField(
+        help_text="Tem Aviso de Renovação de Contrato", default=False
+    )
+    warning_on_period = models.BooleanField(
+        help_text="Tem Aviso Prévio de Contrato", default=False
     )
 
     def __str__(self):
@@ -417,16 +443,27 @@ class Supplier(TimestampedModel):
         null=True,
         blank=True,
     )
-    situation = models.ForeignKey(
-        DomSupplierSituation,
-        on_delete=models.DO_NOTHING,
-        related_name="suppliers",
-        null=True,
-        blank=True,
-    )
 
     def __str__(self):
         return self.trade_name
+
+    @property
+    def is_completed_registration(self) -> bool:
+        """
+        Check if the supplier registration is complete.
+        """
+        is_obj_complete = validate_object_complete(self)
+        first_attach = self.attachments.first()
+        is_files_complete = first_attach and first_attach.is_completed_files
+        is_responsibility_complete = self.responsibility_matrix.is_completed
+        return is_obj_complete and is_files_complete and is_responsibility_complete
+
+    @property
+    def situation(self) -> Optional["SupplierSituation"]:
+        """
+        Get the current situation of the supplier.
+        """
+        return self.situations.order_by("-created_at").first()
 
     class Meta(TimestampedModel.Meta):
         """
@@ -437,3 +474,27 @@ class Supplier(TimestampedModel):
         verbose_name = "Fornecedor"
         verbose_name_plural = "Fornecedores"
         abstract = False
+
+
+class SupplierSituation(TimestampedModel):
+    """
+    Model representing the situation of a supplier.
+    """
+
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.CASCADE, related_name="situations"
+    )
+    status = models.ForeignKey(
+        DomSupplierSituation, on_delete=models.CASCADE, related_name="situations"
+    )
+
+    class Meta(TimestampedModel.Meta):
+        """
+        Meta configuration for SupplierSituation model.
+        """
+
+        db_table = "supplier_situation"
+        verbose_name = "Situação do Fornecedor"
+        verbose_name_plural = "Situações do Fornecedor"
+        abstract = False
+        unique_together = (("supplier", "status"),)
