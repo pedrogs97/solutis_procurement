@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from src.shared.views import BaseAPIView
-from src.supplier.filters import SupplierFilters
+from src.supplier.filters.supplier import SupplierFilters
 from src.supplier.models.supplier import Supplier
 from src.supplier.serializers.inbound.supplier import SupplierInSerializer
 from src.supplier.serializers.outbound.supplier import SupplierOutSerializer

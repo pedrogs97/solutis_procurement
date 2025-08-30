@@ -1,0 +1,170 @@
+[
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 1,
+        "fields": {
+            "name": "Qualidade do Produto/Serviço",
+            "description": "Produto ou serviço atende plenamente às especificações e padrões exigidos.",
+            "weight": 9.00,
+            "order": 1,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 2,
+        "fields": {
+            "name": "Cumprimento de Prazos",
+            "description": "Entregas realizadas dentro dos prazos acordados, sem atrasos recorrentes.",
+            "weight": 9.00,
+            "order": 2,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 3,
+        "fields": {
+            "name": "Preço e Custo-benefício",
+            "description": "Valor compatível com o mercado, considerando a qualidade e o serviço prestado.",
+            "weight": 8.00,
+            "order": 3,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 4,
+        "fields": {
+            "name": "Condições de Pagamento",
+            "description": "Cumprimento das condições comerciais acordadas (prazos, parcelamentos etc.).",
+            "weight": 5.00,
+            "order": 4,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 5,
+        "fields": {
+            "name": "Atendimento e Suporte",
+            "description": "Atendimento cordial, ágil, disponível e prestativo ao longo do relacionamento.",
+            "weight": 8.00,
+            "order": 5,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 6,
+        "fields": {
+            "name": "Logística e Entrega",
+            "description": "Transporte, embalagem e entrega conforme estabelecido, com integridade do material.",
+            "weight": 8.00,
+            "order": 6,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 7,
+        "fields": {
+            "name": "Satisfação Geral do Cliente Interno",
+            "description": "Avaliação média das áreas internas usuárias quanto à experiência geral com o fornecedor.",
+            "weight": 5.00,
+            "order": 7,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 8,
+        "fields": {
+            "name": "Comprometimento do Fornecedor",
+            "description": "Nível de responsabilidade, confiabilidade e proatividade com os acordos assumidos.",
+            "weight": 8.00,
+            "order": 8,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 9,
+        "fields": {
+            "name": "Solução de Problemas",
+            "description": "Agilidade e eficácia na resolução de não conformidades, erros, devoluções e ajustes.",
+            "weight": 8.00,
+            "order": 9,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 10,
+        "fields": {
+            "name": "Flexibilidade e Adaptação",
+            "description": "Capacidade de atender mudanças de demanda, prazos ou condições sob imprevistos.",
+            "weight": 4.00,
+            "order": 10,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 11,
+        "fields": {
+            "name": "Conformidade Documental",
+            "description": "Envio completo e pontual de notas fiscais, certidões e contratos exigidos.",
+            "weight": 4.00,
+            "order": 11,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 12,
+        "fields": {
+            "name": "Inovação / Melhoria Contínua",
+            "description": "Apresenta soluções de melhoria em produto, processo ou atendimento ao longo do tempo.",
+            "weight": 4.00,
+            "order": 12,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 13,
+        "fields": {
+            "name": "Atendimento aos Requisitos Técnicos",
+            "description": "Produtos/serviços seguem especificações técnicas, normas regulamentares e requisitos do setor.",
+            "weight": 5.00,
+            "order": 13,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.evaluationcriterion",
+        "pk": 14,
+        "fields": {
+            "name": "Suporte Técnico / Pós-venda",
+            "description": "Suporte após a entrega, assistência técnica, treinamentos ou orientações sempre que necessário.",
+            "weight": 5.00,
+            "order": 14,
+            "created_at": "2025-08-27T00:00:00Z",
+            "updated_at": "2025-08-27T00:00:00Z"
+        }
+    }
+]

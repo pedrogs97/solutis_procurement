@@ -23,6 +23,7 @@ from django.urls import include, path
 
 from src.supplier.urls.attachment import urlpatterns as attachment_urls
 from src.supplier.urls.domain import urlpatterns as domain_urls
+from src.supplier.urls.evaluation import urlpatterns as evaluation_urls
 from src.supplier.urls.responsibility_matrix import (
     urlpatterns as responsibility_matrix_urls,
 )
@@ -34,6 +35,7 @@ urlpatterns = [
     path("api/", include(attachment_urls)),
     path("api/", include(responsibility_matrix_urls)),
     path("api/domain/", include(domain_urls)),
+    path("api/evaluation/", include(evaluation_urls)),
     path("api/", lambda request: HttpResponse(status=200), name="healthcheck"),
 ]
 
