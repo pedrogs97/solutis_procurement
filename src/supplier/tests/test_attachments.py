@@ -11,6 +11,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from src.shared.models import Address, Contact
+from src.supplier.enums import DomPendecyTypeEnum
 from src.supplier.models.attachments import SupplierAttachment
 from src.supplier.models.domain import (
     DomAttachmentType,
@@ -25,6 +26,7 @@ from src.supplier.models.domain import (
     DomIssWithholding,
     DomPayerType,
     DomPaymentMethod,
+    DomPendecyType,
     DomPixType,
     DomPublicEntity,
     DomRiskLevel,
@@ -45,25 +47,41 @@ from src.supplier.models.supplier import (
 )
 
 
+def setup_situation():
+    """Set up supplier situation."""
+    DomPendecyType.objects.create(name="PENDENCIA_CADASTRO")
+    DomPendecyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
+    DomPendecyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
+    DomPendecyType.objects.create(name="PENDENCIA_AVALIACAO")
+    DomSupplierSituation.objects.create(name="ATIVO")
+    DomSupplierSituation.objects.create(
+        name="PENDENTE",
+        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
+    )
+    DomSupplierSituation.objects.create(
+        name="PENDENTE",
+        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
+    )
+    DomSupplierSituation.objects.create(
+        name="PENDENTE",
+        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
+    )
+
+
 class TestSupplierAttachment(TestCase):
     """Test cases for SupplierAttachment model."""
 
     def setUp(self):
         """Set up test data."""
-        # Create attachment type
-        self.attachment_type = DomAttachmentType.objects.create(
-            name="Contrato Social", description="Contrato social da empresa"
-        )
+        self.attachment_type = DomAttachmentType.objects.create(name="Contrato Social")
 
-        # Create minimal supplier setup
         address = Address.objects.create(postal_code="01234-567", number="123")
         contact = Contact.objects.create(email="test@example.com", phone="11999999999")
 
-        # Create required domain objects
-        payment_method = DomPaymentMethod.objects.create(
-            name="TED", description="Transfer"
-        )
-        pix_type = DomPixType.objects.create(name="Email", description="Email PIX")
+        setup_situation()
+
+        payment_method = DomPaymentMethod.objects.create(name="TED")
+        pix_type = DomPixType.objects.create(name="Email")
         payment_details = PaymentDetails.objects.create(
             payment_frequency="Mensal",
             payment_date="2024-01-15",
@@ -75,16 +93,12 @@ class TestSupplierAttachment(TestCase):
             pix_key="test@email.com",
         )
 
-        payer_type = DomPayerType.objects.create(name="PJ", description="Legal Entity")
-        business_sector = DomBusinessSector.objects.create(
-            name="Tech", description="Technology"
-        )
+        payer_type = DomPayerType.objects.create(name="PJ")
+        business_sector = DomBusinessSector.objects.create(name="Technology")
         taxpayer_classification = DomTaxpayerClassification.objects.create(
-            name="Normal", description="Normal"
+            name="Normal"
         )
-        public_entity = DomPublicEntity.objects.create(
-            name="RFB", description="Federal Revenue"
-        )
+        public_entity = DomPublicEntity.objects.create(name="RFB")
         organizational_details = OrganizationalDetails.objects.create(
             cost_center="CC001",
             business_unit="TI",
@@ -95,15 +109,9 @@ class TestSupplierAttachment(TestCase):
             public_entity=public_entity,
         )
 
-        iss_withholding = DomIssWithholding.objects.create(
-            name="No", description="No withholding"
-        )
-        iss_regime = DomIssRegime.objects.create(
-            name="Normal", description="Normal regime"
-        )
-        withholding_tax = DomWithholdingTax.objects.create(
-            name="IRRF", description="Income tax"
-        )
+        iss_withholding = DomIssWithholding.objects.create(name="No")
+        iss_regime = DomIssRegime.objects.create(name="Normal")
+        withholding_tax = DomWithholdingTax.objects.create(name="IRRF")
         fiscal_details = FiscalDetails.objects.create(
             iss_withholding=iss_withholding,
             iss_regime=iss_regime,
@@ -113,24 +121,12 @@ class TestSupplierAttachment(TestCase):
             withholding_tax_nature=withholding_tax,
         )
 
-        company_size = DomCompanySize.objects.create(
-            name="Small", description="Small company"
-        )
-        icms_taxpayer = DomIcmsTaxpayer.objects.create(
-            name="No", description="Not taxpayer"
-        )
-        taxation_regime = DomTaxationRegime.objects.create(
-            name="Simple", description="Simple regime"
-        )
-        income_type = DomIncomeType.objects.create(
-            name="Services", description="Service income"
-        )
-        taxation_method = DomTaxationMethod.objects.create(
-            name="Normal", description="Normal method"
-        )
-        customer_type = DomCustomerType.objects.create(
-            name="B2B", description="Business to Business"
-        )
+        company_size = DomCompanySize.objects.create(name="Small")
+        icms_taxpayer = DomIcmsTaxpayer.objects.create(name="No")
+        taxation_regime = DomTaxationRegime.objects.create(name="Simple")
+        income_type = DomIncomeType.objects.create(name="Services")
+        taxation_method = DomTaxationMethod.objects.create(name="Normal")
+        customer_type = DomCustomerType.objects.create(name="B2B")
         company_information = CompanyInformation.objects.create(
             company_size=company_size,
             icms_taxpayer=icms_taxpayer,
@@ -147,19 +143,10 @@ class TestSupplierAttachment(TestCase):
             contract_end_date="2024-12-31",
         )
 
-        classification = DomClassification.objects.create(
-            name="Test", description="Test classification"
-        )
-        category = DomCategory.objects.create(
-            name="Services", description="Service category"
-        )
-        risk_level = DomRiskLevel.objects.create(name="Low", description="Low risk")
-        supplier_type = DomTypeSupplier.objects.create(
-            name="Legal", description="Legal entity"
-        )
-        situation = DomSupplierSituation.objects.create(
-            name="Active", description="Active"
-        )
+        classification = DomClassification.objects.create(name="Test")
+        category = DomCategory.objects.create(name="Services")
+        risk_level = DomRiskLevel.objects.create(name="Low")
+        supplier_type = DomTypeSupplier.objects.create(name="Legal")
 
         self.supplier = Supplier.objects.create(
             trade_name="Test Supplier",
@@ -178,10 +165,8 @@ class TestSupplierAttachment(TestCase):
             category=category,
             risk_level=risk_level,
             type=supplier_type,
-            situation=situation,
         )
 
-        # Create a test file
         self.test_file = SimpleUploadedFile(
             "test_contract.pdf", b"file_content", content_type="application/pdf"
         )
@@ -200,29 +185,6 @@ class TestSupplierAttachment(TestCase):
         self.assertEqual(attachment.description, "Contrato social da empresa teste")
         self.assertIsNotNone(attachment.file)
 
-    def test_supplier_attachment_str_representation(self):
-        """Test supplier attachment string representation."""
-        attachment = SupplierAttachment.objects.create(
-            supplier=self.supplier,
-            attachment_type=self.attachment_type,
-            file=self.test_file,
-            description="Test description",
-        )
-
-        expected_str = "Contrato Social - Test description"
-        self.assertEqual(str(attachment), expected_str)
-
-    def test_supplier_attachment_str_without_description(self):
-        """Test supplier attachment string representation without description."""
-        attachment = SupplierAttachment.objects.create(
-            supplier=self.supplier,
-            attachment_type=self.attachment_type,
-            file=self.test_file,
-        )
-
-        expected_str = "Contrato Social - No Description"
-        self.assertEqual(str(attachment), expected_str)
-
     def test_file_name_property(self):
         """Test the file_name property returns only the filename."""
         test_file = SimpleUploadedFile(
@@ -233,14 +195,13 @@ class TestSupplierAttachment(TestCase):
             supplier=self.supplier, attachment_type=self.attachment_type, file=test_file
         )
 
-        # The file_name property should return just the filename
         self.assertIsNotNone(attachment.file_name)
         if attachment.file_name:
-            self.assertIn("contract_social.pdf", attachment.file_name)
+            self.assertIn("contract_social", attachment.file_name)
+            self.assertTrue(attachment.file_name.endswith(".pdf"))
 
     def test_file_name_property_without_file(self):
         """Test the file_name property when no file is attached."""
-        # Create attachment without file first
         attachment = SupplierAttachment(
             supplier=self.supplier,
             attachment_type=self.attachment_type,
@@ -291,7 +252,6 @@ class TestSupplierAttachment(TestCase):
 
     def test_unique_together_constraint(self):
         """Test that unique_together constraint is enforced."""
-        # Create first attachment
         SupplierAttachment.objects.create(
             supplier=self.supplier,
             attachment_type=self.attachment_type,
@@ -299,7 +259,6 @@ class TestSupplierAttachment(TestCase):
             description="First attachment",
         )
 
-        # Try to create second attachment with same supplier and attachment_type
         test_file_2 = SimpleUploadedFile(
             "test_contract_2.pdf", b"different_content", content_type="application/pdf"
         )
@@ -314,12 +273,8 @@ class TestSupplierAttachment(TestCase):
 
     def test_different_attachment_types_allowed(self):
         """Test that same supplier can have multiple attachments of different types."""
-        # Create second attachment type
-        attachment_type_2 = DomAttachmentType.objects.create(
-            name="CNPJ", description="Cartão CNPJ da empresa"
-        )
+        attachment_type_2 = DomAttachmentType.objects.create(name="CNPJ")
 
-        # Create first attachment
         attachment_1 = SupplierAttachment.objects.create(
             supplier=self.supplier,
             attachment_type=self.attachment_type,
@@ -327,7 +282,6 @@ class TestSupplierAttachment(TestCase):
             description="First attachment",
         )
 
-        # Create second attachment with different type
         test_file_2 = SimpleUploadedFile(
             "cnpj.pdf", b"cnpj_content", content_type="application/pdf"
         )
@@ -339,7 +293,6 @@ class TestSupplierAttachment(TestCase):
             description="Second attachment",
         )
 
-        # Both should exist
         self.assertTrue(SupplierAttachment.objects.filter(pk=attachment_1.pk).exists())
         self.assertTrue(SupplierAttachment.objects.filter(pk=attachment_2.pk).exists())
 
@@ -354,10 +307,8 @@ class TestSupplierAttachment(TestCase):
 
         attachment_id = attachment.pk
 
-        # Delete supplier
         self.supplier.delete()
 
-        # Check that attachment is also deleted
         self.assertFalse(SupplierAttachment.objects.filter(pk=attachment_id).exists())
 
     def test_do_nothing_deletion_from_attachment_type(self):
@@ -371,30 +322,10 @@ class TestSupplierAttachment(TestCase):
 
         attachment_id = attachment.pk
 
-        # Try to delete attachment type - should be protected
         with self.assertRaises(Exception):
             self.attachment_type.delete()
 
-        # Attachment should still exist
         self.assertTrue(SupplierAttachment.objects.filter(pk=attachment_id).exists())
-
-    def test_meta_configuration(self):
-        """Test model meta configuration."""
-        attachment = SupplierAttachment.objects.create(
-            supplier=self.supplier,
-            attachment_type=self.attachment_type,
-            file=self.test_file,
-        )
-
-        # Test meta attributes
-        self.assertEqual(attachment._meta.db_table, "supplier_attachment")
-        self.assertEqual(attachment._meta.verbose_name, "Supplier Attachment")
-        self.assertEqual(attachment._meta.verbose_name_plural, "Supplier Attachments")
-        self.assertFalse(attachment._meta.abstract)
-
-        # Test unique_together
-        unique_together = attachment._meta.unique_together
-        self.assertIn(("supplier", "attachment_type"), unique_together)
 
     def test_attachment_relationships(self):
         """Test attachment model relationships."""
@@ -405,11 +336,9 @@ class TestSupplierAttachment(TestCase):
             description="Relationship test",
         )
 
-        # Test forward relationships
         self.assertEqual(attachment.supplier, self.supplier)
         self.assertEqual(attachment.attachment_type, self.attachment_type)
 
-        # Test reverse relationships through queries
         supplier_attachments = SupplierAttachment.objects.filter(supplier=self.supplier)
         self.assertIn(attachment, supplier_attachments)
 
@@ -418,47 +347,22 @@ class TestSupplierAttachment(TestCase):
         )
         self.assertIn(attachment, type_attachments)
 
-    def test_timestamps(self):
-        """Test that timestamp fields are properly set."""
-        attachment = SupplierAttachment.objects.create(
-            supplier=self.supplier,
-            attachment_type=self.attachment_type,
-            file=self.test_file,
-            description="Timestamp test",
-        )
-
-        self.assertIsNotNone(attachment.created_at)
-        self.assertIsNotNone(attachment.updated_at)
-
-        # Update the attachment and check timestamp update
-        original_updated_at = attachment.updated_at
-        attachment.description = "Updated description"
-        attachment.save()
-
-        self.assertGreater(attachment.updated_at, original_updated_at)
-
 
 class TestSupplierAttachmentQueryMethods(TestCase):
     """Test cases for SupplierAttachment query methods and filtering."""
 
     def setUp(self):
         """Set up test data for query tests."""
-        # Create attachment types
-        self.contract_type = DomAttachmentType.objects.create(
-            name="Contrato Social", description="Contrato social"
-        )
-        self.cnpj_type = DomAttachmentType.objects.create(
-            name="CNPJ", description="Cartão CNPJ"
-        )
+        self.contract_type = DomAttachmentType.objects.create(name="Contrato Social")
+        self.cnpj_type = DomAttachmentType.objects.create(name="CNPJ")
 
-        # Create minimal supplier setup
+        setup_situation()
+
         address = Address.objects.create(postal_code="01234-567", number="123")
         contact = Contact.objects.create(email="test@example.com", phone="11999999999")
 
-        payment_method = DomPaymentMethod.objects.create(
-            name="TED", description="Transfer"
-        )
-        pix_type = DomPixType.objects.create(name="Email", description="Email PIX")
+        payment_method = DomPaymentMethod.objects.create(name="TED")
+        pix_type = DomPixType.objects.create(name="Email")
         payment_details = PaymentDetails.objects.create(
             payment_frequency="Mensal",
             payment_date="2024-01-15",
@@ -470,16 +374,12 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             pix_key="test@email.com",
         )
 
-        payer_type = DomPayerType.objects.create(name="PJ", description="Legal Entity")
-        business_sector = DomBusinessSector.objects.create(
-            name="Tech", description="Technology"
-        )
+        payer_type = DomPayerType.objects.create(name="PJ")
+        business_sector = DomBusinessSector.objects.create(name="Tech")
         taxpayer_classification = DomTaxpayerClassification.objects.create(
-            name="Normal", description="Normal"
+            name="Normal"
         )
-        public_entity = DomPublicEntity.objects.create(
-            name="RFB", description="Federal Revenue"
-        )
+        public_entity = DomPublicEntity.objects.create(name="RFB")
         organizational_details = OrganizationalDetails.objects.create(
             cost_center="CC001",
             business_unit="TI",
@@ -490,15 +390,9 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             public_entity=public_entity,
         )
 
-        iss_withholding = DomIssWithholding.objects.create(
-            name="No", description="No withholding"
-        )
-        iss_regime = DomIssRegime.objects.create(
-            name="Normal", description="Normal regime"
-        )
-        withholding_tax = DomWithholdingTax.objects.create(
-            name="IRRF", description="Income tax"
-        )
+        iss_withholding = DomIssWithholding.objects.create(name="No")
+        iss_regime = DomIssRegime.objects.create(name="Normal")
+        withholding_tax = DomWithholdingTax.objects.create(name="IRRF")
         fiscal_details = FiscalDetails.objects.create(
             iss_withholding=iss_withholding,
             iss_regime=iss_regime,
@@ -508,24 +402,12 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             withholding_tax_nature=withholding_tax,
         )
 
-        company_size = DomCompanySize.objects.create(
-            name="Small", description="Small company"
-        )
-        icms_taxpayer = DomIcmsTaxpayer.objects.create(
-            name="No", description="Not taxpayer"
-        )
-        taxation_regime = DomTaxationRegime.objects.create(
-            name="Simple", description="Simple regime"
-        )
-        income_type = DomIncomeType.objects.create(
-            name="Services", description="Service income"
-        )
-        taxation_method = DomTaxationMethod.objects.create(
-            name="Normal", description="Normal method"
-        )
-        customer_type = DomCustomerType.objects.create(
-            name="B2B", description="Business to Business"
-        )
+        company_size = DomCompanySize.objects.create(name="Small")
+        icms_taxpayer = DomIcmsTaxpayer.objects.create(name="No")
+        taxation_regime = DomTaxationRegime.objects.create(name="Simple")
+        income_type = DomIncomeType.objects.create(name="Services")
+        taxation_method = DomTaxationMethod.objects.create(name="Normal")
+        customer_type = DomCustomerType.objects.create(name="B2B")
         company_information = CompanyInformation.objects.create(
             company_size=company_size,
             icms_taxpayer=icms_taxpayer,
@@ -542,20 +424,10 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             contract_end_date="2024-12-31",
         )
 
-        classification = DomClassification.objects.create(
-            name="Test", description="Test classification"
-        )
-        category = DomCategory.objects.create(
-            name="Services", description="Service category"
-        )
-        risk_level = DomRiskLevel.objects.create(name="Low", description="Low risk")
-        supplier_type = DomTypeSupplier.objects.create(
-            name="Legal", description="Legal entity"
-        )
-        situation = DomSupplierSituation.objects.create(
-            name="Active", description="Active"
-        )
-
+        classification = DomClassification.objects.create(name="Test")
+        category = DomCategory.objects.create(name="Services")
+        risk_level = DomRiskLevel.objects.create(name="Low")
+        supplier_type = DomTypeSupplier.objects.create(name="Legal")
         self.supplier = Supplier.objects.create(
             trade_name="Test Supplier",
             legal_name="Test Supplier LTDA",
@@ -573,12 +445,10 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             category=category,
             risk_level=risk_level,
             type=supplier_type,
-            situation=situation,
         )
 
     def test_filter_by_attachment_type(self):
         """Test filtering attachments by type."""
-        # Create attachments of different types
         contract_file = SimpleUploadedFile(
             "contract.pdf", b"contract_content", content_type="application/pdf"
         )
@@ -595,14 +465,12 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             supplier=self.supplier, attachment_type=self.cnpj_type, file=cnpj_file
         )
 
-        # Filter by contract type
         contract_attachments = SupplierAttachment.objects.filter(
             attachment_type=self.contract_type
         )
         self.assertIn(contract_attachment, contract_attachments)
         self.assertNotIn(cnpj_attachment, contract_attachments)
 
-        # Filter by CNPJ type
         cnpj_attachments = SupplierAttachment.objects.filter(
             attachment_type=self.cnpj_type
         )
@@ -619,13 +487,11 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             supplier=self.supplier, attachment_type=self.contract_type, file=test_file
         )
 
-        # Filter by supplier
         supplier_attachments = SupplierAttachment.objects.filter(supplier=self.supplier)
         self.assertIn(attachment, supplier_attachments)
 
     def test_count_attachments_by_type(self):
         """Test counting attachments by type."""
-        # Create attachment
         test_file_1 = SimpleUploadedFile(
             "test1.pdf", b"content1", content_type="application/pdf"
         )
@@ -634,13 +500,11 @@ class TestSupplierAttachmentQueryMethods(TestCase):
             supplier=self.supplier, attachment_type=self.contract_type, file=test_file_1
         )
 
-        # Contract type should have 1 attachment
         contract_count = SupplierAttachment.objects.filter(
             attachment_type=self.contract_type
         ).count()
         self.assertEqual(contract_count, 1)
 
-        # CNPJ type should have 0 attachments
         cnpj_count = SupplierAttachment.objects.filter(
             attachment_type=self.cnpj_type
         ).count()

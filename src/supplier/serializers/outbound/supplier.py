@@ -3,6 +3,8 @@ Serializer for Supplier model.
 This module provides serializers for output representations of the Supplier model.
 """
 
+from rest_framework.serializers import SerializerMethodField
+
 from src.shared.serializers import AddressSerializer, BaseSerializer, ContactSerializer
 from src.supplier.models.supplier import (
     CompanyInformation,
@@ -11,6 +13,7 @@ from src.supplier.models.supplier import (
     OrganizationalDetails,
     PaymentDetails,
     Supplier,
+    SupplierSituation,
 )
 from src.supplier.serializers.outbound.domain import (
     DomBusinessSectorSerializer,
@@ -138,6 +141,24 @@ class CompanyInformationOutSerializer(BaseSerializer):
         read_only_fields = ("id", "created_at", "updated_at")
 
 
+class SupplierSituationOutSerializer(BaseSerializer):
+    """
+    Serializer for SupplierSituation model.
+    Converts field names to camelCase representation.
+    """
+
+    status = DomSupplierSituationSerializer()
+
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for SupplierSituationOutSerializer.
+        """
+
+        model = SupplierSituation
+        fields = "__all__"
+        read_only_fields = ("id", "created_at", "updated_at")
+
+
 class SupplierOutSerializer(BaseSerializer):
     """
     Serializer for Supplier model.
@@ -155,7 +176,7 @@ class SupplierOutSerializer(BaseSerializer):
     category = DomCategorySerializer()
     risk_level = DomRiskLevelSerializer()
     type = DomTypeSupplierSerializer()
-    situation = DomSupplierSituationSerializer()
+    situation = SerializerMethodField()
     responsibility_matrix = ResponsibilityMatrixOutSerializer(read_only=True)
 
     class Meta(BaseSerializer.Meta):
@@ -166,3 +187,9 @@ class SupplierOutSerializer(BaseSerializer):
         model = Supplier
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
+
+    def get_situation(self, obj: Supplier):
+        """Retrieve the supplier's situation using the SupplierSituationOutSerializer."""
+        if obj.situation:
+            return SupplierSituationOutSerializer(obj.situation).data
+        return None

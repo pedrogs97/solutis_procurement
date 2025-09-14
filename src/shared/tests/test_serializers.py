@@ -10,7 +10,6 @@ from rest_framework import serializers
 
 from src.shared.models import Address, Contact
 from src.shared.serializers import AddressSerializer, BaseSerializer, ContactSerializer
-from src.shared.validation import BaseValidationError
 
 
 class TestBaseSerializer(TestCase):
@@ -94,10 +93,8 @@ class TestAddressSerializer(TestCase):
         invalid_data["postal_code"] = "invalid"
 
         serializer = AddressSerializer(data=invalid_data)
-
-        # Deve falhar na validação
-        with self.assertRaises(BaseValidationError):
-            serializer.is_valid(raise_exception=True)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("field", serializer.errors)
 
     @patch("src.shared.serializers.get_address_from_cep")
     def test_validate_with_postal_code_not_found(self, mock_get_address):
@@ -110,10 +107,8 @@ class TestAddressSerializer(TestCase):
         invalid_data["postal_code"] = "99999999"
 
         serializer = AddressSerializer(data=invalid_data)
-
-        # Deve falhar na validação
-        with self.assertRaises(BaseValidationError):
-            serializer.is_valid(raise_exception=True)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("field", serializer.errors)
 
     @patch("src.shared.serializers.get_address_from_cep")
     def test_validate_with_connection_error(self, mock_get_address):
@@ -128,10 +123,8 @@ class TestAddressSerializer(TestCase):
         ]
 
         serializer = AddressSerializer(data=self.valid_address_data)
-
-        # Deve falhar na validação
-        with self.assertRaises(BaseValidationError):
-            serializer.is_valid(raise_exception=True)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("field", serializer.errors)
 
     def test_create_address(self):
         """Test creating an address through serializer."""
@@ -244,8 +237,8 @@ class TestContactSerializer(TestCase):
         data = {"email": "email-invalido", "phone": "11999999999"}
         serializer = ContactSerializer(data=data)
 
-        with self.assertRaises(BaseValidationError):
-            serializer.is_valid(raise_exception=True)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("email", serializer.errors)
 
     def test_create_contact(self):
         """Test creating a contact through serializer."""

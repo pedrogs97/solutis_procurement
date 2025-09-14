@@ -6,7 +6,6 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from src.supplier.views.evaluation import (
-    CriterionScoreViewSet,
     EvaluationCriterionListViewSet,
     EvaluationCriterionViewSet,
     SupplierEvaluationListViewSet,
@@ -15,7 +14,6 @@ from src.supplier.views.evaluation import (
 
 router = DefaultRouter()
 router.register(r"evaluations", SupplierEvaluationViewSet)
-router.register(r"scores", CriterionScoreViewSet)
 
 urlpatterns = [
     path(

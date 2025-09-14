@@ -21,7 +21,7 @@ class SupplierAttachment(TimestampedModel):
 
     attachment_type = models.ForeignKey(
         DomAttachmentType,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.PROTECT,
         related_name="attachments",
         help_text="Tipo de Anexo",
     )
@@ -68,7 +68,7 @@ class SupplierAttachment(TimestampedModel):
         total_supplier_attachs = self.supplier.attachments.all().count()
         total_needed_attachs = (
             SupplierAttachment.objects.select_related("attachment_type")
-            .filter(attachment_type=self.supplier.risk_level)
+            .filter(attachment_type__risk_level=self.supplier.risk_level)
             .count()
         )
         return total_supplier_attachs >= total_needed_attachs

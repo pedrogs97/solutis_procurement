@@ -6,7 +6,6 @@ This module provides serializers for input representations of supplier evaluatio
 from typing import Dict
 
 from django.db.transaction import atomic
-from rest_framework import serializers
 
 from src.shared.serializers import BaseSerializer
 from src.supplier.models.evaluation import (
@@ -140,52 +139,3 @@ class SupplierEvaluationInSerializer(BaseSerializer):
         instance.save()
 
         return instance
-
-
-class BulkCriterionScoreInSerializer(BaseSerializer):
-    """
-    Serializer for bulk creation of CriterionScore models.
-    Useful for submitting all scores for a supplier evaluation at once.
-    """
-
-    evaluation_id = serializers.IntegerField()
-    scores = CriterionScoreInSerializer(many=True)
-
-    class Meta(BaseSerializer.Meta):
-        """
-        Meta options for the BulkCriterionScore serializer.
-        """
-
-        fields = ("evaluation_id", "scores")
-
-    @atomic
-    def create(self, validated_data: Dict):
-        """
-        Create multiple CriterionScore instances for a SupplierEvaluation.
-
-        Args:
-            validated_data (Dict): The validated data containing evaluation_id and scores.
-        Returns:
-            List[CriterionScore]: The created CriterionScore instances.
-        """
-        evaluation_id = validated_data.get("evaluation_id")
-        scores_data = validated_data.get("scores", [])
-
-        try:
-            evaluation = SupplierEvaluation.objects.get(id=evaluation_id)
-        except SupplierEvaluation.DoesNotExist:
-            raise serializers.ValidationError(
-                {"evaluation_id": "SupplierEvaluation with this ID does not exist."}
-            )
-
-        created_scores = []
-
-        for score_data in scores_data:
-            criterion_score = CriterionScore.objects.create(
-                evaluation=evaluation, **score_data
-            )
-            created_scores.append(criterion_score)
-
-        evaluation.save()
-
-        return created_scores

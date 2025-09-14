@@ -32,33 +32,27 @@ class TestDomBusinessSectorSerializer(TestCase):
         serializer = DomBusinessSectorSerializer(self.business_sector)
         data = serializer.data
 
-        # Check that required fields are present
         self.assertIn("id", data)
         self.assertIn("name", data)
 
     def test_baker_prepare_vs_make(self):
         """Test difference between baker.prepare and baker.make."""
-        # Prepare doesn't save to database
         prepared_instance = baker.prepare(DomBusinessSector, name="Test Prepare")
-        self.assertIsNone(prepared_instance.pk)  # Not saved
+        self.assertIsNone(prepared_instance.pk)
 
-        # Make saves to database
         made_instance = baker.make(DomBusinessSector, name="Test Make")
-        self.assertIsNotNone(made_instance.pk)  # Saved
+        self.assertIsNotNone(made_instance.pk)
 
-        # Test serialization
         serializer = DomBusinessSectorSerializer(made_instance)
         data = serializer.data
         self.assertIn("id", data)
 
     def test_baker_batch_creation(self):
         """Test creating multiple instances efficiently with model_bakery."""
-        # Create multiple instances
         sectors = baker.make(DomBusinessSector, _quantity=5)
 
         self.assertEqual(len(sectors), 5)
 
-        # Test serialization of batch
         serializer = DomBusinessSectorSerializer(sectors, many=True)
         data = serializer.data
 

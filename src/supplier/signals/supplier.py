@@ -13,9 +13,7 @@ from src.supplier.models.supplier import Supplier, SupplierSituation
 
 
 @receiver(post_save, sender=Supplier)
-def verify_supplier_pendency(
-    sender, instance: Supplier, created_instance: bool, **kwargs
-):
+def verify_supplier_pendency(sender, instance: Supplier, created: bool, **kwargs):
     """
     Verify and update the supplier's pendency status.
     """
@@ -33,7 +31,7 @@ def verify_supplier_pendency(
             supplier=instance,
             status=DomSupplierSituation.objects.get(
                 name="PENDENTE",
-                pendency_type=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
+                pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
             ),
         )
 
@@ -54,7 +52,7 @@ def verify_responsability_matrix_pendency(
             supplier=supplier,
             status=DomSupplierSituation.objects.get(
                 name="PENDENTE",
-                pendency_type=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
+                pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
             ),
         )
     elif (
@@ -84,7 +82,7 @@ def verify_supplier_attachment_pendency(
             supplier=supplier,
             status=DomSupplierSituation.objects.get(
                 name="PENDENTE",
-                pendency_type=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
+                pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
             ),
         )
     elif (

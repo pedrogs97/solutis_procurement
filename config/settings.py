@@ -101,7 +101,15 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
+    "sqlserver": {
+        "ENGINE": "mssql",
+        "NAME": os.getenv("SQLSERVER_NAME_DB", "CorporeRM_SI"),
+        "USER": os.getenv("SQLSERVER_USER_DB", "parametrize.pedro"),
+        "PASSWORD": os.getenv("SQLSERVER_PASSWORD_DB", "Solutis@123!"),
+        "HOST": os.getenv("SQLSERVER_HOST_DB", "172.29.0.127"),
+        "PORT": "1433",
+    },
 }
 
 

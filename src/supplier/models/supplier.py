@@ -455,7 +455,10 @@ class Supplier(TimestampedModel):
         is_obj_complete = validate_object_complete(self)
         first_attach = self.attachments.first()
         is_files_complete = first_attach and first_attach.is_completed_files
-        is_responsibility_complete = self.responsibility_matrix.is_completed
+        is_responsibility_complete = (
+            hasattr(self, "responsibility_matrix")
+            and self.responsibility_matrix.is_completed
+        )
         return is_obj_complete and is_files_complete and is_responsibility_complete
 
     @property

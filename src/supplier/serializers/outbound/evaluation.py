@@ -70,7 +70,7 @@ class SupplierEvaluationSerializer(BaseSerializer):
     """
 
     period = EvaluationPeriodSerializer(read_only=True)
-    criterion_scores = CriterionScoreSerializer(many=True, read_only=True)
+    last_criterion_score = serializers.SerializerMethodField()
 
     class Meta(BaseSerializer.Meta):
         """
@@ -86,6 +86,15 @@ class SupplierEvaluationSerializer(BaseSerializer):
             "comments",
             "final_score",
         )
+
+    def get_last_criterion_score(self, obj: SupplierEvaluation):
+        """
+        Get the last criterion scores for the supplier evaluation.
+        """
+        last_score = obj.get_last_criterion_score()
+        if last_score:
+            return CriterionScoreSerializer(last_score).data
+        return None
 
 
 # sugestões futuras

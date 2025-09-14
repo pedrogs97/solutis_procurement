@@ -23,7 +23,6 @@ from src.supplier.serializers.inbound.evaluation import (
     SupplierEvaluationInSerializer,
 )
 from src.supplier.serializers.outbound.evaluation import (
-    CriterionScoreSerializer,
     EvaluationCriterionSerializer,
     EvaluationSummarySerializer,
     SupplierEvaluationDetailSerializer,
@@ -122,13 +121,3 @@ class SupplierEvaluationViewSet(BaseAPIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CriterionScoreViewSet(BaseAPIView):
-    """
-    ViewSet for managing criterion scores.
-    """
-
-    queryset = CriterionScore.objects.all().select_related("criterion", "evaluation")
-    serializer_class_in = CriterionScoreInSerializer
-    serializer_class_out = CriterionScoreSerializer

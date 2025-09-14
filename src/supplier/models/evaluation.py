@@ -1,6 +1,8 @@
 """Evaluation models for supplier assessments."""
 
+from datetime import date, datetime
 from decimal import Decimal
+from typing import List, Optional
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -70,6 +72,80 @@ class EvaluationPeriod(TimestampedModel):
             self.year = timezone.now().year
 
         super().save(*args, **kwargs)
+
+    @classmethod
+    def get_current_evaluation_period(cls) -> Optional["EvaluationPeriod"]:
+        """
+        Gets the current evaluation period based on today's date.
+
+        Returns:
+            The current EvaluationPeriod or None if not found.
+        """
+        today = date.today()
+
+        current_period = EvaluationPeriod.objects.filter(
+            start_date__lte=today, end_date__gte=today
+        ).first()
+
+        return current_period
+
+    @classmethod
+    def create_evaluation_periods_for_year(
+        cls,
+        year: Optional[int] = None,
+    ) -> List["EvaluationPeriod"]:
+        """
+        Creates the three evaluation periods for a given year.
+        If no year is provided, uses the current year.
+
+        Args:
+            year: The year to create periods for.
+
+        Returns:
+            List of created EvaluationPeriod instances.
+        """
+        if year is None:
+            year = datetime.now().year
+
+        period_dates = [
+            {
+                "name": f"Primeiro Quadrimestre {year}",
+                "start_date": date(year, 1, 1),
+                "end_date": date(year, 4, 30),
+                "period_number": 1,
+            },
+            {
+                "name": f"Segundo Quadrimestre {year}",
+                "start_date": date(year, 5, 1),
+                "end_date": date(year, 8, 31),
+                "period_number": 2,
+            },
+            {
+                "name": f"Terceiro Quadrimestre {year}",
+                "start_date": date(year, 9, 1),
+                "end_date": date(year, 12, 31),
+                "period_number": 3,
+            },
+        ]
+
+        created_periods = []
+
+        period_number_list = [
+            period_data["period_number"] for period_data in period_dates
+        ]
+        existing = EvaluationPeriod.objects.filter(
+            period_number__in=period_number_list, start_date__year=year
+        ).exists()
+
+        if not existing:
+            created_periods = EvaluationPeriod.objects.bulk_create(
+                [
+                    EvaluationPeriod(**period_data, year=year)
+                    for period_data in period_dates
+                ]
+            )
+
+        return created_periods
 
     def __str__(self):
         return f"{self.name} ({self.start_date} - {self.end_date})"
@@ -152,6 +228,22 @@ class SupplierEvaluation(TimestampedModel):
         """
         self.final_score = self.calculate_final_score()
         super().save(*args, **kwargs)
+
+    def get_last_criterion_score(self) -> Optional[EvaluationPeriod]:
+        """
+        Get the last criterion score for the supplier evaluation.
+        """
+        current_period = EvaluationPeriod.get_current_evaluation_period()
+
+        if not current_period:
+            EvaluationPeriod.create_evaluation_periods_for_year(datetime.now().year)
+            current_period = EvaluationPeriod.get_current_evaluation_period()
+
+        return (
+            self.criterion_scores.select_related("period")
+            .filter(period=current_period)
+            .first()
+        )
 
     def __str__(self):
         return f"Avaliação de {self.supplier} - {self.period} ({self.final_score}%)"

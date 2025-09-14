@@ -16,7 +16,13 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from src.supplier.models.domain import DomCategory, DomTypeSupplier
+from src.supplier.enums import DomPendecyTypeEnum
+from src.supplier.models.domain import (
+    DomCategory,
+    DomPendecyType,
+    DomSupplierSituation,
+    DomTypeSupplier,
+)
 from src.supplier.models.evaluation import (
     CriterionScore,
     EvaluationCriterion,
@@ -25,10 +31,27 @@ from src.supplier.models.evaluation import (
 )
 from src.supplier.models.supplier import Supplier
 from src.supplier.signals.evaluation import create_current_year_evaluation_periods
-from src.supplier.utils.evaluation import (
-    create_evaluation_periods_for_year,
-    get_current_evaluation_period,
-)
+
+
+def setup_situation():
+    """Set up supplier situation."""
+    DomPendecyType.objects.create(name="PENDENCIA_CADASTRO")
+    DomPendecyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
+    DomPendecyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
+    DomPendecyType.objects.create(name="PENDENCIA_AVALIACAO")
+    DomSupplierSituation.objects.create(name="ATIVO")
+    DomSupplierSituation.objects.create(
+        name="PENDENTE",
+        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
+    )
+    DomSupplierSituation.objects.create(
+        name="PENDENTE",
+        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
+    )
+    DomSupplierSituation.objects.create(
+        name="PENDENTE",
+        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
+    )
 
 
 class EvaluationSignalTestCase(TestCase):
@@ -41,7 +64,9 @@ class EvaluationSignalTestCase(TestCase):
         self.current_year = timezone.now().year
         EvaluationPeriod.objects.all().delete()
 
-    @patch("src.supplier.signals.evaluation.create_evaluation_periods_for_year")
+    @patch(
+        "src.supplier.models.evaluation.EvaluationPeriod.create_evaluation_periods_for_year"
+    )
     def test_post_migrate_signal(self, mock_create_periods):
         """Test that post_migrate signal creates periods for current year."""
         mock_create_periods.return_value = [
@@ -73,7 +98,9 @@ class EvaluationUtilsTestCase(TestCase):
 
     def test_create_evaluation_periods_for_year(self):
         """Test creating evaluation periods for a specific year."""
-        created_periods = create_evaluation_periods_for_year(self.current_year)
+        created_periods = EvaluationPeriod.create_evaluation_periods_for_year(
+            self.current_year
+        )
 
         self.assertEqual(len(created_periods), 3)
 
@@ -94,10 +121,14 @@ class EvaluationUtilsTestCase(TestCase):
 
     def test_create_periods_idempotent(self):
         """Test that creating periods for the same year is idempotent."""
-        first_creation = create_evaluation_periods_for_year(self.current_year)
+        first_creation = EvaluationPeriod.create_evaluation_periods_for_year(
+            self.current_year
+        )
         self.assertEqual(len(first_creation), 3)
 
-        second_creation = create_evaluation_periods_for_year(self.current_year)
+        second_creation = EvaluationPeriod.create_evaluation_periods_for_year(
+            self.current_year
+        )
 
         self.assertEqual(len(second_creation), 0)
 
@@ -107,35 +138,37 @@ class EvaluationUtilsTestCase(TestCase):
 
     def test_get_current_evaluation_period(self):
         """Test getting the current evaluation period."""
-        created_periods = create_evaluation_periods_for_year(self.current_year)
+        created_periods = EvaluationPeriod.create_evaluation_periods_for_year(
+            self.current_year
+        )
         self.assertEqual(len(created_periods), 3)
 
         db_periods = EvaluationPeriod.objects.filter(year=self.current_year)
         self.assertEqual(db_periods.count(), 3)
 
         today = date(self.current_year, 2, 15)
-        with patch("src.supplier.utils.evaluation.date") as mock_date:
+        with patch("src.supplier.models.evaluation.date") as mock_date:
             mock_date.today.return_value = today
             mock_date.side_effect = lambda: today
-            current_period = get_current_evaluation_period()
+            current_period = EvaluationPeriod.get_current_evaluation_period()
             self.assertIsNotNone(current_period)
             if current_period:
                 self.assertEqual(current_period.period_number, 1)
 
         today = date(self.current_year, 6, 15)
-        with patch("src.supplier.utils.evaluation.date") as mock_date:
+        with patch("src.supplier.models.evaluation.date") as mock_date:
             mock_date.today.return_value = today
             mock_date.side_effect = lambda: today
-            current_period = get_current_evaluation_period()
+            current_period = EvaluationPeriod.get_current_evaluation_period()
             self.assertIsNotNone(current_period)
             if current_period:
                 self.assertEqual(current_period.period_number, 2)
 
         today = date(self.current_year, 10, 15)
-        with patch("src.supplier.utils.evaluation.date") as mock_date:
+        with patch("src.supplier.models.evaluation.date") as mock_date:
             mock_date.today.return_value = today
             mock_date.side_effect = lambda: today
-            current_period = get_current_evaluation_period()
+            current_period = EvaluationPeriod.get_current_evaluation_period()
             self.assertIsNotNone(current_period)
             if current_period:
                 self.assertEqual(current_period.period_number, 3)
@@ -153,6 +186,8 @@ class BaseEvaluationViewTestCase(TestCase):
 
         self.supplier_category = DomCategory.objects.create(name="Test Category")
         self.supplier_type = DomTypeSupplier.objects.create(name="Test Type")
+
+        setup_situation()
 
         self.supplier = Supplier.objects.create(
             trade_name="Test Supplier",

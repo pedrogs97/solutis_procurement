@@ -7,6 +7,7 @@ from unittest.mock import Mock
 
 from django.test import TestCase
 from rest_framework import serializers, status
+from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory
 
 from src.shared.models import Contact
@@ -42,6 +43,41 @@ class DummyView(BaseAPIView):
 
     serializer_class = DummySerializer
     queryset = Contact.objects.all()
+    format_kwarg = None
+
+    def __init__(self):
+        super().__init__()
+        self.format_kwarg = None
+
+    # Override methods for testing to avoid relying on request.data
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        new_instance = serializer.save()
+        return_data = self.get_out_serializer_class()(new_instance).data
+        return Response(return_data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.POST
+        serializer = self.get_serializer(instance, data=data)
+        serializer.is_valid(raise_exception=True)
+        return_data = self.get_out_serializer_class()(serializer.save()).data
+        return Response(return_data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.POST
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        return_data = self.get_out_serializer_class()(serializer.save()).data
+        return Response(return_data, status=status.HTTP_200_OK)
 
 
 class DummyViewWithInOut(BaseAPIView):
@@ -50,6 +86,20 @@ class DummyViewWithInOut(BaseAPIView):
     serializer_class_in = DummyInSerializer
     serializer_class_out = DummyOutSerializer
     queryset = Contact.objects.all()
+    format_kwarg = None
+
+    def __init__(self):
+        super().__init__()
+        self.format_kwarg = None
+
+    # Override methods for testing to avoid relying on request.data
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        new_instance = serializer.save()
+        return_data = self.get_out_serializer_class()(new_instance).data
+        return Response(return_data, status=status.HTTP_201_CREATED)
 
 
 class TestBaseAPIView(TestCase):

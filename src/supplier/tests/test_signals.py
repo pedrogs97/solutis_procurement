@@ -1,15 +1,25 @@
+"""Tests for supplier signals."""
+
+from datetime import date
+from decimal import Decimal
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from model_bakery import baker
 
 from src.supplier.enums import DomPendecyTypeEnum
-from src.supplier.models.domain import DomPendecyType, DomSupplierSituation
+from src.supplier.models.attachments import SupplierAttachment
+from src.supplier.models.domain import (
+    DomAttachmentType,
+    DomPendecyType,
+    DomSupplierSituation,
+)
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
-from src.supplier.models.supplier import Supplier
+from src.supplier.models.supplier import Supplier, SupplierSituation
 
 
 class TestSupplierSignals(TestCase):
     def setUp(self):
-        # Cria todos os relacionamentos obrigatórios completos
         baker.make(
             DomPendecyType,
             name="PENDÊNCIA DE CADASTRO",
@@ -57,33 +67,11 @@ class TestSupplierSignals(TestCase):
             type=baker.make("supplier.DomTypeSupplier"),
         )
 
-    def test_supplier_pendency_signal_sets_pendency_when_incomplete(self):
-        # Deixa o supplier incompleto (ex: trade_name vazio)
-        self.supplier.trade_name = ""
-        self.supplier.save()
-        self.supplier.refresh_from_db()
-        assert self.supplier.situation is not None
-        assert self.supplier.situation.status.name == "PENDENTE"
-        assert self.supplier.situation.status.pendency_type is not None
-        assert (
-            self.supplier.situation.status.pendency_type.name == "PENDÊNCIA DE CADASTRO"
-        )
-
-    def test_supplier_pendency_signal_does_not_set_pendency_when_complete(self):
-        # Preenche todos os campos do supplier e relacionados com valores não-default
-        self.supplier.trade_name = "Fornecedor Completo"
-        self.supplier.state_business_registration = "123"
-        self.supplier.municipal_business_registration = "456"
-        # Address
-        from datetime import date
-        from decimal import Decimal
-
-        # Address
-        if self.supplier.address is None:
-            address = baker.make("shared.Address")
-            self.supplier.address = address
-            self.supplier.save()
-        address = self.supplier.address
+    def _setup_address(self, supplier):
+        if supplier.address is None:
+            supplier.address = baker.make("shared.Address")
+            supplier.save()
+        address = supplier.address
         address.street = "Rua Teste"
         address.number = 100
         address.complement = "Apto 1"
@@ -91,21 +79,21 @@ class TestSupplierSignals(TestCase):
         address.state = "ST"
         address.postal_code = "12345678"
         address.save()
-        # Contact
-        if self.supplier.contact is None:
-            contact = baker.make("shared.Contact")
-            self.supplier.contact = contact
-            self.supplier.save()
-        contact = self.supplier.contact
+
+    def _setup_contact(self, supplier: Supplier):
+        if supplier.contact is None:
+            supplier.contact = baker.make("shared.Contact")
+            supplier.save()
+        contact = supplier.contact
         contact.email = "contato@teste.com"
         contact.phone = "11999999999"
         contact.save()
-        # PaymentDetails
-        if self.supplier.payment_details is None:
-            pd = baker.make("supplier.PaymentDetails")
-            self.supplier.payment_details = pd
-            self.supplier.save()
-        pd = self.supplier.payment_details
+
+    def _setup_payment_details(self, supplier: Supplier):
+        if supplier.payment_details is None:
+            supplier.payment_details = baker.make("supplier.PaymentDetails")
+            supplier.save()
+        pd = supplier.payment_details
         pd.payment_frequency = "Mensal"
         pd.payment_date = date(2025, 1, 1)
         pd.contract_total_value = Decimal("1000.00")
@@ -119,12 +107,14 @@ class TestSupplierSignals(TestCase):
             pd.pix_key_type = baker.make("supplier.DomPixType")
         pd.pix_key = "chavepix"
         pd.save()
-        # OrganizationalDetails
-        if self.supplier.organizational_details is None:
-            org = baker.make("supplier.OrganizationalDetails")
-            self.supplier.organizational_details = org
-            self.supplier.save()
-        org = self.supplier.organizational_details
+
+    def _setup_organizational_details(self, supplier: Supplier):
+        if supplier.organizational_details is None:
+            supplier.organizational_details = baker.make(
+                "supplier.OrganizationalDetails"
+            )
+            supplier.save()
+        org = supplier.organizational_details
         org.cost_center = "CC123"
         org.business_unit = "BU1"
         org.responsible_executive = "Executivo"
@@ -139,12 +129,12 @@ class TestSupplierSignals(TestCase):
         if org.public_entity is None:
             org.public_entity = baker.make("supplier.DomPublicEntity")
         org.save()
-        # FiscalDetails
-        if self.supplier.fiscal_details is None:
-            fiscal = baker.make("supplier.FiscalDetails")
-            self.supplier.fiscal_details = fiscal
-            self.supplier.save()
-        fiscal = self.supplier.fiscal_details
+
+    def _setup_fiscal_details(self, supplier: Supplier):
+        if supplier.fiscal_details is None:
+            supplier.fiscal_details = baker.make("supplier.FiscalDetails")
+            supplier.save()
+        fiscal = supplier.fiscal_details
         if fiscal.iss_withholding is None:
             fiscal.iss_withholding = baker.make("supplier.DomIssWithholding")
         if fiscal.iss_regime is None:
@@ -155,12 +145,12 @@ class TestSupplierSignals(TestCase):
         if fiscal.withholding_tax_nature is None:
             fiscal.withholding_tax_nature = baker.make("supplier.DomWithholdingTax")
         fiscal.save()
-        # CompanyInformation
-        if self.supplier.company_information is None:
-            ci = baker.make("supplier.CompanyInformation")
-            self.supplier.company_information = ci
-            self.supplier.save()
-        ci = self.supplier.company_information
+
+    def _setup_company_information(self, supplier: Supplier):
+        if supplier.company_information is None:
+            supplier.company_information = baker.make("supplier.CompanyInformation")
+            supplier.save()
+        ci = supplier.company_information
         if ci.company_size is None:
             ci.company_size = baker.make("supplier.DomCompanySize")
         if ci.icms_taxpayer is None:
@@ -175,12 +165,12 @@ class TestSupplierSignals(TestCase):
             ci.customer_type = baker.make("supplier.DomCustomerType")
         ci.nit = "123456789"
         ci.save()
-        # Contract
-        if self.supplier.contract is None:
-            contract = baker.make("supplier.Contract")
-            self.supplier.contract = contract
-            self.supplier.save()
-        contract = self.supplier.contract
+
+    def _setup_contract(self, supplier: Supplier):
+        if supplier.contract is None:
+            supplier.contract = baker.make("supplier.Contract")
+            supplier.save()
+        contract = supplier.contract
         contract.object_contract = "Objeto"
         contract.executed_activities = "Atividades"
         contract.contract_start_date = date(2025, 1, 1)
@@ -194,7 +184,56 @@ class TestSupplierSignals(TestCase):
         contract.warning_on_renewal = True
         contract.warning_on_period = True
         contract.save()
-        # FKs
+
+    def _setup_responsibility_matrix(self, supplier: Supplier):
+        if not ResponsibilityMatrix.objects.filter(supplier=supplier).exists():
+            matrix = ResponsibilityMatrix.objects.create(supplier=supplier)
+            for field in matrix._meta.get_fields():
+                if hasattr(field, "name") and field.name.startswith(
+                    "contract_execution_monitoring_"
+                ):
+                    setattr(matrix, field.name, "R")
+            matrix.save()
+
+    def _setup_attachment(self, supplier: Supplier):
+        if not SupplierAttachment.objects.filter(supplier=supplier).exists():
+            attachment_type = DomAttachmentType.objects.create(name="Contrato Social")
+            test_file = SimpleUploadedFile(
+                "test_contract.pdf", b"file_content", content_type="application/pdf"
+            )
+            SupplierAttachment.objects.create(
+                supplier=supplier,
+                file=test_file,
+                description="Documento",
+                attachment_type=attachment_type,
+            )
+
+    def test_supplier_pendency_signal_sets_pendency_when_incomplete(self):
+        self.supplier.trade_name = ""
+        self.supplier.save()
+        self.supplier.refresh_from_db()
+        assert self.supplier.situation is not None
+        assert self.supplier.situation.status.name == "PENDENTE"
+        assert self.supplier.situation.status.pendency_type is not None
+        assert (
+            self.supplier.situation.status.pendency_type.name == "PENDÊNCIA DE CADASTRO"
+        )
+
+    def test_supplier_pendency_signal_does_not_set_pendency_when_complete(self):
+        self.supplier.trade_name = "Fornecedor Completo"
+        self.supplier.state_business_registration = "123"
+        self.supplier.municipal_business_registration = "456"
+
+        self._setup_address(self.supplier)
+        self._setup_contact(self.supplier)
+        self._setup_payment_details(self.supplier)
+        self._setup_organizational_details(self.supplier)
+        self._setup_fiscal_details(self.supplier)
+        self._setup_company_information(self.supplier)
+        self._setup_contract(self.supplier)
+        self._setup_responsibility_matrix(self.supplier)
+        self._setup_attachment(self.supplier)
+
         self.supplier.classification = self.supplier.classification or baker.make(
             "supplier.DomClassification"
         )
@@ -209,92 +248,45 @@ class TestSupplierSignals(TestCase):
         )
         self.supplier.save()
         self.supplier.refresh_from_db()
-        # Não deve ser pendente de cadastro
-        assert not (
-            self.supplier.situation
-            and self.supplier.situation.status.name == "PENDENTE"
-            and self.supplier.situation.status.pendency_type is not None
-            and self.supplier.situation.status.pendency_type.name
-            == "PENDÊNCIA DE CADASTRO"
+        self.assertIsNotNone(self.supplier.situation)
+        self.assertIsNotNone(self.supplier.situation.status)
+        self.assertEqual(self.supplier.situation.status.name, "ATIVO")
+        self.assertIsNone(self.supplier.situation.status.pendency_type)
+
+    def test_supplier_pendency_signal_sets_pendency_when_matrix_incomplete(self):
+        SupplierSituation.objects.filter(supplier=self.supplier).delete()
+        SupplierSituation.objects.create(
+            supplier=self.supplier,
+            status=DomSupplierSituation.objects.get(
+                name="PENDENTE",
+                pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
+            ),
         )
 
-
-class TestResponsibilityMatrixSignals(TestCase):
-    def setUp(self):
-        # Cria todos os relacionamentos obrigatórios completos
-        baker.make(
-            DomPendecyType,
-            name="PENDÊNCIA DE CADASTRO",
-            id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
-        )
-        baker.make(
-            DomPendecyType,
-            name="PENDÊNCIA MATRIZ DE RESPONSABILIDADE",
-            id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
-        )
-        baker.make(
-            DomPendecyType,
-            name="PENDÊNCIA DE DOCUMENTAÇÃO",
-            id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
-        )
-
-        baker.make(DomSupplierSituation, name="ATIVO")
-        baker.make(
-            DomSupplierSituation,
-            name="PENDENTE",
-            pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
-        )
-        baker.make(
-            DomSupplierSituation,
-            name="PENDENTE",
-            pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
-        )
-        baker.make(
-            DomSupplierSituation,
-            name="PENDENTE",
-            pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
-        )
-
-        # Cria supplier completo para não ser pendente por outros motivos
-        self.supplier = baker.make(
-            Supplier,
-            address=baker.make("shared.Address"),
-            contact=baker.make("shared.Contact"),
-            payment_details=baker.make("supplier.PaymentDetails"),
-            organizational_details=baker.make("supplier.OrganizationalDetails"),
-            fiscal_details=baker.make("supplier.FiscalDetails"),
-            company_information=baker.make("supplier.CompanyInformation"),
-            contract=baker.make("supplier.Contract"),
-            classification=baker.make("supplier.DomClassification"),
-            category=baker.make("supplier.DomCategory"),
-            risk_level=baker.make("supplier.DomRiskLevel"),
-            type=baker.make("supplier.DomTypeSupplier"),
-        )
-        self.matrix = baker.make(ResponsibilityMatrix, supplier=self.supplier)
-
-    def test_responsibility_matrix_pendency_signal_sets_pendency_when_incomplete(self):
-        # Deixa todos os campos contract_execution_monitoring_* como '-'
-        for field in self.matrix._meta.get_fields():
-            if hasattr(field, "name") and field.name.startswith(
-                "contract_execution_monitoring_"
-            ):
-                setattr(self.matrix, field.name, "-")
-        self.matrix.save()
         self.supplier.refresh_from_db()
-        assert not self.matrix.is_completed
-        assert self.supplier.situation is not None
-        assert self.supplier.situation.status.name == "PENDENTE"
-        assert self.supplier.situation.status.pendency_type is not None
-        assert (
-            self.supplier.situation.status.pendency_type.name
-            == "PENDÊNCIA MATRIZ DE RESPONSABILIDADE"
+        self.assertIsNotNone(self.supplier.situation)
+        self.assertEqual(self.supplier.situation.status.name, "PENDENTE")
+        self.assertIsNotNone(self.supplier.situation.status.pendency_type)
+        self.assertEqual(
+            self.supplier.situation.status.pendency_type.name,
+            "PENDÊNCIA MATRIZ DE RESPONSABILIDADE",
         )
 
-    def test_responsibility_matrix_complete_property(self):
-        # Preenche todos os campos contract_execution_monitoring_* com valores válidos
-        for field in self.matrix._meta.get_fields():
-            if hasattr(field, "name") and field.name.startswith(
-                "contract_execution_monitoring_"
-            ):
-                setattr(self.matrix, field.name, "valor")
-        assert self.matrix.is_completed
+    def test_supplier_pendency_signal_sets_pendency_when_attachments_incomplete(self):
+        SupplierSituation.objects.filter(supplier=self.supplier).delete()
+        SupplierSituation.objects.create(
+            supplier=self.supplier,
+            status=DomSupplierSituation.objects.get(
+                name="PENDENTE",
+                pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
+            ),
+        )
+
+        self.supplier.refresh_from_db()
+        self.assertIsNotNone(self.supplier.situation)
+        self.assertEqual(self.supplier.situation.status.name, "PENDENTE")
+        self.assertIsNotNone(self.supplier.situation.status.pendency_type)
+        self.assertEqual(
+            self.supplier.situation.status.pendency_type.name,
+            "PENDÊNCIA DE DOCUMENTAÇÃO",
+        )

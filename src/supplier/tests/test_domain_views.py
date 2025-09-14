@@ -9,11 +9,7 @@ from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from src.supplier.models.domain import (
-    DomBusinessSector,
-    DomCategory,
-    DomClassification,
-)
+from src.supplier.models.domain import DomBusinessSector, DomCategory, DomClassification
 
 
 class TestDomainListViews(TestCase):
@@ -23,7 +19,6 @@ class TestDomainListViews(TestCase):
         """Set up test data."""
         self.client = APIClient()
 
-        # Create test data
         self.business_sector = baker.make(DomBusinessSector, name="Tecnologia")
         self.category = baker.make(DomCategory, name="Software")
         self.classification = baker.make(DomClassification, name="Fornecedor")
@@ -35,7 +30,7 @@ class TestDomainListViews(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertIsInstance(data, list)  # Now returns a direct list
+        self.assertIsInstance(data, list)
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["name"], "Tecnologia")
 
@@ -46,7 +41,7 @@ class TestDomainListViews(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertIsInstance(data, list)  # Now returns a direct list
+        self.assertIsInstance(data, list)
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["name"], "Software")
 
@@ -57,13 +52,12 @@ class TestDomainListViews(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertIsInstance(data, list)  # Now returns a direct list
+        self.assertIsInstance(data, list)
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["name"], "Fornecedor")
 
     def test_empty_lists(self):
         """Test that views return empty lists when no data exists."""
-        # Clear all data
         DomBusinessSector.objects.all().delete()
         DomCategory.objects.all().delete()
         DomClassification.objects.all().delete()
@@ -86,32 +80,28 @@ class TestDomainListViews(TestCase):
 
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 data = response.json()
-                self.assertIsInstance(data, list)  # Now returns a direct list
+                self.assertIsInstance(data, list)
                 self.assertEqual(len(data), 0)
 
     def test_multiple_records(self):
         """Test views with multiple records."""
-        # Add more test data
         baker.make(DomBusinessSector, _quantity=3)
         baker.make(DomCategory, _quantity=2)
 
-        # Test business sectors
         url = reverse("dom-business-sector-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(len(data), 4)  # 1 + 3 new
+        self.assertEqual(len(data), 4)
 
-        # Test categories
         url = reverse("dom-category-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(len(data), 3)  # 1 + 2 new
+        self.assertEqual(len(data), 3)
 
     def test_all_domain_endpoints(self):
         """Test all domain endpoints exist and return valid responses."""
-        # Use existing data from setUp or create with different names
 
         domain_endpoints = [
             "dom-business-sector-list",
@@ -144,11 +134,9 @@ class TestDomainListViews(TestCase):
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 data = response.json()
                 self.assertIsInstance(data, list)
-                # Each endpoint should return a list (may be empty for some)
 
     def test_ordered_results(self):
         """Test that results are ordered by name."""
-        # Create data in reverse alphabetical order
         baker.make(DomBusinessSector, name="Zebra")
         baker.make(DomBusinessSector, name="Alpha")
         baker.make(DomBusinessSector, name="Beta")
@@ -159,7 +147,6 @@ class TestDomainListViews(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
-        # Should be ordered alphabetically by name
         names = [item["name"] for item in data]
         self.assertEqual(names, ["Alpha", "Beta", "Tecnologia", "Zebra"])
 
@@ -173,10 +160,8 @@ class TestDomainListViews(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
-        # Should have at least one item
         self.assertGreater(len(data), 0)
 
-        # Check data structure (camelCase from BaseSerializer)
         item = data[0]
         self.assertIn("id", item)
         self.assertIn("name", item)
@@ -185,25 +170,21 @@ class TestDomainListViews(TestCase):
 
     def test_baker_integration_with_views(self):
         """Test that model_bakery works correctly with domain views."""
-        # Create test data using baker
         baker.make(DomBusinessSector, _quantity=3)
         baker.make(DomCategory, _quantity=2)
         baker.make(DomClassification, _quantity=1)
 
-        # Test business sectors
         url = reverse("dom-business-sector-list")
         response = self.client.get(url)
         data = response.json()
-        self.assertEqual(len(data), 4)  # 3 new + 1 from setUp
+        self.assertEqual(len(data), 4)
 
-        # Test categories
         url = reverse("dom-category-list")
         response = self.client.get(url)
         data = response.json()
-        self.assertEqual(len(data), 3)  # 2 new + 1 from setUp
+        self.assertEqual(len(data), 3)
 
-        # Test classifications
         url = reverse("dom-classification-list")
         response = self.client.get(url)
         data = response.json()
-        self.assertEqual(len(data), 2)  # 1 new + 1 from setUp
+        self.assertEqual(len(data), 2)
