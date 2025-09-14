@@ -5,6 +5,7 @@ This module defines views for managing responsibility matrices, including creati
 
 from rest_framework.exceptions import MethodNotAllowed
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 from src.shared.views import BaseAPIView
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
@@ -42,6 +43,11 @@ class ResponsibilityMatrixView(BaseAPIView):
         Retrieve the responsibility matrix associated with the supplier.
         """
         supplier: Supplier = get_object_or_404(Supplier, pk=self.kwargs.get("pk"))
+        if (
+            not hasattr(supplier, "responsibility_matrix")
+            or not supplier.responsibility_matrix
+        ):
+            raise Http404
         self.kwargs["pk"] = supplier.responsibility_matrix.pk
         return super().get_object()
 
