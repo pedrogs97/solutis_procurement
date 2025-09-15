@@ -19,7 +19,7 @@ from rest_framework.test import APIClient
 from src.supplier.enums import DomPendecyTypeEnum
 from src.supplier.models.domain import (
     DomCategory,
-    DomPendecyType,
+    DomPendencyType,
     DomSupplierSituation,
     DomTypeSupplier,
 )
@@ -35,10 +35,10 @@ from src.supplier.signals.evaluation import create_current_year_evaluation_perio
 
 def setup_situation():
     """Set up supplier situation."""
-    DomPendecyType.objects.create(name="PENDENCIA_CADASTRO")
-    DomPendecyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
-    DomPendecyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
-    DomPendecyType.objects.create(name="PENDENCIA_AVALIACAO")
+    DomPendencyType.objects.create(name="PENDENCIA_CADASTRO")
+    DomPendencyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
+    DomPendencyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
+    DomPendencyType.objects.create(name="PENDENCIA_AVALIACAO")
     DomSupplierSituation.objects.create(name="ATIVO")
     DomSupplierSituation.objects.create(
         name="PENDENTE",

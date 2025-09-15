@@ -72,14 +72,14 @@ class DomTypeSupplier(DomType):
         abstract = False
 
 
-class DomPendecyType(DomType):
+class DomPendencyType(DomType):
     """
     Model representing dependency types for suppliers.
     """
 
     class Meta(DomType.Meta):
         """
-        Meta options for the DomPendecyType model.
+        Meta options for the DomPendencyType model.
         """
 
         db_table = "pendecy_type"
@@ -98,7 +98,7 @@ class DomSupplierSituation(models.Model):
     )
 
     pendency_type = models.ForeignKey(
-        DomPendecyType,
+        DomPendencyType,
         on_delete=models.DO_NOTHING,
         related_name="supplier_situation",
         help_text="Tipo de Pendência",

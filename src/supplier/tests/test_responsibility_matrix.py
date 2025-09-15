@@ -9,17 +9,17 @@ from django.test import TestCase
 from model_bakery import baker
 
 from src.supplier.enums import DomPendecyTypeEnum
-from src.supplier.models.domain import DomPendecyType, DomSupplierSituation
+from src.supplier.models.domain import DomPendencyType, DomSupplierSituation
 from src.supplier.models.responsibility_matrix import RACI_CHOICES, ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
 
 
 def setup_situation():
     """Set up supplier situation."""
-    DomPendecyType.objects.create(name="PENDENCIA_CADASTRO")
-    DomPendecyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
-    DomPendecyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
-    DomPendecyType.objects.create(name="PENDENCIA_AVALIACAO")
+    DomPendencyType.objects.create(name="PENDENCIA_CADASTRO")
+    DomPendencyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
+    DomPendencyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
+    DomPendencyType.objects.create(name="PENDENCIA_AVALIACAO")
     DomSupplierSituation.objects.create(name="ATIVO")
     DomSupplierSituation.objects.create(
         name="PENDENTE",

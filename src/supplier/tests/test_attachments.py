@@ -26,7 +26,7 @@ from src.supplier.models.domain import (
     DomIssWithholding,
     DomPayerType,
     DomPaymentMethod,
-    DomPendecyType,
+    DomPendencyType,
     DomPixType,
     DomPublicEntity,
     DomRiskLevel,
@@ -49,10 +49,10 @@ from src.supplier.models.supplier import (
 
 def setup_situation():
     """Set up supplier situation."""
-    DomPendecyType.objects.create(name="PENDENCIA_CADASTRO")
-    DomPendecyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
-    DomPendecyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
-    DomPendecyType.objects.create(name="PENDENCIA_AVALIACAO")
+    DomPendencyType.objects.create(name="PENDENCIA_CADASTRO")
+    DomPendencyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
+    DomPendencyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
+    DomPendencyType.objects.create(name="PENDENCIA_AVALIACAO")
     DomSupplierSituation.objects.create(name="ATIVO")
     DomSupplierSituation.objects.create(
         name="PENDENTE",

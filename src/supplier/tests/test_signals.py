@@ -11,7 +11,7 @@ from src.supplier.enums import DomPendecyTypeEnum
 from src.supplier.models.attachments import SupplierAttachment
 from src.supplier.models.domain import (
     DomAttachmentType,
-    DomPendecyType,
+    DomPendencyType,
     DomSupplierSituation,
 )
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
@@ -21,17 +21,17 @@ from src.supplier.models.supplier import Supplier, SupplierSituation
 class TestSupplierSignals(TestCase):
     def setUp(self):
         baker.make(
-            DomPendecyType,
+            DomPendencyType,
             name="PENDÊNCIA DE CADASTRO",
             id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
         )
         baker.make(
-            DomPendecyType,
+            DomPendencyType,
             name="PENDÊNCIA MATRIZ DE RESPONSABILIDADE",
             id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
         )
         baker.make(
-            DomPendecyType,
+            DomPendencyType,
             name="PENDÊNCIA DE DOCUMENTAÇÃO",
             id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
         )

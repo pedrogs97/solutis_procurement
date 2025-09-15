@@ -3,7 +3,6 @@ Serializer for SupplierAttachment model.
 This module provides serializers for output representations of the SupplierAttachment model.
 """
 
-
 from src.shared.serializers import BaseSerializer
 from src.supplier.models.domain import (
     DomBusinessSector,
@@ -25,6 +24,7 @@ from src.supplier.models.domain import (
     DomTaxationRegime,
     DomTaxpayerClassification,
     DomTypeSupplier,
+    DomPendencyType,
     DomWithholdingTax,
 )
 
@@ -93,11 +93,29 @@ class DomTypeSupplierSerializer(BaseSerializer):
         read_only_fields = ("id",)
 
 
+class DomPendencyTypeSerializer(BaseSerializer):
+    """
+    Serializer for DomPendencyType model.
+    Converts field names to camelCase representation.
+    """
+
+    class Meta(BaseSerializer.Meta):
+        """
+        Meta configuration for DomPendencyTypeSerializer.
+        """
+
+        model = DomPendencyType
+        fields = "__all__"
+        read_only_fields = ("id",)
+
+
 class DomSupplierSituationSerializer(BaseSerializer):
     """
     Serializer for DomSupplierSituation model.
     Converts field names to camelCase representation.
     """
+
+    pendency_type = DomPendencyTypeSerializer()
 
     class Meta(BaseSerializer.Meta):
         """

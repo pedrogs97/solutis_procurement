@@ -32,7 +32,7 @@ class Address(TimestampedModel):
     state = models.CharField(max_length=100, blank=True)
     neighbourhood = models.CharField(max_length=150, blank=True)
     number = models.IntegerField(null=True)
-    postal_code = models.CharField(max_length=8, blank=True)
+    postal_code = models.CharField(max_length=9, blank=True)
     complement = models.CharField(max_length=255, blank=True)
 
     def __str__(self):

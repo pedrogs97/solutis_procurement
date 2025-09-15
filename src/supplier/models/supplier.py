@@ -357,7 +357,7 @@ class Supplier(TimestampedModel):
         max_length=255, help_text="Nome fantasia", blank=True, default=""
     )
     legal_name = models.CharField(max_length=255, unique=True, help_text="Razão Social")
-    tax_id = models.CharField(max_length=16, unique=True, help_text="CPF/CNPJ")
+    tax_id = models.CharField(max_length=18, unique=True, help_text="CPF/CNPJ")
     state_business_registration = models.CharField(
         max_length=20, help_text="Inscrição Estadual", blank=True, default=""
     )
