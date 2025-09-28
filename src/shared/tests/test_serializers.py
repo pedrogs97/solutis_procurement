@@ -65,7 +65,6 @@ class TestAddressSerializer(TestCase):
     @patch("src.shared.serializers.get_address_from_cep")
     def test_validate_with_valid_postal_code(self, mock_get_address):
         """Test validation with valid postal code."""
-        # Mock da resposta da API de CEP
         mock_get_address.return_value = {
             "street": "Avenida Paulista",
             "district": "Bela Vista",
@@ -76,7 +75,6 @@ class TestAddressSerializer(TestCase):
         serializer = AddressSerializer(data=self.valid_address_data)
         self.assertTrue(serializer.is_valid())
 
-        # Verifica se os dados foram processados corretamente
         self.assertIn("street", serializer.validated_data)
         self.assertIn("neighbourhood", serializer.validated_data)
         self.assertIn("city", serializer.validated_data)
@@ -115,7 +113,6 @@ class TestAddressSerializer(TestCase):
         """Test validation when all CEP services fail."""
         from brazilcep.exceptions import BrazilCEPException, ConnectionError
 
-        # Simula falha em todos os serviços
         mock_get_address.side_effect = [
             ConnectionError("Service 1 failed"),
             BrazilCEPException("Service 2 failed"),
@@ -176,7 +173,6 @@ class TestContactSerializer(TestCase):
         serializer = ContactSerializer(data=self.valid_contact_data)
         self.assertTrue(serializer.is_valid())
 
-        # Verifica se os dados estão presentes
         self.assertIsNotNone(serializer.validated_data)
 
     def test_validate_with_empty_email(self):
@@ -193,10 +189,8 @@ class TestContactSerializer(TestCase):
 
     def test_validate_email_unique_constraint_new_contact(self):
         """Test email unique validation for new contact."""
-        # Cria um contato existente
         Contact.objects.create(email="existente@exemplo.com")
 
-        # Tenta criar outro contato com o mesmo email
         data = {"email": "existente@exemplo.com", "phone": "11888888888"}
         serializer = ContactSerializer(data=data)
 
@@ -205,10 +199,8 @@ class TestContactSerializer(TestCase):
 
     def test_validate_email_same_instance_update(self):
         """Test email validation when updating with same email."""
-        # Cria um contato
         contact = Contact.objects.create(email="teste@exemplo.com", phone="11999999999")
 
-        # Atualiza com o mesmo email (deve permitir)
         data = {"email": "teste@exemplo.com", "phone": "11888888888"}
         serializer = ContactSerializer(instance=contact, data=data, partial=True)
 
@@ -216,13 +208,11 @@ class TestContactSerializer(TestCase):
 
     def test_validate_email_different_instance_update(self):
         """Test email validation when updating with existing email from another contact."""
-        # Cria dois contatos
         Contact.objects.create(email="contato1@exemplo.com", phone="11111111111")
         contact2 = Contact.objects.create(
             email="contato2@exemplo.com", phone="11222222222"
         )
 
-        # Tenta atualizar contact2 com email do contact1
         data = {"email": "contato1@exemplo.com"}
         serializer = ContactSerializer(instance=contact2, data=data, partial=True)
 

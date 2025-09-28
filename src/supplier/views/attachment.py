@@ -93,22 +93,18 @@ class SupplierAttachmentDownloadView(APIView):
             )
 
         try:
-            # Verifica se o arquivo existe no sistema de arquivos
             if attachment.storage_path and not os.path.exists(attachment.storage_path):
                 return Response(
                     {"error": "Arquivo não existe no servidor"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Determina o tipo de conteúdo
             content_type, _ = mimetypes.guess_type(attachment.file.name)
             if not content_type:
                 content_type = "application/octet-stream"
 
-            # Nome do arquivo para download
             filename = attachment.file_name or "download"
 
-            # Retorna o arquivo
             response = FileResponse(
                 attachment.file.open("rb"),
                 content_type=content_type,

@@ -60,7 +60,7 @@ class CriterionScoreInSerializer(BaseSerializer):
         """
 
         model = CriterionScore
-        fields = "__all__"
+        fields = ["criterion", "score", "comments"]
         read_only_fields = ("id", "created_at", "updated_at")
 
 

@@ -13,4 +13,8 @@ urlpatterns = [
     path("suppliers/", include("src.supplier.urls.supplier")),
     path("domain/", include("src.supplier.urls.domain")),
     path("evaluations/", include("src.supplier.urls.evaluation")),
+    path(
+        "approval-workflow/",
+        include("src.supplier.urls.approval_workflow"),
+    ),
 ]

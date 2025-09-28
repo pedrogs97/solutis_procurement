@@ -11,7 +11,6 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from src.shared.models import Address, Contact
-from src.supplier.enums import DomPendecyTypeEnum
 from src.supplier.models.attachments import SupplierAttachment
 from src.supplier.models.domain import (
     DomAttachmentType,
@@ -26,11 +25,9 @@ from src.supplier.models.domain import (
     DomIssWithholding,
     DomPayerType,
     DomPaymentMethod,
-    DomPendencyType,
     DomPixType,
     DomPublicEntity,
     DomRiskLevel,
-    DomSupplierSituation,
     DomTaxationMethod,
     DomTaxationRegime,
     DomTaxpayerClassification,
@@ -47,27 +44,6 @@ from src.supplier.models.supplier import (
 )
 
 
-def setup_situation():
-    """Set up supplier situation."""
-    DomPendencyType.objects.create(name="PENDENCIA_CADASTRO")
-    DomPendencyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
-    DomPendencyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
-    DomPendencyType.objects.create(name="PENDENCIA_AVALIACAO")
-    DomSupplierSituation.objects.create(name="ATIVO")
-    DomSupplierSituation.objects.create(
-        name="PENDENTE",
-        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
-    )
-    DomSupplierSituation.objects.create(
-        name="PENDENTE",
-        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
-    )
-    DomSupplierSituation.objects.create(
-        name="PENDENTE",
-        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
-    )
-
-
 class TestSupplierAttachment(TestCase):
     """Test cases for SupplierAttachment model."""
 
@@ -77,8 +53,6 @@ class TestSupplierAttachment(TestCase):
 
         address = Address.objects.create(postal_code="01234-567", number="123")
         contact = Contact.objects.create(email="test@example.com", phone="11999999999")
-
-        setup_situation()
 
         payment_method = DomPaymentMethod.objects.create(name="TED")
         pix_type = DomPixType.objects.create(name="Email")
@@ -355,8 +329,6 @@ class TestSupplierAttachmentQueryMethods(TestCase):
         """Set up test data for query tests."""
         self.contract_type = DomAttachmentType.objects.create(name="Contrato Social")
         self.cnpj_type = DomAttachmentType.objects.create(name="CNPJ")
-
-        setup_situation()
 
         address = Address.objects.create(postal_code="01234-567", number="123")
         contact = Contact.objects.create(email="test@example.com", phone="11999999999")

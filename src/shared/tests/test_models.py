@@ -3,6 +3,8 @@ Tests for shared models.
 This module contains tests for Address, Contact and TimestampedModel.
 """
 
+import time
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
@@ -42,9 +44,6 @@ class TestTimestampedModel(TestCase):
             postal_code="01234567",
         )
         original_updated_at = address.updated_at
-
-        # Wait a moment and update
-        import time
 
         time.sleep(0.01)
 
@@ -118,7 +117,6 @@ class TestAddressModel(TestCase):
 
     def test_address_field_max_lengths(self):
         """Test field maximum lengths."""
-        # Test street max_length
         long_street = "x" * 256  # Exceeds max_length of 255
         with self.assertRaises(ValidationError):
             address = Address(
@@ -132,7 +130,6 @@ class TestAddressModel(TestCase):
 
     def test_postal_code_length(self):
         """Test postal code field length."""
-        # Test valid 8-digit postal code
         address = Address.objects.create(
             street="Rua Teste",
             city="São Paulo",
@@ -189,12 +186,10 @@ class TestContactModel(TestCase):
 
     def test_email_allows_duplicates(self):
         """Test that email field allows duplicates (unique constraint removed for supplier updates)."""
-        # Create first contact
         contact1 = Contact.objects.create(
             email="duplicado@teste.com", phone="11111111111"
         )
 
-        # Create second contact with same email - should not raise error
         contact2 = Contact.objects.create(
             email="duplicado@teste.com", phone="11222222222"
         )
@@ -225,7 +220,6 @@ class TestContactModel(TestCase):
 
     def test_email_field_validation(self):
         """Test email field validation."""
-        # Test invalid email format
         with self.assertRaises(ValidationError):
             contact = Contact(email="email-invalido", phone="11999999999")
             contact.full_clean()

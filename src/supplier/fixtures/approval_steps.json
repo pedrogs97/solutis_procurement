@@ -1,0 +1,106 @@
+[
+    {
+        "model": "supplier.approvalstep",
+        "pk": 1,
+        "fields": {
+            "name": "Cadastro inicial",
+            "description": "Cadastro inicial do fornecedor no sistema",
+            "order": 1,
+            "department": "Administrativo",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 2,
+        "fields": {
+            "name": "Validação geral do cadastro",
+            "description": "Validação administrativa dos dados cadastrais do fornecedor",
+            "order": 2,
+            "department": "Administrativo",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 3,
+        "fields": {
+            "name": "Validação geral do cadastro",
+            "description": "Validação financeira dos dados cadastrais do fornecedor",
+            "order": 3,
+            "department": "Financeiro",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 4,
+        "fields": {
+            "name": "Avaliação do compliance | Sustentabilidade",
+            "description": "Avaliação de compliance e critérios de sustentabilidade do fornecedor",
+            "order": 4,
+            "department": "Financeiro",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 5,
+        "fields": {
+            "name": "Avaliação do gestor",
+            "description": "Avaliação e aprovação do gestor responsável",
+            "order": 5,
+            "department": "Administrativo",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 6,
+        "fields": {
+            "name": "Avaliação jurídica",
+            "description": "Análise jurídica dos contratos e documentação legal",
+            "order": 6,
+            "department": "Jurídico",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 7,
+        "fields": {
+            "name": "Avaliação diretoria",
+            "description": "Avaliação e decisão da diretoria",
+            "order": 7,
+            "department": "Diretoria",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    },
+    {
+        "model": "supplier.approvalstep",
+        "pk": 8,
+        "fields": {
+            "name": "Aprovação final do fluxo",
+            "description": "Aprovação final e conclusão do processo de aprovação",
+            "order": 8,
+            "department": "Diretoria",
+            "is_mandatory": true,
+            "created_at": "2025-09-28T00:00:00Z",
+            "updated_at": "2025-09-28T00:00:00Z"
+        }
+    }
+]

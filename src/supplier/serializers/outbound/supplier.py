@@ -165,6 +165,7 @@ class SupplierOutSerializer(BaseSerializer):
     Converts field names to camelCase representation.
     """
 
+    name = SerializerMethodField()
     address = AddressSerializer()
     contact = ContactSerializer()
     payment_details = PaymentDetailsOutSerializer()
@@ -187,6 +188,10 @@ class SupplierOutSerializer(BaseSerializer):
         model = Supplier
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
+
+    def get_name(self, obj: Supplier):
+        """Return the trade_name as the supplier's display name."""
+        return obj.trade_name or obj.legal_name
 
     def get_situation(self, obj: Supplier):
         """Retrieve the supplier's situation using the SupplierSituationOutSerializer."""

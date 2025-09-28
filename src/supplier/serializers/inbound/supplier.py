@@ -149,7 +149,6 @@ class SupplierInSerializer(BaseSerializer):
         fiscal_details = {}
         company_information = {}
 
-        # Create related objects first
         if address_data:
             address = Address.objects.create(**address_data)
         if contact_data:
@@ -168,7 +167,7 @@ class SupplierInSerializer(BaseSerializer):
             )
         if contract_data:
             contract = Contract.objects.create(**contract_data)
-        # Create the Supplier instance with related objects
+
         validated_data["address"] = address
         validated_data["contact"] = contact
         validated_data["payment_details"] = payment_details

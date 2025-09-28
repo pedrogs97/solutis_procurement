@@ -9,49 +9,13 @@ from model_bakery import baker
 
 from src.supplier.enums import DomPendecyTypeEnum
 from src.supplier.models.attachments import SupplierAttachment
-from src.supplier.models.domain import (
-    DomAttachmentType,
-    DomPendencyType,
-    DomSupplierSituation,
-)
+from src.supplier.models.domain import DomAttachmentType, DomSupplierSituation
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier, SupplierSituation
 
 
 class TestSupplierSignals(TestCase):
     def setUp(self):
-        baker.make(
-            DomPendencyType,
-            name="PENDÊNCIA DE CADASTRO",
-            id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
-        )
-        baker.make(
-            DomPendencyType,
-            name="PENDÊNCIA MATRIZ DE RESPONSABILIDADE",
-            id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
-        )
-        baker.make(
-            DomPendencyType,
-            name="PENDÊNCIA DE DOCUMENTAÇÃO",
-            id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
-        )
-
-        baker.make(DomSupplierSituation, name="ATIVO")
-        baker.make(
-            DomSupplierSituation,
-            name="PENDENTE",
-            pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
-        )
-        baker.make(
-            DomSupplierSituation,
-            name="PENDENTE",
-            pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
-        )
-        baker.make(
-            DomSupplierSituation,
-            name="PENDENTE",
-            pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
-        )
         self.supplier = baker.make(
             Supplier,
             address=baker.make("shared.Address"),

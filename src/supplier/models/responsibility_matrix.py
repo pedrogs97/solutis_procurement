@@ -48,7 +48,6 @@ class ResponsibilityMatrix(TimestampedModel):
     I = Informado sobre o andamento ou resultado (Informed)
     """
 
-    # Relacionamento one-to-one com Supplier
     supplier = models.OneToOneField(
         Supplier,
         on_delete=models.CASCADE,
@@ -56,7 +55,6 @@ class ResponsibilityMatrix(TimestampedModel):
         help_text="Fornecedor vinculado à matriz",
     )
 
-    # Atividade: Solicitação e justificativa de contratação
     contract_request_requesting_area = create_raci_field("-", AREA_SOLICITANTE)
     contract_request_administrative = create_raci_field("-", ADMINISTRATIVO)
     contract_request_legal = create_raci_field("-", JURIDICO)

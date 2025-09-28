@@ -69,8 +69,8 @@ class SupplierEvaluationSerializer(BaseSerializer):
     Converts field names to camelCase representation.
     """
 
+    supplier = SupplierOutSerializer(read_only=True)
     period = EvaluationPeriodSerializer(read_only=True)
-    last_criterion_score = serializers.SerializerMethodField()
 
     class Meta(BaseSerializer.Meta):
         """
@@ -80,6 +80,7 @@ class SupplierEvaluationSerializer(BaseSerializer):
         model = SupplierEvaluation
         fields = (
             "id",
+            "supplier",
             "period",
             "evaluator_name",
             "evaluation_date",
@@ -87,17 +88,7 @@ class SupplierEvaluationSerializer(BaseSerializer):
             "final_score",
         )
 
-    def get_last_criterion_score(self, obj: SupplierEvaluation):
-        """
-        Get the last criterion scores for the supplier evaluation.
-        """
-        last_score = obj.get_last_criterion_score()
-        if last_score:
-            return CriterionScoreSerializer(last_score).data
-        return None
 
-
-# sugestões futuras
 class SupplierEvaluationDetailSerializer(BaseSerializer):
     """
     Serializer for detailed SupplierEvaluation model output.

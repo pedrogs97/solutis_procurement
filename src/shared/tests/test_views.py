@@ -49,7 +49,6 @@ class DummyView(BaseAPIView):
         super().__init__()
         self.format_kwarg = None
 
-    # Override methods for testing to avoid relying on request.data
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
@@ -92,7 +91,6 @@ class DummyViewWithInOut(BaseAPIView):
         super().__init__()
         self.format_kwarg = None
 
-    # Override methods for testing to avoid relying on request.data
     def post(self, request, *args, **kwargs):
         data = request.POST
         serializer = self.get_serializer(data=data)
@@ -154,7 +152,6 @@ class TestBaseAPIView(TestCase):
         view = DummyViewWithInOut()
         self.assertEqual(view.get_out_serializer_class(), DummyOutSerializer)
 
-        # Test fallback to serializer_class
         view_single = DummyView()
         self.assertEqual(view_single.get_out_serializer_class(), DummySerializer)
 
@@ -235,35 +232,28 @@ class TestBaseAPIView(TestCase):
         response = view.post(request)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # Should use output serializer for response
         self.assertIn("created_at", response.data)
 
     def test_method_routing(self):
         """Test that different HTTP methods use appropriate serializers."""
         view = DummyViewWithInOut()
 
-        # Test POST uses input serializer
         view.request = Mock()
         view.request.method = "POST"
         self.assertEqual(view.get_serializer_class(), DummyInSerializer)
 
-        # Test PUT uses input serializer
         view.request.method = "PUT"
         self.assertEqual(view.get_serializer_class(), DummyInSerializer)
 
-        # Test PATCH uses input serializer
         view.request.method = "PATCH"
         self.assertEqual(view.get_serializer_class(), DummyInSerializer)
 
-        # Test GET uses output serializer
         view.request.method = "GET"
         self.assertEqual(view.get_serializer_class(), DummyOutSerializer)
 
-        # Test HEAD uses output serializer
         view.request.method = "HEAD"
         self.assertEqual(view.get_serializer_class(), DummyOutSerializer)
 
-        # Test OPTIONS uses output serializer
         view.request.method = "OPTIONS"
         self.assertEqual(view.get_serializer_class(), DummyOutSerializer)
 
@@ -278,11 +268,9 @@ class TestBaseAPIView(TestCase):
         view = ViewWithAll()
         view.request = Mock()
 
-        # POST should use serializer_class_in
         view.request.method = "POST"
         self.assertEqual(view.get_serializer_class(), DummyInSerializer)
 
-        # GET should use serializer_class_out
         view.request.method = "GET"
         self.assertEqual(view.get_serializer_class(), DummyOutSerializer)
 
@@ -295,7 +283,6 @@ class TestBaseAPIView(TestCase):
         view = ViewWithOnlyBase()
         view.request = Mock()
 
-        # All methods should use base serializer_class
         for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
             view.request.method = method
             self.assertEqual(view.get_serializer_class(), DummySerializer)

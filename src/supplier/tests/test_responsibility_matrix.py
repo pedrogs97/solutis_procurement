@@ -8,31 +8,8 @@ from django.db import IntegrityError
 from django.test import TestCase
 from model_bakery import baker
 
-from src.supplier.enums import DomPendecyTypeEnum
-from src.supplier.models.domain import DomPendencyType, DomSupplierSituation
 from src.supplier.models.responsibility_matrix import RACI_CHOICES, ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
-
-
-def setup_situation():
-    """Set up supplier situation."""
-    DomPendencyType.objects.create(name="PENDENCIA_CADASTRO")
-    DomPendencyType.objects.create(name="PENDENCIA_DOCUMENTACAO")
-    DomPendencyType.objects.create(name="PENDENCIA_MATRIZ_RESPONSABILIDADE")
-    DomPendencyType.objects.create(name="PENDENCIA_AVALIACAO")
-    DomSupplierSituation.objects.create(name="ATIVO")
-    DomSupplierSituation.objects.create(
-        name="PENDENTE",
-        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_MATRIZ_RESPONSABILIDADE.value,
-    )
-    DomSupplierSituation.objects.create(
-        name="PENDENTE",
-        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_DOCUMENTACAO.value,
-    )
-    DomSupplierSituation.objects.create(
-        name="PENDENTE",
-        pendency_type_id=DomPendecyTypeEnum.PENDENCIA_CADASTRO.value,
-    )
 
 
 class TestResponsibilityMatrix(TestCase):
@@ -40,7 +17,6 @@ class TestResponsibilityMatrix(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        setup_situation()
         self.supplier = baker.make(Supplier, trade_name="Test Supplier")
 
     def test_responsibility_matrix_creation(self):
@@ -157,7 +133,7 @@ class TestResponsibilityMatrix(TestCase):
         """Test that all expected activity fields are present."""
         matrix = ResponsibilityMatrix.objects.create(supplier=self.supplier)
 
-        # Ccontract request activity fields
+        # Contract request activity fields
         self.assertTrue(hasattr(matrix, "contract_request_requesting_area"))
         self.assertTrue(hasattr(matrix, "contract_request_administrative"))
         self.assertTrue(hasattr(matrix, "contract_request_legal"))

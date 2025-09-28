@@ -5,7 +5,6 @@ This module provides views for managing supplier evaluations.
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
@@ -31,18 +30,18 @@ from src.supplier.serializers.outbound.evaluation import (
 )
 
 
-class EvaluationCriterionListViewSet(ListAPIView):
+class EvaluationCriterionListView(ListAPIView):
     """
-    ViewSet for listing evaluation criteria.
+    View for listing evaluation criteria.
     """
 
     queryset = EvaluationCriterion.objects.all().order_by("order")
     serializer_class = EvaluationCriterionSerializer
 
 
-class EvaluationCriterionViewSet(BaseAPIView):
+class EvaluationCriterionView(BaseAPIView):
     """
-    ViewSet for managing evaluation criteria.
+    View for managing evaluation criteria CRUD operations.
     """
 
     queryset = EvaluationCriterion.objects.all().order_by("order")
@@ -50,9 +49,9 @@ class EvaluationCriterionViewSet(BaseAPIView):
     serializer_class_out = EvaluationCriterionSerializer
 
 
-class SupplierEvaluationListViewSet(ListAPIView):
+class SupplierEvaluationListView(ListAPIView):
     """
-    ViewSet for listing evaluation criteria.
+    View for listing supplier evaluations.
     """
 
     queryset = SupplierEvaluation.objects.all().select_related("supplier", "period")
@@ -60,26 +59,46 @@ class SupplierEvaluationListViewSet(ListAPIView):
     filterset_class = SupplierEvaluationFilters
 
 
-class SupplierEvaluationViewSet(BaseAPIView):
+class SupplierEvaluationView(BaseAPIView):
     """
-    ViewSet for managing supplier evaluations.
+    View for managing supplier evaluations CRUD operations.
     """
 
     queryset = SupplierEvaluation.objects.all().select_related("supplier", "period")
     serializer_class_in = SupplierEvaluationInSerializer
     serializer_class_out = SupplierEvaluationSerializer
 
-    @action(detail=False, methods=["get"])
-    def summary(self, request):
+    def get(self, request, pk=None, *args, **kwargs):
+        """
+        Get a single evaluation with detailed information or handle list.
+        """
+        if pk:
+            instance = self.get_object()
+            serializer = SupplierEvaluationDetailSerializer(instance)
+            return Response(serializer.data)
+        return super().get(request, *args, **kwargs)
+
+
+class EvaluationSummaryView(BaseAPIView):
+    """
+    View for getting evaluation summaries.
+    """
+
+    def get(self, request, *args, **kwargs):
         """
         Get a summary of all evaluations.
         """
-        queryset = self.get_queryset()
+        queryset = SupplierEvaluation.objects.all().select_related("supplier", "period")
         serializer = EvaluationSummarySerializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=["get"])
-    def supplier_history(self, request):
+
+class SupplierHistoryView(BaseAPIView):
+    """
+    View for getting supplier evaluation history.
+    """
+
+    def get(self, request, *args, **kwargs):
         """
         Get evaluation history for a specific supplier.
         """
@@ -90,7 +109,7 @@ class SupplierEvaluationViewSet(BaseAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        supplier = get_object_or_404(Supplier, id=supplier_id)
+        supplier = get_object_or_404(Supplier, pk=supplier_id)
         evaluations = SupplierEvaluation.objects.filter(supplier=supplier).order_by(
             "-evaluation_date"
         )
@@ -98,12 +117,17 @@ class SupplierEvaluationViewSet(BaseAPIView):
         serializer = SupplierEvaluationHistorySerializer(evaluations, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"])
-    def add_criterion_scores(self, request, pk=None):
+
+class AddCriterionScoresView(BaseAPIView):
+    """
+    View for adding criterion scores to an evaluation.
+    """
+
+    def post(self, request, evaluation_id, *args, **kwargs):
         """
         Add criterion scores to an existing evaluation.
         """
-        evaluation = self.get_object()
+        evaluation = get_object_or_404(SupplierEvaluation, pk=evaluation_id)
         serializer = CriterionScoreInSerializer(
             data=request.data, many=True, context={"request": request}
         )
@@ -112,7 +136,6 @@ class SupplierEvaluationViewSet(BaseAPIView):
             for score_data in serializer.validated_data:
                 CriterionScore.objects.create(evaluation=evaluation, **score_data)
 
-            # Recalculate final score
             evaluation.save()
 
             return Response(

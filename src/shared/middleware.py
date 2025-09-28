@@ -40,6 +40,16 @@ class SnakeCaseMiddleware(MiddlewareMixin):
         ):
             body = request.body.decode("utf-8")
             data = json.loads(body)
-            snake_case_data = self.__dict_to_snake_case(data)
+
+            if isinstance(data, dict):
+                snake_case_data = self.__dict_to_snake_case(data)
+            elif isinstance(data, list):
+                snake_case_data = [
+                    self.__dict_to_snake_case(item) if isinstance(item, dict) else item
+                    for item in data
+                ]
+            else:
+                snake_case_data = data
+
             request._body = json.dumps(snake_case_data).encode("utf-8")
             request._data = snake_case_data
