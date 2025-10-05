@@ -5,39 +5,29 @@ URLs relacionadas ao fluxo de aprovação de fornecedores.
 from django.urls import path
 
 from src.supplier.views.approval_workflow import (
-    ApprovalFlowCreateView,
-    ApprovalFlowDetailView,
-    ApprovalFlowListView,
-    ApprovalStepView,
+    ApproveCurrentStepView,
     StartApprovalFlowView,
-    StepApprovalCreateView,
-    SupplierApprovalFlowView,
+    StepResponsibleApproverView,
+    SupplierApprovalFlowsView,
 )
 
 app_name = "supplier"
 
 urlpatterns = [
-    path("steps/", ApprovalStepView.as_view(), name="approval-steps"),
-    path("flows/", ApprovalFlowListView.as_view(), name="approval-flows-list"),
+    path("start/", StartApprovalFlowView.as_view(), name="start-approval-flow"),
     path(
-        "flows/create/", ApprovalFlowCreateView.as_view(), name="approval-flows-create"
+        "steps/responsible/",
+        StepResponsibleApproverView.as_view(),
+        name="step-responsible-approver",
     ),
     path(
-        "flows/<int:pk>/", ApprovalFlowDetailView.as_view(), name="approval-flow-detail"
+        "step/approve/",
+        ApproveCurrentStepView.as_view(),
+        name="approve-current-step",
     ),
     path(
-        "flows/<int:flow_id>/approve/",
-        StepApprovalCreateView.as_view(),
-        name="approval-flow-approve",
-    ),
-    path(
-        "supplier/<int:supplier_id>/",
-        SupplierApprovalFlowView.as_view(),
-        name="approval-flow-for-supplier",
-    ),
-    path(
-        "supplier/<int:supplier_id>/start/",
-        StartApprovalFlowView.as_view(),
-        name="approval-flow-start",
+        "supplier/<int:supplier_id>/flows/",
+        SupplierApprovalFlowsView.as_view(),
+        name="supplier-approval-flows",
     ),
 ]

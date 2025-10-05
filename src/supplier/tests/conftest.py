@@ -7,12 +7,7 @@ from django.utils import timezone
 from model_bakery import baker
 from rest_framework.test import APIClient
 
-from src.supplier.models.approval_workflow import (
-    ApprovalFlow,
-    ApprovalStep,
-    Approver,
-    StepApproval,
-)
+from src.supplier.models.approval_workflow import ApprovalFlow, ApprovalStep, Approver
 from src.supplier.models.domain import DomPendencyType, DomSupplierSituation
 from src.supplier.models.supplier import Supplier
 from supplier.enums import DomPendecyTypeEnum
@@ -27,11 +22,13 @@ def api_client():
 @pytest.fixture
 def supplier():
     """Fixture para criar um fornecedor para testes usando model_bakery."""
-    return baker.make(
+    supplier = baker.make(
         Supplier,
         trade_name="Fornecedor Teste",
         legal_name="Fornecedor Teste LTDA",
     )
+
+    return supplier
 
 
 @pytest.fixture
@@ -51,19 +48,6 @@ def approval_step():
 def basic_approval_flow(supplier, approval_step):
     """Fixture básica para criar um fluxo de aprovação simples para testes usando model_bakery."""
     return baker.make(ApprovalFlow, supplier=supplier, current_step=approval_step)
-
-
-@pytest.fixture
-def step_approval(basic_approval_flow, approval_step, sample_approver):
-    """Fixture para criar uma aprovação de passo para testes usando model_bakery."""
-    return baker.make(
-        StepApproval,
-        approval_flow=basic_approval_flow,
-        step=approval_step,
-        approver=sample_approver,
-        comments="Comentário de teste",
-        is_approved=True,
-    )
 
 
 @pytest.fixture(autouse=True)
@@ -224,15 +208,6 @@ def completed_approval_flow(supplier, approval_steps):
             Approver,
             name=f"Aprovador {step.department}",
             email=f"aprovador.{step.department.lower()}@company.com",
-        )
-
-        baker.make(
-            StepApproval,
-            approval_flow=flow,
-            step=step,
-            approver=approver,
-            is_approved=True,
-            comments=f"Aprovado - {step.name}",
         )
 
     return flow

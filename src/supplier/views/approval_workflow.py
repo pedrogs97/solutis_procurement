@@ -1,219 +1,81 @@
-"""Views para o fluxo de aprovação de fornecedores."""
+"""Views to manage supplier approval workflows."""
 
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.exceptions import NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from src.shared.views import BaseAPIView
-from src.supplier.models.approval_workflow import (
-    ApprovalFlow,
-    ApprovalStep,
-    StepApproval,
-)
+from src.supplier.models.approval_workflow import ApprovalFlow
 from src.supplier.models.supplier import Supplier
-from src.supplier.serializers.approval_workflow import (
-    ApprovalFlowSerializer,
-    ApprovalStepSerializer,
-    ApproveStepSerializer,
-    StepApprovalSerializer,
+from src.supplier.serializers.inbound.approval_workflow import (
+    ApproveApprovalFlowStepSerializer,
+    SetResponsibleApproverSerializer,
+    StartApprovalFlowSerializer,
 )
-
-ERROR_FLOW_EXISTS = "Já existe um fluxo de aprovação para este fornecedor."
-ERROR_SUPPLIER_ID_REQUIRED = "O parâmetro supplier_id é obrigatório."
-ERROR_SUPPLIER_NOT_FOUND = "Fornecedor não encontrado."
-ERROR_FLOW_NOT_FOUND = "Fluxo de aprovação não encontrado."
-ERROR_NO_CURRENT_STEP = "Este fluxo não possui um passo atual definido."
-ERROR_STEP_ALREADY_EVALUATED = "Este passo já foi avaliado anteriormente."
-ERROR_FLOW_COMPLETED = "Este fluxo já está concluído."
-ERROR_FLOW_NOT_ADVANCED = "Não foi possível avançar o fluxo."
+from src.supplier.serializers.outbound.approval_workflow import (
+    SupplierApprovalFlowSerializer,
+)
+from src.supplier.services.approval_workflow import SendRequestToApprovalWorkflowService
 
 
-class ApprovalStepView(generics.ListAPIView):
+class StartApprovalFlowView(generics.CreateAPIView):
+    """View para iniciar um fluxo de aprovação para um fornecedor."""
+
+    serializer_class = StartApprovalFlowSerializer
+
+
+class StepResponsibleApproverView(generics.CreateAPIView):
     """
-    View para listar os passos de aprovação.
-    Somente leitura pois os passos são definidos pelo sistema.
-    """
-
-    queryset = ApprovalStep.objects.all().order_by("order")
-    serializer_class = ApprovalStepSerializer
-
-
-class ApprovalFlowCreateView(BaseAPIView):
-    """
-    View para criar um novo fluxo de aprovação.
-    Utiliza a BaseAPIView para aproveitar as funcionalidades comuns.
+    View para gerenciar o aprovador responsável por um step específico.
     """
 
-    serializer_class = ApprovalFlowSerializer
+    serializer_class = SetResponsibleApproverSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request) -> Response:
         """
-        Sobrescreve o método para validar se já existe um fluxo para o fornecedor.
+        Method to assign a responsible approver to a specific step in the approval workflow.
         """
-        supplier_id = request.data.get("supplier")
-
-        if (
-            supplier_id
-            and ApprovalFlow.objects.filter(supplier_id=supplier_id).exists()
-        ):
-            return Response(
-                {"detail": ERROR_FLOW_EXISTS},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        return super().post(request, *args, **kwargs)
-
-
-class ApprovalFlowListView(generics.ListAPIView):
-    """
-    View para listar fluxos de aprovação.
-    """
-
-    queryset = ApprovalFlow.objects.all()
-    serializer_class = ApprovalFlowSerializer
-
-
-class ApprovalFlowDetailView(BaseAPIView):
-    """
-    View para operações de detalhe em um fluxo de aprovação.
-    """
-
-    queryset = ApprovalFlow.objects.all()
-    serializer_class = ApprovalFlowSerializer
-
-    def get_next_step(self, request: Request, *args, **kwargs) -> Response:
-        """Avança o fluxo para o próximo passo."""
-        approval_flow = self.get_object()
-
-        if approval_flow.is_completed:
-            return Response(
-                {"detail": ERROR_FLOW_COMPLETED},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        success = approval_flow.advance_to_next_step()
-
-        if success:
-            return Response(
-                {
-                    "detail": "Fluxo avançado com sucesso.",
-                    "current_step": (
-                        approval_flow.current_step.name
-                        if approval_flow.current_step
-                        else None
-                    ),
-                    "is_completed": approval_flow.is_completed,
-                },
-                status=status.HTTP_200_OK,
-            )
-        return Response(
-            {"detail": ERROR_FLOW_NOT_ADVANCED},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-
-class StepApprovalCreateView(BaseAPIView):
-    """
-    View para criar uma aprovação de passo.
-    """
-
-    serializer_class_in = ApproveStepSerializer
-    serializer_class_out = StepApprovalSerializer
-
-    def post(self, request, flow_id, *args, **kwargs):
-        """Aprova ou rejeita o passo atual do fluxo."""
-        try:
-            approval_flow = ApprovalFlow.objects.get(pk=flow_id)
-        except ApprovalFlow.DoesNotExist:
-            return Response(
-                {"detail": ERROR_FLOW_NOT_FOUND},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        if not approval_flow.current_step:
-            return Response(
-                {"detail": ERROR_NO_CURRENT_STEP},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if StepApproval.objects.filter(
-            approval_flow=approval_flow, step=approval_flow.current_step
-        ).exists():
-            return Response(
-                {"detail": ERROR_STEP_ALREADY_EVALUATED},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer = self.get_serializer(
-            data=request.data,
-            context={
-                "flow_id": approval_flow.pk,
-                "step_id": approval_flow.current_step.pk,
-            },
-        )
-
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        step_approval = StepApproval.objects.create(
-            approval_flow=approval_flow,
-            step=approval_flow.current_step,
-            **serializer.validated_data,
-        )
-
-        if step_approval.is_approved:
-            approval_flow.advance_to_next_step()
-
+        instance = serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        SendRequestToApprovalWorkflowService.execute(instance.supplier, instance)
         return Response(
-            self.get_out_serializer_class()(step_approval).data,
-            status=status.HTTP_201_CREATED,
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
 
-class SupplierApprovalFlowView(BaseAPIView):
-    """
-    View para operações relacionadas ao fluxo de aprovação de um fornecedor específico.
-    """
+class ApproveCurrentStepView(generics.UpdateAPIView):
+    """View para aprovar ou rejeitar o passo atual do fluxo de aprovação."""
 
-    serializer_class = ApprovalFlowSerializer
-
-    def get(self, request, supplier_id, *args, **kwargs):
-        """Obtém o fluxo de aprovação para um fornecedor específico."""
-        try:
-            approval_flow = ApprovalFlow.objects.get(supplier_id=supplier_id)
-            serializer = self.get_serializer(approval_flow)
-            return Response(serializer.data)
-        except ApprovalFlow.DoesNotExist:
-            return Response(
-                {"detail": "Não existe fluxo de aprovação para este fornecedor."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+    serializer_class = ApproveApprovalFlowStepSerializer
 
 
-class StartApprovalFlowView(BaseAPIView):
-    """
-    View para iniciar um fluxo de aprovação para um fornecedor.
-    """
+class SupplierApprovalFlowsView(generics.RetrieveAPIView):
+    """View para listar os fluxos de aprovação de um fornecedor."""
 
-    serializer_class = ApprovalFlowSerializer
+    serializer_class = SupplierApprovalFlowSerializer
 
-    def post(self, request, supplier_id, *args, **kwargs):
-        """Inicia um fluxo de aprovação para um fornecedor."""
-        try:
-            supplier = Supplier.objects.get(pk=supplier_id)
-        except Supplier.DoesNotExist:
-            return Response(
-                {"detail": ERROR_SUPPLIER_NOT_FOUND},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+    def get_object(self) -> Supplier:
+        """
+        Get the supplier object for the specified supplier ID.
+        """
+        supplier_id = self.kwargs.get("supplier_id")
+        supplier = get_object_or_404(Supplier, id=supplier_id)
+        if not ApprovalFlow.objects.filter(supplier=supplier).exists():
+            raise NotFound("Nenhum fluxo de aprovação encontrado para este fornecedor.")
+        return supplier
 
-        if ApprovalFlow.objects.filter(supplier_id=supplier_id).exists():
-            return Response(
-                {"detail": ERROR_FLOW_EXISTS},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        approval_flow = ApprovalFlow.objects.create(supplier=supplier)
-
-        approval_flow.advance_to_next_step()
-
-        serializer = self.get_serializer(approval_flow)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve the approval flows associated with the supplier.
+        """
+        instance = self.get_object()
+        approve_flow = (
+            instance.approval_flow_history.select_related("step")
+            .all()
+            .order_by("step__order")
+        )
+        serializer = self.get_serializer(approve_flow, many=True)
+        return Response(serializer.data)

@@ -23,7 +23,7 @@ class Approver(TimestampedModel):
         help_text=_("Nome completo do aprovador"),
     )
     email = models.EmailField(
-        verbose_name=_("Email"), help_text=_("Email do aprovador")
+        verbose_name=_("Email"), help_text=_("Email do aprovador"), unique=True
     )
 
     def __str__(self):
@@ -84,74 +84,52 @@ class ApprovalFlow(TimestampedModel):
     Tracks the approval process through various steps.
     """
 
-    supplier = models.OneToOneField(
+    supplier = models.ForeignKey(
         Supplier,
         on_delete=models.CASCADE,
-        related_name="approval_flow",
+        related_name="approval_flow_history",
         verbose_name=_("Fornecedor"),
     )
-    start_date = models.DateTimeField(
-        default=timezone.now,
-        verbose_name=_("Data de Início"),
-        help_text=_("Data de início do fluxo de aprovação"),
-    )
-    completion_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_("Data de Conclusão"),
-        help_text=_("Data de conclusão do fluxo de aprovação"),
-    )
-    current_step = models.ForeignKey(
+    step = models.ForeignKey(
         ApprovalStep,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.PROTECT,
         related_name="current_flows",
         verbose_name=_("Passo Atual"),
         help_text=_("Passo atual no fluxo de aprovação"),
     )
+    approver = models.ForeignKey(
+        Approver,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approval_flows",
+        verbose_name=_("Aprovador Atual"),
+        help_text=_("Aprovador responsável pelo passo atual"),
+    )
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Data de Aprovação"),
+        help_text=_("Data em que o fluxo foi aprovado"),
+    )
+    reproved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Data de Reprovação"),
+        help_text=_("Data em que o fluxo foi reprovado"),
+    )
 
-    @property
-    def is_completed(self):
-        """Check if the flow is completed by verifying if completion_date is set."""
-        return self.completion_date is not None
-
-    def complete_flow(self):
-        """Mark the approval flow as completed."""
-        self.completion_date = timezone.now()
-        self.current_step = None
+    def approve(self):
+        """Mark the approval flow as approved."""
+        self.approved_at = timezone.now()
+        self.reproved_at = None
         self.save()
 
-    def advance_to_next_step(self):
-        """Advance to the next step in the approval flow."""
-        if self.is_completed:
-            return False
-
-        if not self.current_step:
-            first_step = ApprovalStep.objects.order_by("order").first()
-            if first_step:
-                self.current_step = first_step
-                self.save()
-                return True
-            return False
-
-        next_step = (
-            ApprovalStep.objects.filter(order__gt=self.current_step.order)
-            .order_by("order")
-            .first()
-        )
-
-        if next_step:
-            self.current_step = next_step
-            self.save()
-            return True
-
-        self.complete_flow()
-        return True
-
-    def __str__(self):
-        status = "Concluído" if self.is_completed else "Em andamento"
-        return f"Fluxo de aprovação - {self.supplier} - {status}"
+    def reprove(self):
+        """Mark the approval flow as reproved."""
+        self.reproved_at = timezone.now()
+        self.approved_at = None
+        self.save()
 
     class Meta(TimestampedModel.Meta):
         """
@@ -161,56 +139,4 @@ class ApprovalFlow(TimestampedModel):
         db_table = "approval_flow"
         verbose_name = _("Fluxo de Aprovação")
         verbose_name_plural = _("Fluxos de Aprovação")
-        abstract = False
-
-
-class StepApproval(TimestampedModel):
-    """
-    Model representing the approval of a specific step in the approval flow.
-    Contains information about who approved the step and when.
-    """
-
-    approval_flow = models.ForeignKey(
-        ApprovalFlow,
-        on_delete=models.CASCADE,
-        related_name="step_approvals",
-        verbose_name=_("Fluxo de Aprovação"),
-    )
-    step = models.ForeignKey(
-        ApprovalStep,
-        on_delete=models.PROTECT,
-        related_name="approvals",
-        verbose_name=_("Passo de Aprovação"),
-    )
-    approver = models.ForeignKey(
-        Approver,
-        on_delete=models.PROTECT,
-        related_name="step_approvals",
-        verbose_name=_("Aprovador"),
-        help_text=_("Usuário que realizou a aprovação"),
-    )
-    approval_date = models.DateTimeField(
-        default=timezone.now, verbose_name=_("Data da Aprovação")
-    )
-    comments = models.TextField(blank=True, verbose_name=_("Observações"))
-    is_approved = models.BooleanField(
-        default=True,
-        verbose_name=_("Aprovado"),
-        help_text=_("Indica se o passo foi aprovado ou rejeitado"),
-    )
-
-    def __str__(self):
-        status = "aprovado" if self.is_approved else "rejeitado"
-        return f"{self.step.name} - {status} por {self.approver.name}"
-
-    class Meta(TimestampedModel.Meta):
-        """
-        Meta configuration for StepApproval model.
-        """
-
-        db_table = "step_approval"
-        verbose_name = _("Aprovação de Passo")
-        verbose_name_plural = _("Aprovações de Passos")
-        ordering = ["approval_flow", "step__order"]
-        unique_together = [["approval_flow", "step"]]
         abstract = False
