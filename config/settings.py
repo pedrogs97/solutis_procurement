@@ -163,3 +163,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "storage") if DEBUG else "/storage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+EMAIL_SOLUTIS_365 = "agile@solutis.com.br"
+EMAIL_PASSWORD_SOLUTIS_365 = os.getenv("EMAIL_PASSWORD_SOLUTIS_365")
+APP_URL = os.getenv("URL_FRONTEND", "http://localhost:3000")

@@ -2,6 +2,10 @@
 
 from logging import getLogger
 
+from django.conf import settings
+from jwt import encode
+
+from src.shared.backends import Email365Client
 from src.supplier.models.approval_workflow import (
     ApprovalFlow,
     ApprovalStep,
@@ -26,7 +30,7 @@ class SendRequestToApprovalWorkflowService:
             "approvalFlowStepId": approval_flow_step_id,
             "action": "accept",
         }
-        return str(hash(frozenset(content_to_hash.items())))
+        return encode(content_to_hash, settings.SECRET_KEY, algorithm="HS256")
 
     @staticmethod
     def __generate_reject_token(approval_flow_step_id: int) -> str:
@@ -37,7 +41,7 @@ class SendRequestToApprovalWorkflowService:
             "approvalFlowStepId": approval_flow_step_id,
             "action": "reject",
         }
-        return str(hash(frozenset(content_to_hash.items())))
+        return encode(content_to_hash, settings.SECRET_KEY, algorithm="HS256")
 
     @classmethod
     def execute(cls, supplier: Supplier, approval_flow: ApprovalFlow):
@@ -48,15 +52,22 @@ class SendRequestToApprovalWorkflowService:
         if not approval_flow.approver:
             logger.warning("Aprovador não definido para o fluxo de aprovação.")
             return
-        context_email = {  # pylint: disable=unused-variable
+        accept_token = cls.__generate_accept_token(approval_flow.pk)
+        reject_token = cls.__generate_reject_token(approval_flow.pk)
+        context_email = {
             "supplier": supplier.trade_name,
-            "approver_email": approval_flow.approver.email,
             "approver_name": approval_flow.approver.name,
             "step": approval_flow.step.name,
-            "accept_token": cls.__generate_accept_token(approval_flow.pk),
-            "reject_token": cls.__generate_reject_token(approval_flow.pk),
+            "accept_token": f"{settings.APP_URL}/supplier/approval?token={accept_token}",
+            "reject_token": f"{settings.APP_URL}/supplier/approval?token={reject_token}",
         }
-        # Aqui você integraria com o serviço de envio de email
+        email_client = Email365Client(
+            mail_to=approval_flow.approver.email,
+            mail_subject=f"Aprovação de Fornecedor - {supplier.trade_name}",
+            type_message="approval",
+            extra=context_email,
+        )
+        email_client.send_message()
 
 
 class ApprovalWorkflowService:

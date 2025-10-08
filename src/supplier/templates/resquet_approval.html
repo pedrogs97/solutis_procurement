@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <title>Aprovação de Fornecedor</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            .spaced-paragraph {
+                margin-bottom: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="spaced-paragraph">Prezado(a) <b>{{ approver_name }}</b>,</p>
+        <p class="spaced-paragraph">Foi solicitado a sua aprovação para do fornecedor {{ supplier }} para o passo {{ step }}.</p>
+        <p class="spaced-paragraph">Verifique em anexo os documentos do fornecedor e aprove ou reprova conforme necessário.</p>
+        <p class="spaced-paragraph">Para aprovar, clique no link:</p>
+        <a href="{{ approval_link }}">{{ approval_link }}</a>
+        <p class="spaced-paragraph">Para reprovar, clique no link:</p>
+        <a href="{{ reprove_link }}">{{ reprove_link }}</a>
+        <p class="spaced-paragraph">Se tiver alguma dúvida ou precisar de assistência, não hesite em nos contatar.</p>
+        <p class="spaced-paragraph">Atenciosamente,</p>
+        <p class="spaced-paragraph">Administrativo</p>
+        <p class="spaced-paragraph">Solutis Tecnologias Ltda</p>
+    </body>
+</html>
