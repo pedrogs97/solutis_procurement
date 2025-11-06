@@ -104,10 +104,10 @@ DATABASES = {
     },
     "sqlserver": {
         "ENGINE": "mssql",
-        "NAME": os.getenv("SQLSERVER_NAME_DB", "CorporeRM_SI"),
+        "NAME": os.getenv("SQLSERVER_NAME_DB", "CorporeRM"),
         "USER": os.getenv("SQLSERVER_USER_DB", "parametrize.pedro"),
         "PASSWORD": os.getenv("SQLSERVER_PASSWORD_DB", "Solutis@123!"),
-        "HOST": os.getenv("SQLSERVER_HOST_DB", "172.29.0.127"),
+        "HOST": os.getenv("SQLSERVER_HOST_DB", "10.0.10.77"),
         "PORT": "1433",
     },
 }

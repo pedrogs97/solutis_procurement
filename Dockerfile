@@ -19,6 +19,16 @@ COPY ./src /app/src
 
 WORKDIR /app
 
+
+# Install Microsoft SQL Server tools
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc \
+    && curl https://packages.microsoft.com/config/debian/11/prod.list | tee /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update -y \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
+    && apt-get install -y unixodbc unixodbc-dev libgssapi-krb5-2
+
+
 # Install system packages and configure locale
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update -y \

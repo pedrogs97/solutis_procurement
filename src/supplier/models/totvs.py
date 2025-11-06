@@ -11,7 +11,7 @@ FORMATRIBUTACAO -> forma de tributação (numeros)
 from django.db import models
 from django.db.transaction import atomic
 
-from src.supplier.models.supplier import (
+from supplier.models.supplier import (
     Address,
     Contact,
     DomRiskLevel,
@@ -83,14 +83,9 @@ class SupplierTypeTotvs(SqlServerModel):
 def load_suppliers():
     """Carrega fornecedores da TOTVS para o sistema local"""
     dict_supplier_risk = {
-        "05.607.657/0008-01": "ALTO",
-        "07.976.147/0001-60": "MÉDIO",
-        "12.639.870/0001-94": "MÉDIO",
-        "59.456.277/0001-76": "MÉDIO",
-        "53.113.791/0001-22": "ALTO",
-        "04.699.639/0001-68": "BAIXO",
-        "12.499.520/0001-70": "BAIXO",
-        "31.433.149/0001-98": "BAIXO",
+        "43.649.570/0001-10": "BAIXO",
+        "33.571.622/0001-29": "BAIXO",
+        "60.143.657/0001-30": "BAIXO",
     }
 
     supplier_from_totvs = SupplierTotvs.objects.using("sqlserver").filter(
