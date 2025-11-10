@@ -22,6 +22,7 @@ disable=
     E1102,  # not-callable (serializers podem não ser detectados)
     E0307,  # invalid-str-returned (Django models podem retornar outros tipos)
     W0622,  # redefined-builtin
+    W0221,  # arguments-differ
 
 [FORMAT]
 # Configurações de formatação (delegadas ao black)
