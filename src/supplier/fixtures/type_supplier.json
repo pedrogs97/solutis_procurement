@@ -1,0 +1,79 @@
+[
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 1,
+        "fields": {
+            "name": "FORNECEDOR - SERVIÇOS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 2,
+        "fields": {
+            "name": "FORNECEDOR - PRODUTOS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 3,
+        "fields": {
+            "name": "FORNECEDOR - PRODUTOS E SERVIÇOS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 4,
+        "fields": {
+            "name": "AUTÔNOMO"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 5,
+        "fields": {
+            "name": "ALUGUEL"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 6,
+        "fields": {
+            "name": "SEGURO"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 7,
+        "fields": {
+            "name": "FUNCIONÁRIOS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 8,
+        "fields": {
+            "name": "ORGÃO PÚBLICO MUNICIPAL"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 9,
+        "fields": {
+            "name": "SEGURADORA"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 10,
+        "fields": {
+            "name": "FORNECEDOR - CLIENTE"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 11,
+        "fields": {
+            "name": "FORNECEDOR - SERVIÇOS E PRODUTOS"
+        }
+    }
+]

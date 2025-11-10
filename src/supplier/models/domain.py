@@ -82,7 +82,7 @@ class DomPendencyType(DomType):
         Meta options for the DomPendencyType model.
         """
 
-        db_table = "pendecy_type"
+        db_table = "pendency_type"
         verbose_name = "Tipo de Pendência"
         verbose_name_plural = "Tipos de Pendência"
         abstract = False

@@ -1,0 +1,16 @@
+[
+    {
+        "model": "supplier.domcategory",
+        "pk": 1,
+        "fields": {
+            "name": "PESSOA JURÍDICA"
+        }
+    },
+    {
+        "model": "supplier.domcategory",
+        "pk": 2,
+        "fields": {
+            "name": "PESSOA FÍSICA"
+        }
+    }
+]

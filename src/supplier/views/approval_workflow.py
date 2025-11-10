@@ -6,7 +6,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from src.supplier.models.approval_workflow import ApprovalFlow
+from src.supplier.models.approval_workflow import ApprovalFlow, ApprovalStep
 from src.supplier.models.supplier import Supplier
 from src.supplier.serializers.inbound.approval_workflow import (
     ApproveApprovalFlowStepSerializer,
@@ -14,6 +14,7 @@ from src.supplier.serializers.inbound.approval_workflow import (
     StartApprovalFlowSerializer,
 )
 from src.supplier.serializers.outbound.approval_workflow import (
+    ApprovalStepSerializer,
     SupplierApprovalFlowSerializer,
 )
 from src.supplier.services.approval_workflow import SendRequestToApprovalWorkflowService
@@ -38,15 +39,14 @@ class StepResponsibleApproverView(generics.CreateAPIView):
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        headers = self.get_success_headers(serializer.data)
-        SendRequestToApprovalWorkflowService.execute(instance.supplier, instance)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        created_data = serializer.save()
+        SendRequestToApprovalWorkflowService.execute(
+            created_data["supplier"], created_data["workflow"]
         )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class ApproveCurrentStepView(generics.UpdateAPIView):
+class ApproveCurrentStepView(generics.CreateAPIView):
     """View para aprovar ou rejeitar o passo atual do fluxo de aprovação."""
 
     serializer_class = ApproveApprovalFlowStepSerializer
@@ -78,4 +78,18 @@ class SupplierApprovalFlowsView(generics.RetrieveAPIView):
             .order_by("step__order")
         )
         serializer = self.get_serializer(approve_flow, many=True)
+        return Response(serializer.data)
+
+
+class StepsView(generics.ListAPIView):
+    """View para listar os passos de aprovação."""
+
+    serializer_class = ApprovalStepSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        List all approval steps.
+        """
+        queryset = ApprovalStep.objects.all()
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

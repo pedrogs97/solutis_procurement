@@ -7,10 +7,10 @@ from django.utils import timezone
 from model_bakery import baker
 from rest_framework.test import APIClient
 
+from src.supplier.enums import DomPendecyTypeEnum
 from src.supplier.models.approval_workflow import ApprovalFlow, ApprovalStep, Approver
 from src.supplier.models.domain import DomPendencyType, DomSupplierSituation
 from src.supplier.models.supplier import Supplier
-from supplier.enums import DomPendecyTypeEnum
 
 
 @pytest.fixture

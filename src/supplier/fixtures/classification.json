@@ -1,0 +1,23 @@
+[
+    {
+        "model": "supplier.domclassification",
+        "pk": 1,
+        "fields": {
+            "name": "FORNECEDOR"
+        }
+    },
+    {
+        "model": "supplier.domclassification",
+        "pk": 2,
+        "fields": {
+            "name": "PRESTADOR"
+        }
+    },
+    {
+        "model": "supplier.domclassification",
+        "pk": 3,
+        "fields": {
+            "name": "CLIENTE"
+        }
+    }
+]

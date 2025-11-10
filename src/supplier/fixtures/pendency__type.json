@@ -1,27 +1,27 @@
 [
     {
-        "model": "supplier.dompendecytype",
+        "model": "supplier.dompendencytype",
         "pk": 1,
         "fields": {
             "name": "PENDÊNCIA DE CADASTRO"
         }
     },
     {
-        "model": "supplier.dompendecytype",
+        "model": "supplier.dompendencytype",
         "pk": 2,
         "fields": {
             "name": "PENDÊNCIA DE DOCUMENTAÇÃO"
         }
     },
     {
-        "model": "supplier.dompendecytype",
+        "model": "supplier.dompendencytype",
         "pk": 3,
         "fields": {
             "name": "PENDÊNCIA MATRIZ DE RESPONSABILIDADE"
         }
     },
     {
-        "model": "supplier.dompendecytype",
+        "model": "supplier.dompendencytype",
         "pk": 4,
         "fields": {
             "name": "PENDÊNCIA DE AVALIAÇÃO"

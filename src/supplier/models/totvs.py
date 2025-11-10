@@ -8,10 +8,12 @@ TIPORENDIMENTO -> tipo de rendimento (numeros)
 FORMATRIBUTACAO -> forma de tributação (numeros)
 """
 
-from django.db import models
-from django.db.transaction import atomic
+import os
 
-from supplier.models.supplier import (
+import pymssql
+from django.db import models
+
+from src.supplier.models.supplier import (
     Address,
     Contact,
     DomRiskLevel,
@@ -79,59 +81,122 @@ class SupplierTypeTotvs(SqlServerModel):
         db_table = "FTCF"
 
 
-@atomic
-def load_suppliers():
-    """Carrega fornecedores da TOTVS para o sistema local"""
-    dict_supplier_risk = {
-        "43.649.570/0001-10": "BAIXO",
-        "33.571.622/0001-29": "BAIXO",
-        "60.143.657/0001-30": "BAIXO",
-    }
+class ExternalDatabase:
+    """Class of SQLServe connection"""
 
-    supplier_from_totvs = SupplierTotvs.objects.using("sqlserver").filter(
-        active=1,
-        cnpj__in=dict_supplier_risk.keys(),
-    )
+    # Some other example server values are
+    # server = 'localhost\sqlexpress' # for a named instance
+    # server = 'myserver,port' # to specify an alternate port
 
-    print("Supplier from TOTVS:", supplier_from_totvs.count())
+    def __init__(self) -> None:
+        self.connection = None
+        self._cursor = None
 
-    for supplier in supplier_from_totvs:
-        address = Address.objects.create(
-            street=supplier.street or "",
-            city=supplier.city or "",
-            state=supplier.state or "",
-            neighbourhood=supplier.neighborhood or "",
-            number=None if isinstance(supplier.number, str) else supplier.number,
-            postal_code=supplier.postal_code or "",
-            complement=supplier.complement or "",
+    def _try_connect(self, as_dict=True) -> None:
+        """Try connect with SQLServer database"""
+        # ENCRYPT defaults to yes starting in ODBC Driver 18.
+        # It's good to always specify ENCRYPT=yes on the client side to avoid MITM attacks.
+        if self.connection is None:
+            # pylint: disable=no-member
+            self.connection = pymssql.connect(
+                server=os.getenv("SQLSERVER_HOST_DB", ""),
+                user=os.getenv("SQLSERVER_USER_DB", ""),
+                password=os.getenv("SQLSERVER_PASSWORD_DB", ""),
+                database=os.getenv("SQLSERVER_NAME_DB", ""),
+            )
+        if self._cursor is None:
+            self._cursor = self.connection.cursor(as_dict)
+
+    def get_connection(self, as_dict=True):
+        """Return external connection"""
+        if self.connection is None:
+            self._try_connect(as_dict)
+        return self.connection
+
+    def get_cursor(self, as_dict=True):
+        """Return external cursor"""
+        if self._cursor is None:
+            self._try_connect(as_dict)
+        return self._cursor
+
+    def load_suppliers(self):
+        """Carrega fornecedores da TOTVS para o sistema local"""
+        dict_supplier_risk = {
+            "43.649.570/0001-10": "BAIXO",
+            "33.571.622/0001-29": "BAIXO",
+            "60.143.657/0001-30": "BAIXO",
+        }
+
+        cursor = self.get_cursor()
+        list_param = ",".join(f"'{cnpj}'" for cnpj in dict_supplier_risk)
+        cursor.execute(
+            f"""SELECT
+            RUA,
+            CIDADE,
+            BAIRRO,
+            CODETD,
+            NUMERO,
+            CEP,
+            COMPLEMENTO,
+            NOMEFANTASIA,
+            NOME,
+            CGCCFO,
+            EMAIL,
+            TELEFONE,
+            CODTCF,
+            INSCRESTADUAL,
+            INSCRMUNICIPAL,
+            PESSOAFISOUJUR,
+            ATIVO FROM FCFO WHERE ATIVO = 1 AND CGCCFO IN ({list_param})"""
         )
-        address.refresh_from_db()
-        contact = Contact.objects.create(
-            email=supplier.email or "",
-            phone=supplier.phone or "",
-        )
-        contact.refresh_from_db()
-        risk_level = DomRiskLevel.objects.get(name=dict_supplier_risk[supplier.cnpj])
-        supplier_type_totvs = (
-            SupplierTypeTotvs.objects.using("sqlserver")
-            .filter(code=supplier.type_supplier)
-            .first()
-        )
-        if not supplier_type_totvs:
-            continue
-        supplier_type, _ = DomTypeSupplier.objects.get_or_create(
-            name=supplier_type_totvs.description.strip().upper()
-        )
-        Supplier.objects.create(
-            trade_name=supplier.trade_name,
-            legal_name=supplier.legal_name,
-            tax_id=supplier.cnpj,
-            state_business_registration=supplier.state_registration or "",
-            municipal_business_registration=supplier.municipal_registration or "",
-            address=address,
-            contact=contact,
-            classification_id=1,
-            category_id=1 if supplier.category.upper() == "J" else 2,
-            risk_level=risk_level,
-            type=supplier_type,
-        )
+        rows = cursor.fetchall()
+
+        print("Supplier from TOTVS:", len(rows))
+
+        for row in rows:
+            address = Address.objects.create(
+                street=row["RUA"] or "",
+                city=row["CIDADE"] or "",
+                state=row["BAIRRO"] or "",
+                neighbourhood=row["CODETD"] or "",
+                number=None if isinstance(row["NUMERO"], str) else row["NUMERO"],
+                postal_code=row["CEP"] or "",
+                complement=row["COMPLEMENTO"] or "",
+            )
+            address.refresh_from_db()
+            contact = Contact.objects.create(
+                email=row["EMAIL"] or "",
+                phone=row["TELEFONE"] or "",
+            )
+            contact.refresh_from_db()
+            risk_level = DomRiskLevel.objects.get(
+                name=dict_supplier_risk[row["CGCCFO"]]
+            )
+
+            cursor = self.get_cursor()
+            cursor.execute(
+                f"SELECT CODTCF, DESCRICAO  FROM FTCF WHERE CODTCF = {row['CODTCF']}"
+            )
+            rows = cursor.fetchall()
+
+            type_row = rows[0]
+
+            supplier_type, _ = DomTypeSupplier.objects.get_or_create(
+                name=type_row["DESCRICAO"].strip().upper()
+            )
+            Supplier.objects.create(
+                trade_name=row["NOMEFANTASIA"],
+                legal_name=row["NOME"],
+                tax_id=row["CGCCFO"],
+                state_business_registration=row["INSCRESTADUAL"] or "",
+                municipal_business_registration=row["INSCRMUNICIPAL"] or "",
+                address=address,
+                contact=contact,
+                classification_id=1,
+                category_id=1 if row["CODTCF"].upper() == "J" else 2,
+                risk_level=risk_level,
+                type=supplier_type,
+            )
+        cnxn = self.get_connection()
+        cnxn.close()
+        print("Suppliers loaded successfully.")

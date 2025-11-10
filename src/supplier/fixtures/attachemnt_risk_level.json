@@ -1,0 +1,23 @@
+[
+    {
+        "model": "supplier.domrisklevel",
+        "pk": 1,
+        "fields": {
+            "name": "BAIXO"
+        }
+    },
+    {
+        "model": "supplier.domrisklevel",
+        "pk": 2,
+        "fields": {
+            "name": "MÉDIO"
+        }
+    },
+    {
+        "model": "supplier.domrisklevel",
+        "pk": 3,
+        "fields": {
+            "name": "ALTO"
+        }
+    }
+]

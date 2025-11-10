@@ -86,6 +86,17 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
 
         try:
             step = ApprovalStep.objects.get(id=step_id)
+            next_step = (
+                ApprovalStep.objects.filter(order__gt=step.order)
+                .order_by("order")
+                .first()
+            )
+
+            if not next_step:
+                raise serializers.ValidationError(
+                    "Não há próximo passo definido no fluxo de aprovação."
+                )
+            data["next_step"] = next_step
         except ApprovalStep.DoesNotExist:
             raise serializers.ValidationError("Passo de aprovação não encontrado.")
 
@@ -106,9 +117,21 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
             email=validated_data["email"],
             defaults={"name": validated_data["name"]},
         )
-        workflow.approver = approver
-        workflow.save()
-        return workflow
+
+        new_approval_flow = ApprovalFlow.objects.create(
+            supplier=workflow.supplier,
+            approver=approver,
+            step=validated_data["next_step"],
+        )
+
+        return {
+            "name": validated_data["name"],
+            "email": validated_data["email"],
+            "workflow": new_approval_flow,
+            "supplier": workflow.supplier,
+            "workflow_id": new_approval_flow.pk,
+            "step_id": validated_data["next_step"].pk,
+        }
 
 
 class ApproveApprovalFlowStepSerializer(serializers.Serializer):
@@ -148,8 +171,16 @@ class ApproveApprovalFlowStepSerializer(serializers.Serializer):
 
         if is_approved:
             workflow.approve()
-            return workflow
+            return {
+                "workflow_id": workflow.pk,
+                "workflow": workflow,
+                "is_approved": True,
+            }
 
         workflow.reprove()
 
-        return workflow
+        return {
+            "workflow_id": workflow.pk,
+            "workflow": workflow,
+            "is_approved": False,
+        }

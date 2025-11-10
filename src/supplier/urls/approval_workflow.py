@@ -8,12 +8,14 @@ from src.supplier.views.approval_workflow import (
     ApproveCurrentStepView,
     StartApprovalFlowView,
     StepResponsibleApproverView,
+    StepsView,
     SupplierApprovalFlowsView,
 )
 
 app_name = "supplier"
 
 urlpatterns = [
+    path("steps/", StepsView.as_view(), name="steps"),
     path("start/", StartApprovalFlowView.as_view(), name="start-approval-flow"),
     path(
         "steps/responsible/",

@@ -30,8 +30,6 @@ multidict = "==6.6.3"
 packaging = "==25.0"
 pluggy = "==1.6.0"
 propcache = "==0.3.2"
-pydantic-core = "==2.33.2"
-pydantic = "==2.11.7"
 pygments = "==2.19.2"
 pyjwt = "==2.10.1"
 pyodbc = "==5.2.0"
@@ -46,8 +44,23 @@ urllib3 = "==2.5.0"
 uvicorn = "==0.35.0"
 validate-docbr = "==1.11.1"
 yarl = "==1.20.1"
+pymssql = "*"
+mysqlclient = "*"
+python-dotenv = "*"
 
 [dev-packages]
+pytest = "==8.4.1"
+black = "==25.1.0"
+pre-commit = "==4.2.0"
+pylint = "==3.3.7"
+model-bakery = "==1.19.5"
+pytest-django = "==4.11.1"
 
 [requires]
 python_version = "3.11"
+
+[scripts]
+start = "python manage.py runserver 0.0.0.0:8001"
+test = "pytest"
+migrate = "python manage.py migrate"
+makemigrations = "python manage.py makemigrations"

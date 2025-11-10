@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -97,19 +100,26 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+def get_default_db():
+    use_sqlite = os.getenv("USE_SQLITE", "true").lower() == "true"
+    if use_sqlite:
+        return {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+
+    return {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("MYSQL_DATABASE", "procurement_db"),
+        "USER": os.getenv("MYSQL_USER", "procurement_user"),
+        "PASSWORD": os.getenv("MYSQL_PASSWORD", "procurement_pass"),
+        "HOST": os.getenv("MYSQL_HOST", "localhost"),
+    }
+
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
-    "sqlserver": {
-        "ENGINE": "mssql",
-        "NAME": os.getenv("SQLSERVER_NAME_DB", "CorporeRM"),
-        "USER": os.getenv("SQLSERVER_USER_DB", "parametrize.pedro"),
-        "PASSWORD": os.getenv("SQLSERVER_PASSWORD_DB", "Solutis@123!"),
-        "HOST": os.getenv("SQLSERVER_HOST_DB", "10.0.10.77"),
-        "PORT": "1433",
-    },
+    "default": get_default_db(),
 }
 
 

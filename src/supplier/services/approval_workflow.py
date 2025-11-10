@@ -1,7 +1,7 @@
 """Service to send a request to the approval workflow."""
 
-from typing import Optional
 from logging import getLogger
+from typing import Optional
 
 from django.conf import settings
 from jwt import encode
@@ -59,9 +59,10 @@ class SendRequestToApprovalWorkflowService:
             "supplier": supplier.trade_name,
             "approver_name": approval_flow.approver.name,
             "step": approval_flow.step.name,
-            "accept_token": f"{settings.APP_URL}/supplier/approval?token={accept_token}",
-            "reject_token": f"{settings.APP_URL}/supplier/approval?token={reject_token}",
+            "approval_link": f"{settings.APP_URL}/approval?token={accept_token}",
+            "reprove_link": f"{settings.APP_URL}/approval?token={reject_token}",
         }
+        print(context_email)
         email_client = Email365Client(
             mail_to=approval_flow.approver.email,
             mail_subject=f"Aprovação de Fornecedor - {supplier.trade_name}",

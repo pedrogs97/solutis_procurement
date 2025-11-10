@@ -115,61 +115,13 @@
         "model": "supplier.domattachmenttype",
         "pk": 15,
         "fields": {
-            "name": "ACEITE DO CÓDIGO DE CONDUTA",
-            "risk_level": 1
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 16,
-        "fields": {
-            "name": "ACEITE DO CÓDIGO DE CONDUTA",
-            "risk_level": 2
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 17,
-        "fields": {
-            "name": "ACEITE DO CÓDIGO DE CONDUTA",
-            "risk_level": 3
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 18,
-        "fields": {
-            "name": "ACEITE DA POLÍTICA DE SEGURANÇA",
-            "risk_level": 1
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 19,
-        "fields": {
-            "name": "ACEITE DA POLÍTICA DE SEGURANÇA",
-            "risk_level": 2
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 20,
-        "fields": {
-            "name": "ACEITE DA POLÍTICA DE SEGURANÇA",
-            "risk_level": 3
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 21,
-        "fields": {
             "name": "QUESTIONÁRIO DE DUE DILIGENCE",
             "risk_level": 3
         }
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 22,
+        "pk": 16,
         "fields": {
             "name": "ATESTADO DE CAPACIDADE TÉCNICA",
             "risk_level": 3
@@ -177,7 +129,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 23,
+        "pk": 17,
         "fields": {
             "name": "TERMO DE COMPROMISSO",
             "risk_level": 2
@@ -185,7 +137,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 24,
+        "pk": 18,
         "fields": {
             "name": "TERMO DE COMPROMISSO",
             "risk_level": 3
@@ -193,7 +145,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 25,
+        "pk": 19,
         "fields": {
             "name": "TERMO DE RESPONSABILIDADE",
             "risk_level": 2
@@ -201,7 +153,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 26,
+        "pk": 20,
         "fields": {
             "name": "TERMO DE RESPONSABILIDADE",
             "risk_level": 3
@@ -209,7 +161,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 27,
+        "pk": 21,
         "fields": {
             "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
             "risk_level": 1
@@ -217,7 +169,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 28,
+        "pk": 22,
         "fields": {
             "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
             "risk_level": 2
@@ -225,7 +177,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 29,
+        "pk": 23,
         "fields": {
             "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
             "risk_level": 3
@@ -233,7 +185,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 30,
+        "pk": 24,
         "fields": {
             "name": "RELATÓRIO DE AUDITORIA OU CERTIFICAÇÕES ISO (QUANDO APLICÁVEL)",
             "risk_level": 3
@@ -241,7 +193,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 31,
+        "pk": 25,
         "fields": {
             "name": "DOCUMENTOS DIVERSOS",
             "risk_level": 1
@@ -249,7 +201,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 32,
+        "pk": 26,
         "fields": {
             "name": "DOCUMENTOS DIVERSOS",
             "risk_level": 2
@@ -257,7 +209,7 @@
     },
     {
         "model": "supplier.domattachmenttype",
-        "pk": 33,
+        "pk": 27,
         "fields": {
             "name": "DOCUMENTOS DIVERSOS",
             "risk_level": 3

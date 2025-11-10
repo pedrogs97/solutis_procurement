@@ -1,0 +1,66 @@
+[
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 1,
+        "fields": {
+            "name": "PENDENTE",
+            "pendency_type_id": null
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 2,
+        "fields": {
+            "name": "BLOQUEADO",
+            "pendency_type_id": null
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 3,
+        "fields": {
+            "name": "INATIVO",
+            "pendency_type_id": null
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 4,
+        "fields": {
+            "name": "ATIVO",
+            "pendency_type_id": null
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 5,
+        "fields": {
+            "name": "PENDENTE",
+            "pendency_type_id": 1
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 6,
+        "fields": {
+            "name": "PENDENTE",
+            "pendency_type_id": 4
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 7,
+        "fields": {
+            "name": "PENDENTE",
+            "pendency_type_id": 3
+        }
+    },
+    {
+        "model": "supplier.domsuppliersituation",
+        "pk": 8,
+        "fields": {
+            "name": "PENDENTE",
+            "pendency_type_id": 2
+        }
+    }
+]
