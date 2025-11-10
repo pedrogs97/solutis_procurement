@@ -11,8 +11,8 @@ ENV PATH="/root/.local/bin:$PATH"
 ENV PYTHONPATH="/app"
 
 # Copy dependency files
-COPY ./poetry.lock /app/
-COPY ./pyproject.toml /app/
+COPY ./Pipfile /app/
+COPY ./Pipfile.lock /app/
 COPY ./manage.py /app/
 COPY ./config /app/config
 COPY ./src /app/src
@@ -42,13 +42,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && sed -i '/^# pt_BR.UTF-8 UTF-8/s/^# //' /etc/locale.gen \
     && locale-gen \
     && update-locale LANG=pt_BR.UTF-8 \
-    && curl -sSL https://install.python-poetry.org | python3 - \
-    && poetry self add poetry-plugin-export \
-    && poetry export -f requirements.txt --output requirements.txt --without-hashes \
     && pip install --upgrade pip \
+    && pip install pipenv \
+    && pipenv requirements > requirements.txt \
     && pip install --no-cache-dir --upgrade -r requirements.txt \
     && pip install --no-cache-dir uvicorn[standard] \
-    && pip uninstall poetry -y \
     && rm requirements.txt \
     && chmod -R 755 /var \
     && apt-get remove -y curl \
