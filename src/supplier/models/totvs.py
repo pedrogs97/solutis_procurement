@@ -165,6 +165,7 @@ class ExternalDatabase:
             )
             address.refresh_from_db()
             contact = Contact.objects.create(
+                name="",
                 email=row["EMAIL"] or "",
                 phone=row["TELEFONE"] or "",
             )

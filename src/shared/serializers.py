@@ -124,8 +124,6 @@ class ContactSerializer(BaseSerializer):
         """
 
         model = Contact
-        fields = ["id", "email", "phone"]
-        read_only_fields = ("id",)
 
     def validate_email(self, value):
         """

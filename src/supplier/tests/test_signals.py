@@ -49,6 +49,7 @@ class TestSupplierSignals(TestCase):
             supplier.contact = baker.make("shared.Contact")
             supplier.save()
         contact = supplier.contact
+        contact.name = "Contato Teste"
         contact.email = "contato@teste.com"
         contact.phone = "11999999999"
         contact.save()

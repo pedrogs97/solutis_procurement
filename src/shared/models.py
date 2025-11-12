@@ -54,6 +54,7 @@ class Contact(TimestampedModel):
     Model representing a contact.
     """
 
+    name = models.CharField(max_length=255, blank=True, default="")
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=11, blank=True)
 

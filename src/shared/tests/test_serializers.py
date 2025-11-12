@@ -161,12 +161,14 @@ class TestContactSerializer(TestCase):
 
     def test_meta_fields(self):
         """Test that Meta.fields contains expected fields."""
-        expected_fields = ["id", "email", "phone"]
+        expected_fields = "__all__"
         self.assertEqual(ContactSerializer.Meta.fields, expected_fields)
 
     def test_meta_read_only_fields(self):
         """Test that Meta.read_only_fields contains id."""
-        self.assertEqual(ContactSerializer.Meta.read_only_fields, ("id",))
+        self.assertEqual(
+            ContactSerializer.Meta.read_only_fields, ("id", "created_at", "updated_at")
+        )
 
     def test_validate_with_valid_data(self):
         """Test validation with valid contact data."""

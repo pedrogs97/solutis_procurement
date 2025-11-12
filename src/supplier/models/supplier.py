@@ -100,8 +100,8 @@ class PaymentDetails(TimestampedModel):
     payment_frequency = models.CharField(
         max_length=50, help_text="Periodicidade do Pagamento", blank=True, default=""
     )
-    payment_date = models.DateField(
-        help_text="Data de Pagamento", null=True, blank=True
+    payment_date = models.CharField(
+        max_length=100, help_text="Data de Pagamento", blank=True, default=""
     )
     contract_total_value = models.DecimalField(
         max_digits=15,

@@ -59,7 +59,7 @@
         "model": "supplier.domattachmenttype",
         "pk": 8,
         "fields": {
-            "name": "CERTIDÕES NEGATIVAS - ESTADUAL/MUNICIPAL",
+            "name": "CERTIDÕES NEGATIVAS - ESTADUAL",
             "risk_level": null
         }
     },
@@ -163,31 +163,31 @@
         "model": "supplier.domattachmenttype",
         "pk": 21,
         "fields": {
-            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
-            "risk_level": 1
+            "name": "RELATÓRIO DE AUDITORIA OU CERTIFICAÇÕES ISO (QUANDO APLICÁVEL)",
+            "risk_level": 3
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 22,
         "fields": {
-            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
-            "risk_level": 2
+            "name": "DOCUMENTOS DIVERSOS",
+            "risk_level": 1
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 23,
         "fields": {
-            "name": "DECLARAÇÃO DE ATENDIMENTO À NOTA MÍNIMA NO QUESTIONÁRIO DE QUALIFICAÇÃO",
-            "risk_level": 3
+            "name": "DOCUMENTOS DIVERSOS",
+            "risk_level": 2
         }
     },
     {
         "model": "supplier.domattachmenttype",
         "pk": 24,
         "fields": {
-            "name": "RELATÓRIO DE AUDITORIA OU CERTIFICAÇÕES ISO (QUANDO APLICÁVEL)",
+            "name": "DOCUMENTOS DIVERSOS",
             "risk_level": 3
         }
     },
@@ -195,24 +195,8 @@
         "model": "supplier.domattachmenttype",
         "pk": 25,
         "fields": {
-            "name": "DOCUMENTOS DIVERSOS",
-            "risk_level": 1
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 26,
-        "fields": {
-            "name": "DOCUMENTOS DIVERSOS",
-            "risk_level": 2
-        }
-    },
-    {
-        "model": "supplier.domattachmenttype",
-        "pk": 27,
-        "fields": {
-            "name": "DOCUMENTOS DIVERSOS",
-            "risk_level": 3
+            "name": "CERTIDÕES NEGATIVAS - MUNICIPAL",
+            "risk_level": null
         }
     }
 ]
