@@ -65,6 +65,7 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
     email = serializers.EmailField()
     workflow_id = serializers.IntegerField()
     step_id = serializers.IntegerField()
+    observations = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         """Meta dados do serializer."""
@@ -74,6 +75,7 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
             "email",
             "workflow_id",
             "step_id",
+            "observations",
         ]
 
     def validate(self, data: Dict):
@@ -108,7 +110,7 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
 
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict):
         """
         Set the responsible approver for the specified step in the workflow.
         """
@@ -122,6 +124,7 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
             supplier=workflow.supplier,
             approver=approver,
             step=validated_data["next_step"],
+            observations=validated_data.get("observations", ""),
         )
 
         return {
@@ -131,6 +134,7 @@ class SetResponsibleApproverSerializer(serializers.Serializer):
             "supplier": workflow.supplier,
             "workflow_id": new_approval_flow.pk,
             "step_id": validated_data["next_step"].pk,
+            "observations": validated_data.get("observations", ""),
         }
 
 

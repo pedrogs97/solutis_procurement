@@ -62,6 +62,7 @@ class SupplierApprovalFlowSerializer(BaseSerializer):
             "is_reproved",
             "approved_at",
             "reproved_at",
+            "observations",
             "next_step",
         ]
         read_only_fields = ["id", "approved_at", "reproved_at"]

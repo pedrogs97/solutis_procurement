@@ -59,10 +59,11 @@ class SendRequestToApprovalWorkflowService:
             "supplier": supplier.trade_name,
             "approver_name": approval_flow.approver.name,
             "step": approval_flow.step.name,
+            "observations": approval_flow.observations,
             "approval_link": f"{settings.APP_URL}/approval?token={accept_token}",
             "reprove_link": f"{settings.APP_URL}/approval?token={reject_token}",
         }
-        print(context_email)
+
         email_client = Email365Client(
             mail_to=approval_flow.approver.email,
             mail_subject=f"Aprovação de Fornecedor - {supplier.trade_name}",
@@ -106,6 +107,7 @@ class ApprovalWorkflowService:
             supplier=supplier,
             step=first_step,
             approver=approver,
+            observations="",
         )
         approval_flow.approve()
         return approval_flow

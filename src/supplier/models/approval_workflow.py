@@ -118,6 +118,11 @@ class ApprovalFlow(TimestampedModel):
         verbose_name=_("Data de Reprovação"),
         help_text=_("Data em que o fluxo foi reprovado"),
     )
+    observations = models.TextField(
+        blank=True,
+        verbose_name=_("Observações"),
+        help_text=_("Observações adicionais sobre o fluxo de aprovação"),
+    )
 
     def approve(self):
         """Mark the approval flow as approved."""
