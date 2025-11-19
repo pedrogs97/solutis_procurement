@@ -168,14 +168,22 @@ class SupplierInSerializer(BaseSerializer):
         if contract_data:
             contract = Contract.objects.create(**contract_data)
 
-        validated_data["address"] = address
-        validated_data["contact"] = contact
-        validated_data["payment_details"] = payment_details
-        validated_data["organizational_details"] = organizational_details
-        validated_data["fiscal_details"] = fiscal_details
-        validated_data["company_information"] = company_information
-        validated_data["contract"] = contract
-
+        validated_data["address_id"] = address.pk if address else None
+        validated_data["contact_id"] = contact.pk if contact else None
+        validated_data["payment_details_id"] = (
+            payment_details.pk if payment_details else None
+        )
+        validated_data["organizational_details_id"] = (
+            organizational_details.pk if organizational_details else None
+        )
+        validated_data["fiscal_details_id"] = (
+            fiscal_details.pk if fiscal_details else None
+        )
+        validated_data["company_information_id"] = (
+            company_information.pk if company_information else None
+        )
+        validated_data["contract_id"] = contract.pk if contract else None
+        print(validated_data)
         return super().create(validated_data)
 
     @atomic
