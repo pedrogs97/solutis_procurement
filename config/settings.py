@@ -114,7 +114,8 @@ def get_default_db():
         "NAME": os.getenv("MYSQL_DATABASE", "procurement_db"),
         "USER": os.getenv("MYSQL_USER", "procurement_user"),
         "PASSWORD": os.getenv("MYSQL_PASSWORD", "procurement_pass"),
-        "HOST": os.getenv("MYSQL_HOST", "localhost"),
+        "HOST": os.getenv("MYSQL_SERVER", "localhost"),
+        "PORT": os.getenv("MYSQL_PORT", "3306"),
     }
 
 
