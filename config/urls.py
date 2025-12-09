@@ -29,6 +29,7 @@ from src.supplier.urls.responsibility_matrix import (
     urlpatterns as responsibility_matrix_urls,
 )
 from src.supplier.urls.supplier import urlpatterns as supplier_urls
+from src.sync.urls import urlpatterns as sync_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -39,6 +40,7 @@ urlpatterns = [
     path("api/evaluation/", include(evaluation_urls)),
     path("api/approval/", include(approval_workflow_urls)),
     path("api/", lambda request: HttpResponse(status=200), name="healthcheck"),
+    path("api/sync/", include(sync_urls)),
 ]
 
 # Serve media files during development

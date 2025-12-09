@@ -3,5 +3,11 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true
     },
-    "postman.settings.dotenv-detection-notification-visibility": false
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "python.defaultInterpreterPath": "C:\\Users\\pedro\\.virtualenvs\\solutis_procurement-mRiyIfRF\\Scripts\\python.EXE",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:pipenv",
+    "python-envs.pythonProjects": []
 }
