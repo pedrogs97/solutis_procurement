@@ -151,7 +151,10 @@ class SupplierSyncService:
         Returns:
             Optional[int]: Parsed number or None
         """
-        return None if isinstance(value, str) else value
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
 
     def _fetch_supplier_type(self, type_code: str) -> SupplierTypeDTO:
         """
