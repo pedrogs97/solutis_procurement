@@ -164,7 +164,6 @@ class SupplierSyncService:
         """
         cursor = self.db_service.get_cursor()
         query = GET_SUPPLIER_TYPE_BY_CODE.format(type_code=type_code)
-        print(f"Executing query to fetch suppliers type: {query}")
         cursor.execute(query)
         rows = cursor.fetchall()
 

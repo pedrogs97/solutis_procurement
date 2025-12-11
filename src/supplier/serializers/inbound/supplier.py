@@ -183,7 +183,6 @@ class SupplierInSerializer(BaseSerializer):
             company_information.pk if company_information else None
         )
         validated_data["contract_id"] = contract.pk if contract else None
-        print(validated_data)
         return super().create(validated_data)
 
     @atomic
