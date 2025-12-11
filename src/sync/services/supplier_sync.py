@@ -170,8 +170,7 @@ class SupplierSyncService:
         if not rows:
             raise ValueError(f"Supplier type not found for code: {type_code}")
 
-        columns = [column[0] for column in cursor.description]
-        row = dict(zip(columns, rows[0]))
+        row = dict(rows[0])
         return SupplierTypeDTO(
             code=row["CODTCF"], description=row["DESCRICAO"].strip().upper()
         )
@@ -433,8 +432,7 @@ class SupplierSyncService:
         if not rows:
             return None
 
-        columns = [column[0] for column in cursor.description]
-        row_data = dict(zip(columns, rows[0]))
+        row_data = dict(rows[0])
         return self._convert_row_to_supplier_payment_data_dto(row_data)
 
     def _save_supplier_payment_data(self, tax_id: str) -> Optional[PaymentDetails]:
