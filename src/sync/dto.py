@@ -29,6 +29,7 @@ class SupplierTotvsDTO:
     municipal_registration: str
     state_registration: str
     active: int
+    contact_name: str
 
     @property
     def is_active(self) -> bool:

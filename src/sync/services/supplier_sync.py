@@ -138,6 +138,7 @@ class SupplierSyncService:
             municipal_registration=row["INSCRMUNICIPAL"] or "",
             state_registration=row["INSCRESTADUAL"] or "",
             active=row["ATIVO"],
+            contact_name=row["CONTATO"] or "",
         )
 
     def _parse_number(self, value) -> Optional[int]:
@@ -197,6 +198,7 @@ class SupplierSyncService:
 
                 if existing_supplier:
                     # Update existing supplier
+                    print(supplier_dto)
                     self._update_supplier(existing_supplier, supplier_dto)
                     logger.info("Updated supplier: %s", supplier_dto.legal_name)
                 else:
@@ -236,7 +238,11 @@ class SupplierSyncService:
         )
 
         contact = self._create_contact(
-            ContactDTO(name="", email=supplier_dto.email, phone=supplier_dto.phone)
+            ContactDTO(
+                name=supplier_dto.contact_name,
+                email=supplier_dto.email,
+                phone=supplier_dto.phone,
+            )
         )
 
         supplier_type_dto = self._fetch_supplier_type(supplier_dto.type_supplier_code)
@@ -309,7 +315,11 @@ class SupplierSyncService:
             self._update_contact(supplier.contact, supplier_dto)
         else:
             supplier.contact = self._create_contact(
-                ContactDTO(name="", email=supplier_dto.email, phone=supplier_dto.phone)
+                ContactDTO(
+                    name=supplier_dto.contact_name,
+                    email=supplier_dto.email,
+                    phone=supplier_dto.phone,
+                )
             )
 
         supplier.save()
@@ -379,6 +389,7 @@ class SupplierSyncService:
         """
         contact.email = supplier_dto.email
         contact.phone = supplier_dto.phone
+        contact.name = supplier_dto.contact_name
         contact.save()
 
     def _convert_row_to_supplier_payment_data_dto(

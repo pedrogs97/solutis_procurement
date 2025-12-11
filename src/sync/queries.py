@@ -21,7 +21,8 @@ GET_SUPPLIERS_BY_TAX_IDS = """
         INSCRESTADUAL,
         INSCRMUNICIPAL,
         PESSOAFISOUJUR,
-        ATIVO
+        ATIVO,
+        CONTATO
     FROM FCFO
     WHERE ATIVO = 1 AND CGCCFO IN ({tax_ids_list})
 """
