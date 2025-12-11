@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     # Local apps
     "src.supplier",
     "src.shared",
+    "src.sync",
     "src.utils",
 ]
 

@@ -49,6 +49,13 @@ class SupplierSyncService:
         """
         self.db_service = db_service
         self._risk_mapping: Dict[str, str] = {
+            "04.699.639/0001-68": "BAIXO",
+            "05.607.657/0008-01": "ALTO",
+            "07.976.147/0001-60": "MÉDIO",
+            "12.499.520/0001-70": "BAIXO",
+            "12.639.870/0001-94": "MÉDIO",
+            "31.433.149/0001-98": "BAIXO",
+            "53.113.791/0001-22": "ALTO",
             "43.649.570/0001-10": "BAIXO",
             "33.571.622/0001-29": "BAIXO",
             "60.143.657/0001-30": "BAIXO",
@@ -101,11 +108,7 @@ class SupplierSyncService:
         if rows is None:
             return []
 
-        columns = [column[0] for column in cursor.description]
-
-        return [
-            self._convert_row_to_supplier_dto(dict(zip(columns, row))) for row in rows
-        ]
+        return [self._convert_row_to_supplier_dto(dict(row)) for row in rows]
 
     def _convert_row_to_supplier_dto(self, row: Dict) -> SupplierTotvsDTO:
         """
@@ -161,6 +164,7 @@ class SupplierSyncService:
         """
         cursor = self.db_service.get_cursor()
         query = GET_SUPPLIER_TYPE_BY_CODE.format(type_code=type_code)
+        print(f"Executing query to fetch suppliers type: {query}")
         cursor.execute(query)
         rows = cursor.fetchall()
 

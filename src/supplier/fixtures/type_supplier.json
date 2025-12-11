@@ -3,77 +3,133 @@
         "model": "supplier.domtypesupplier",
         "pk": 1,
         "fields": {
-            "name": "FORNECEDOR - SERVIÇOS"
+            "name": "CLIENTE SERVIÇOS"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 2,
         "fields": {
-            "name": "FORNECEDOR - PRODUTOS"
+            "name": "CLIENTE PRODUTOS"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 3,
         "fields": {
-            "name": "FORNECEDOR - PRODUTOS E SERVIÇOS"
+            "name": "CLIENTE SERVIÇOS - PRODUTOS"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 4,
         "fields": {
-            "name": "AUTÔNOMO"
+            "name": "SEGURADORA"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 5,
         "fields": {
-            "name": "ALUGUEL"
+            "name": "FORNECEDOR - SERVIÇOS"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 6,
         "fields": {
-            "name": "SEGURO"
+            "name": "FORNECEDOR - PRODUTOS"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 7,
         "fields": {
-            "name": "FUNCIONÁRIOS"
+            "name": "FORNECEDOR - SERVIÇOS E PRODUTOS"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 8,
         "fields": {
-            "name": "ORGÃO PÚBLICO MUNICIPAL"
+            "name": "AUTÔNOMO"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 9,
         "fields": {
-            "name": "SEGURADORA"
+            "name": "FUNCIONÁRIO"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 10,
         "fields": {
-            "name": "FORNECEDOR - CLIENTE"
+            "name": "BANCO"
         }
     },
     {
         "model": "supplier.domtypesupplier",
         "pk": 11,
         "fields": {
-            "name": "FORNECEDOR - SERVIÇOS E PRODUTOS"
+            "name": "PENSÃO ALIMENTÍCIA"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 12,
+        "fields": {
+            "name": "ALUGUEL"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 13,
+        "fields": {
+            "name": "FORNECEDOR - CLIENTE"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 14,
+        "fields": {
+            "name": "ORGÃO PÚBLICO"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 15,
+        "fields": {
+            "name": "MEDICINA OCUPACIONAL"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 16,
+        "fields": {
+            "name": "OUTROS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 17,
+        "fields": {
+            "name": "FORNECEDOR OCASIONAL - SERVIÇOS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 18,
+        "fields": {
+            "name": "FORNECEDOR OCASIONAL - PRODUTOS"
+        }
+    },
+    {
+        "model": "supplier.domtypesupplier",
+        "pk": 19,
+        "fields": {
+            "name": "SINDICATO"
         }
     }
 ]
