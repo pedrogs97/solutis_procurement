@@ -464,15 +464,13 @@ class SupplierSyncService:
             .upper()
             .strip()
         )
-        pix_type = (
-            DomPixType.objects.get(
+        pix_type = None
+        if supplier_payment_data_dto.pix_key_type in PIX_TYPE_MAPPER:
+            pix_type, _ = DomPixType.objects.get_or_create(
                 name=PIX_TYPE_MAPPER[supplier_payment_data_dto.pix_key_type]
                 .upper()
                 .strip()
             )
-            if supplier_payment_data_dto.pix_key_type in PIX_TYPE_MAPPER
-            else None
-        )
         try:
             payment_details = PaymentDetails.objects.create(
                 payment_method=payment_method,
@@ -520,9 +518,13 @@ class SupplierSyncService:
             .upper()
             .strip()
         )
-        pix_type = DomPixType.objects.get(
-            name=PIX_TYPE_MAPPER[supplier_payment_data_dto.pix_key_type].upper().strip()
-        )
+        pix_type = None
+        if supplier_payment_data_dto.pix_key_type in PIX_TYPE_MAPPER:
+            pix_type, _ = DomPixType.objects.get_or_create(
+                name=PIX_TYPE_MAPPER[supplier_payment_data_dto.pix_key_type]
+                .upper()
+                .strip()
+            )
 
         payment_details = supplier.payment_details
         if not payment_details:
