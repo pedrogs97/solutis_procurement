@@ -5,6 +5,7 @@ This module contains all SQL queries used in the sync process.
 
 GET_SUPPLIERS_BY_TAX_IDS = """
     SELECT
+        CODCFO,
         RUA,
         CIDADE,
         BAIRRO,
@@ -46,11 +47,8 @@ GET_SUPPLIER_PAYMENT_DATA = """
         ,DIGITOCONTA
         ,NOMEAGENCIA
         ,TIPOCONTA
-        ,FAVORECIDO
-        ,CGCFAVORECIDO
-        ,ATIVO
         ,CHAVE
         ,TIPOPIX
     FROM FDADOSPGTO
-    WHERE CODCFO='{tax_id}';
+    WHERE CODCFO='{code}';
 """

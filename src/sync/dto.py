@@ -12,6 +12,7 @@ from typing import Optional
 class SupplierTotvsDTO:
     """DTO for supplier data from TOTVS"""
 
+    code: str
     trade_name: str
     legal_name: str
     tax_id: str
@@ -82,8 +83,5 @@ class SupplierPaymentDataDTO:
     bank_account_digit: str
     bank_name: str
     bank_type: int
-    bank_favorecido: str
-    bank_favorecido_cpf_cnpj: str
-    active: int
     pix_key: str
     pix_key_type: int

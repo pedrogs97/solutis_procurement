@@ -121,6 +121,7 @@ class SupplierSyncService:
             SupplierTotvsDTO: Converted supplier DTO
         """
         return SupplierTotvsDTO(
+            code=row["CODCFO"] or "",
             trade_name=row["NOMEFANTASIA"] or "",
             legal_name=row["NOME"] or "",
             tax_id=row["CGCCFO"] or "",
@@ -194,25 +195,23 @@ class SupplierSyncService:
 
         for supplier_dto in suppliers_dto:
             try:
-                # Check if supplier already exists
                 existing_supplier = Supplier.objects.filter(
                     tax_id=supplier_dto.tax_id
                 ).first()
 
                 if existing_supplier:
-                    # Update existing supplier
-                    print(supplier_dto)
                     self._update_supplier(existing_supplier, supplier_dto)
                     logger.info("Updated supplier: %s", supplier_dto.legal_name)
                 else:
-                    # Create new supplier
                     self._create_supplier(supplier_dto)
                     logger.info("Created supplier: %s", supplier_dto.legal_name)
                 saved_count += 1
 
             except Exception as error:
                 logger.error(
-                    "Error processing supplier %s: %s", supplier_dto.legal_name, error
+                    "Error processing supplier %s: %s",
+                    supplier_dto.legal_name,
+                    str(error),
                 )
                 continue
 
@@ -256,8 +255,7 @@ class SupplierSyncService:
         risk_level = DomRiskLevel.objects.get(
             name=self._risk_mapping[supplier_dto.tax_id]
         )
-        payment_details = self._save_supplier_payment_data(supplier_dto.tax_id)
-
+        payment_details = self._create_supplier_payment_data(supplier_dto.code)
         return Supplier.objects.create(
             trade_name=supplier_dto.trade_name,
             legal_name=supplier_dto.legal_name,
@@ -283,7 +281,6 @@ class SupplierSyncService:
             supplier: Existing supplier instance
             supplier_dto: Supplier DTO with updated data
         """
-        # Update basic supplier information
         supplier.trade_name = supplier_dto.trade_name
         supplier.legal_name = supplier_dto.legal_name
         supplier.state_business_registration = supplier_dto.state_registration
@@ -312,7 +309,6 @@ class SupplierSyncService:
                     complement=supplier_dto.complement,
                 )
             )
-
         # Update contact if exists, otherwise create new
         if supplier.contact:
             self._update_contact(supplier.contact, supplier_dto)
@@ -324,7 +320,13 @@ class SupplierSyncService:
                     phone=supplier_dto.phone,
                 )
             )
-
+        if supplier.payment_details:
+            payment_details = self._update_supplier_payment_data(
+                supplier, supplier_dto.code
+            )
+        else:
+            payment_details = self._create_supplier_payment_data(supplier_dto.code)
+        supplier.payment_details = payment_details
         supplier.save()
 
     def _create_address(self, address_dto: AddressDTO) -> Address:
@@ -346,7 +348,6 @@ class SupplierSyncService:
             postal_code=address_dto.postal_code,
             complement=address_dto.complement,
         )
-        address.refresh_from_db()
         return address
 
     def _create_contact(self, contact_dto: ContactDTO) -> Contact:
@@ -362,7 +363,6 @@ class SupplierSyncService:
         contact = Contact.objects.create(
             name=contact_dto.name, email=contact_dto.email, phone=contact_dto.phone
         )
-        contact.refresh_from_db()
         return contact
 
     def _update_address(self, address: Address, supplier_dto: SupplierTotvsDTO) -> None:
@@ -419,72 +419,73 @@ class SupplierSyncService:
             bank_account_digit=row["DIGITOCONTA"],
             bank_name=row["NOMEAGENCIA"],
             bank_type=row["TIPOCONTA"],
-            bank_favorecido=row["FAVORECIDO"],
-            bank_favorecido_cpf_cnpj=row["CGCFAVORECIDO"],
-            active=row["ATIVO"],
             pix_key=row["CHAVE"],
             pix_key_type=row["TIPOPIX"],
         )
 
     def _fetch_supplier_payment_data(
-        self, tax_id: str
+        self, code: str
     ) -> Optional[SupplierPaymentDataDTO]:
         """
         Fetch supplier payment data from TOTVS database.
 
         Args:
-            tax_id: Supplier tax ID
+            code: Supplier tax ID
 
         Returns:
             List[SupplierPaymentDataDTO]: List of supplier payment data DTOs
         """
         cursor = self.db_service.get_cursor()
-        query = GET_SUPPLIER_PAYMENT_DATA.format(tax_id=tax_id)
+        query = GET_SUPPLIER_PAYMENT_DATA.format(code=code)
         cursor.execute(query)
         rows = cursor.fetchall()
-
         if not rows:
             return None
 
         row_data = dict(rows[0])
         return self._convert_row_to_supplier_payment_data_dto(row_data)
 
-    def _save_supplier_payment_data(self, tax_id: str) -> Optional[PaymentDetails]:
+    def _create_supplier_payment_data(self, code: str) -> Optional[PaymentDetails]:
         """
-        Save supplier payment data to local database.
+        Create supplier payment data to local database.
 
         Args:
-            tax_id: Supplier tax ID
+            code: Supplier tax ID
 
         Returns:
             Optional[PaymentDetails]: Payment details if saved, None otherwise
         """
-        supplier_payment_data_dto = self._fetch_supplier_payment_data(tax_id)
-
+        supplier_payment_data_dto = self._fetch_supplier_payment_data(code)
         if not supplier_payment_data_dto:
             return None
 
         payment_method = DomPaymentMethod.objects.get(
             name=PAYMENT_METHOD_MAPPER[supplier_payment_data_dto.payment_method]
+            .upper()
+            .strip()
         )
-        pix_type = DomPixType.objects.get(
-            name=PIX_TYPE_MAPPER[supplier_payment_data_dto.pix_key_type]
+        pix_type = (
+            DomPixType.objects.get(
+                name=PIX_TYPE_MAPPER[supplier_payment_data_dto.pix_key_type]
+                .upper()
+                .strip()
+            )
+            if supplier_payment_data_dto.pix_key_type in PIX_TYPE_MAPPER
+            else None
         )
         try:
             payment_details = PaymentDetails.objects.create(
                 payment_method=payment_method,
-                bank_code=supplier_payment_data_dto.bank_code,
-                bank_agency=supplier_payment_data_dto.bank_agency,
-                bank_account=supplier_payment_data_dto.bank_account,
-                bank_account_digit=supplier_payment_data_dto.bank_account_digit,
-                bank_name=supplier_payment_data_dto.bank_name,
-                bank_favorecido=supplier_payment_data_dto.bank_favorecido,
-                bank_favorecido_cpf_cnpj=supplier_payment_data_dto.bank_favorecido_cpf_cnpj,
-                active=supplier_payment_data_dto.active,
-                pix_key=supplier_payment_data_dto.pix_key,
+                bank=f"{supplier_payment_data_dto.bank_name} - {supplier_payment_data_dto.bank_code}",
+                agency=supplier_payment_data_dto.bank_agency,
+                checking_account=f"{supplier_payment_data_dto.bank_account} - {supplier_payment_data_dto.bank_account_digit}",
+                pix_key=(
+                    supplier_payment_data_dto.pix_key
+                    if supplier_payment_data_dto.pix_key
+                    else ""
+                ),
                 pix_key_type=pix_type,
             )
-            payment_details.refresh_from_db()
             logger.info(
                 "Saved supplier payment data: %s", supplier_payment_data_dto.payment_id
             )
@@ -492,6 +493,61 @@ class SupplierSyncService:
         except Exception as error:
             logger.error(
                 "Error saving supplier payment data %s: %s",
+                supplier_payment_data_dto.payment_id,
+                str(error),
+            )
+            return None
+
+    def _update_supplier_payment_data(
+        self, supplier: Supplier, code: str
+    ) -> Optional[PaymentDetails]:
+        """
+        Update existing supplier payment data with data from TOTVS.
+
+        Args:
+            supplier: Existing supplier instance
+            code: Supplier tax ID
+
+        Returns:
+            Optional[PaymentDetails]: Updated payment details if successful, None otherwise
+        """
+        supplier_payment_data_dto = self._fetch_supplier_payment_data(code)
+        if not supplier_payment_data_dto:
+            return None
+
+        payment_method = DomPaymentMethod.objects.get(
+            name=PAYMENT_METHOD_MAPPER[supplier_payment_data_dto.payment_method]
+            .upper()
+            .strip()
+        )
+        pix_type = DomPixType.objects.get(
+            name=PIX_TYPE_MAPPER[supplier_payment_data_dto.pix_key_type].upper().strip()
+        )
+
+        payment_details = supplier.payment_details
+        if not payment_details:
+            return self._create_supplier_payment_data(code)
+
+        try:
+            payment_details.payment_method = payment_method
+            payment_details.bank = f"{supplier_payment_data_dto.bank_name} - {supplier_payment_data_dto.bank_code}"
+            payment_details.agency = supplier_payment_data_dto.bank_agency
+            payment_details.checking_account = f"{supplier_payment_data_dto.bank_account} - {supplier_payment_data_dto.bank_account_digit}"
+            payment_details.pix_key = (
+                supplier_payment_data_dto.pix_key
+                if supplier_payment_data_dto.pix_key
+                else ""
+            )
+            payment_details.pix_key_type = pix_type
+            payment_details.save()
+            logger.info(
+                "Updated supplier payment data: %s",
+                supplier_payment_data_dto.payment_id,
+            )
+            return payment_details
+        except Exception as error:
+            logger.error(
+                "Error updating supplier payment data %s: %s",
                 supplier_payment_data_dto.payment_id,
                 error,
             )
