@@ -65,6 +65,7 @@ class TestSupplierSignals(TestCase):
         pd.contract_monthly_value = Decimal("100.00")
         pd.checking_account = "12345"
         pd.bank = "Banco Teste"
+        pd.bank_code = "001"
         pd.agency = "0001"
         if pd.payment_method is None:
             pd.payment_method = baker.make("supplier.DomPaymentMethod")

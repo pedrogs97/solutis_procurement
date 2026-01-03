@@ -474,7 +474,8 @@ class SupplierSyncService:
         try:
             payment_details = PaymentDetails.objects.create(
                 payment_method=payment_method,
-                bank=f"{supplier_payment_data_dto.bank_name} - {supplier_payment_data_dto.bank_code}",
+                bank=f"{supplier_payment_data_dto.bank_name}",
+                bank_code=supplier_payment_data_dto.bank_code,
                 agency=supplier_payment_data_dto.bank_agency,
                 checking_account=f"{supplier_payment_data_dto.bank_account} - {supplier_payment_data_dto.bank_account_digit}",
                 pix_key=(
@@ -532,7 +533,8 @@ class SupplierSyncService:
 
         try:
             payment_details.payment_method = payment_method
-            payment_details.bank = f"{supplier_payment_data_dto.bank_name} - {supplier_payment_data_dto.bank_code}"
+            payment_details.bank = f"{supplier_payment_data_dto.bank_name}"
+            payment_details.bank_code = supplier_payment_data_dto.bank_code
             payment_details.agency = supplier_payment_data_dto.bank_agency
             payment_details.checking_account = f"{supplier_payment_data_dto.bank_account} - {supplier_payment_data_dto.bank_account_digit}"
             payment_details.pix_key = (

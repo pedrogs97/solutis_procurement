@@ -119,6 +119,9 @@ class PaymentDetails(TimestampedModel):
         max_length=20, help_text="Conta Corrente", blank=True, default=""
     )
     bank = models.CharField(max_length=50, help_text="Banco", blank=True, default="")
+    bank_code = models.CharField(
+        max_length=50, help_text="Código do Banco", blank=True, default=""
+    )
     agency = models.CharField(
         max_length=20, help_text="Agência", blank=True, default=""
     )
