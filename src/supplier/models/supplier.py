@@ -56,7 +56,7 @@ class Contract(TimestampedModel):
         max_length=50, help_text="Tipo de Contrato", blank=True, default=""
     )
     contract_period = models.CharField(
-        max_length=3, help_text="Período do Contrato", blank=True, default=""
+        max_length=50, help_text="Período do Contrato", blank=True, default=""
     )
     has_contract_renewal = models.BooleanField(
         help_text="Renovação de Contrato", default=False
