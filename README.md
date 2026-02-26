@@ -148,7 +148,6 @@ Crie um arquivo `.env` na raiz do projeto:
 # Django
 SECRET_KEY=your-secret-key
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
 # Database
 DATABASE_URL=sqlite:///db.sqlite3
@@ -237,7 +236,6 @@ python manage.py runserver
 1. **Configure as variáveis de ambiente para produção**
 ```env
 DEBUG=False
-ALLOWED_HOSTS=your-domain.com
 SECRET_KEY=production-secret-key
 ```
 
