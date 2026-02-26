@@ -6,14 +6,9 @@ This module contains serializers for common models used across the application.
 from typing import Dict
 
 from brazilcep.client import WebService, get_address_from_cep
-from brazilcep.exceptions import (
-    BrazilCEPException,
-    CEPNotFound,
-    ConnectionError,
-    InvalidCEP,
-)
+from brazilcep.exceptions import (BrazilCEPException, CEPNotFound,
+                                  ConnectionError, InvalidCEP)
 from rest_framework import serializers
-
 from src.shared.mixins import SerializerCamelCaseRepresentationMixin
 from src.shared.models import Address, Contact
 from src.shared.validation import BaseValidationError
@@ -51,10 +46,14 @@ class AddressSerializer(BaseSerializer):
 
         model = Address
         fields = [
-            "id",
-            "postal_code",
-            "number",
-            "complement",
+                "id",
+                "postal_code",
+                "number",
+                "complement",
+                "street",
+                "city",
+                "state",
+                "neighbourhood",
         ]
         read_only_fields = ("id",)
 
