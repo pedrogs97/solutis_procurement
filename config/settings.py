@@ -20,21 +20,26 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _get_bool_env(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ("1", "true", "t", "yes", "y")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-flg46s-b-q+xvdnjsh$j1thwh8*wa1#+qn2s@*ko^z_61(i$@_"
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _get_bool_env("DEBUG", default=True)
 
-ALLOWED_HOSTS = [
-    "solutis-procurement",
-    "solutis-procurement:8001",
-    "localhost",
-    "127.0.0.1",
-]
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is required")
+
+# Internal deployment: host/IP may vary, so host validation is disabled.
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -75,6 +80,12 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "src.shared.authentication.ProxyHeaderAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
 }
 
@@ -174,6 +185,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "storage") if DEBUG else "/storage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Internal deployment: keep CORS unrestricted.
 CORS_ALLOW_ALL_ORIGINS = True
 
 EMAIL_SOLUTIS_365 = "agile@solutis.com.br"
