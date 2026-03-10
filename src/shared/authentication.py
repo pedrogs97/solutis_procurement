@@ -3,8 +3,7 @@
 from dataclasses import dataclass
 from urllib.parse import unquote
 
-from rest_framework.authentication import (BaseAuthentication,
-                                           get_authorization_header)
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
 
@@ -19,9 +18,11 @@ class ProxyAuthenticatedUser:
 
     @property
     def is_authenticated(self) -> bool:
+        """Indicates that the user is authenticated."""
         return True
 
     def get_full_name(self) -> str:
+        """Return the full name of the user."""
         return self.full_name
 
 
@@ -59,9 +60,7 @@ class ProxyHeaderAuthentication(BaseAuthentication):
             str(request.headers.get("X-Authenticated-User-Email", "") or "").strip()
         )
         full_name = unquote(
-            str(
-                request.headers.get("X-Authenticated-User-Full-Name", "") or ""
-            ).strip()
+            str(request.headers.get("X-Authenticated-User-Full-Name", "") or "").strip()
         )
         group = unquote(
             str(request.headers.get("X-Authenticated-User-Group", "") or "").strip()
