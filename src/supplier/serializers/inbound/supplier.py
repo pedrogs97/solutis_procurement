@@ -185,6 +185,36 @@ class SupplierInSerializer(BaseSerializer):
         validated_data["contract_id"] = contract.pk if contract else None
         return super().create(validated_data)
 
+    def _update_or_create_related(
+        self, instance: Supplier, field_name: str, data: Dict, model_class
+    ) -> None:
+        """
+        Update or create a related object on the instance.
+
+        Args:
+            instance (Supplier): The Supplier instance to update.
+            field_name (str): The name of the field to update.
+            data (Dict): The data to update or use for creation.
+            model_class: The model class to use for creation.
+        """
+        if not data:
+            return
+
+        related_obj = (
+            getattr(instance, field_name, None)
+            if hasattr(instance, field_name)
+            else None
+        )
+
+        if related_obj:
+            for attr, value in data.items():
+                setattr(related_obj, attr, value)
+        else:
+            related_obj = model_class.objects.create(**data)
+            setattr(instance, field_name, related_obj)
+
+        related_obj.save()
+
     @atomic
     def update(self, instance: Supplier, validated_data: Dict) -> Supplier:
         """
@@ -205,39 +235,26 @@ class SupplierInSerializer(BaseSerializer):
         fiscal_details_data = validated_data.pop("fiscal_details", None)
         company_information_data = validated_data.pop("company_information", None)
 
-        if address_data:
-            for attr, value in address_data.items():
-                setattr(instance.address, attr, value)
-            instance.address.save()
-
-        if contact_data:
-            for attr, value in contact_data.items():
-                setattr(instance.contact, attr, value)
-            instance.contact.save()
-
-        if payment_details_data:
-            for attr, value in payment_details_data.items():
-                setattr(instance.payment_details, attr, value)
-            instance.payment_details.save()
-
-        if organizational_details_data:
-            for attr, value in organizational_details_data.items():
-                setattr(instance.organizational_details, attr, value)
-            instance.organizational_details.save()
-
-        if fiscal_details_data:
-            for attr, value in fiscal_details_data.items():
-                setattr(instance.fiscal_details, attr, value)
-            instance.fiscal_details.save()
-
-        if company_information_data:
-            for attr, value in company_information_data.items():
-                setattr(instance.company_information, attr, value)
-            instance.company_information.save()
-
-        if contract_data:
-            for attr, value in contract_data.items():
-                setattr(instance.contract, attr, value)
-            instance.contract.save()
+        self._update_or_create_related(instance, "address", address_data, Address)
+        self._update_or_create_related(instance, "contact", contact_data, Contact)
+        self._update_or_create_related(
+            instance, "payment_details", payment_details_data, PaymentDetails
+        )
+        self._update_or_create_related(
+            instance,
+            "organizational_details",
+            organizational_details_data,
+            OrganizationalDetails,
+        )
+        self._update_or_create_related(
+            instance, "fiscal_details", fiscal_details_data, FiscalDetails
+        )
+        self._update_or_create_related(
+            instance,
+            "company_information",
+            company_information_data,
+            CompanyInformation,
+        )
+        self._update_or_create_related(instance, "contract", contract_data, Contract)
 
         return super().update(instance, validated_data)

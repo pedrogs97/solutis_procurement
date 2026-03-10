@@ -155,6 +155,13 @@ class BaseEvaluationViewTestCase(TestCase):
     def setUp(self):
         """Set up test data for all evaluation view tests."""
         self.client = APIClient()
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer test-token",
+            HTTP_X_AUTHENTICATED_USER_ID="1",
+            HTTP_X_AUTHENTICATED_USER_EMAIL="tests@solutis.com.br",
+            HTTP_X_AUTHENTICATED_USER_FULL_NAME="Test User",
+            HTTP_X_AUTHENTICATED_USER_GROUP="Compras",
+        )
         EvaluationPeriod.objects.all().delete()
 
         self.supplier_category = DomCategory.objects.create(name="Test Category")

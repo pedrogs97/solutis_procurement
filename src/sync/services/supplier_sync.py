@@ -15,6 +15,7 @@ from src.supplier.models.domain import (
     DomRiskLevel,
     DomTypeSupplier,
 )
+from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
 from src.supplier.models.supplier import PaymentDetails, Supplier
 from src.sync.dto import (
     AddressDTO,
@@ -205,6 +206,11 @@ class SupplierSyncService:
                 else:
                     self._create_supplier(supplier_dto)
                     logger.info("Created supplier: %s", supplier_dto.legal_name)
+                if hasattr(existing_supplier, "responsibility_matrix") and not getattr(
+                    existing_supplier, "responsibility_matrix", None
+                ):
+                    ResponsibilityMatrix.objects.create(supplier=existing_supplier)
+
                 saved_count += 1
 
             except Exception as error:

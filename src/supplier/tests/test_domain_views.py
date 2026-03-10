@@ -18,6 +18,13 @@ class TestDomainListViews(TestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer test-token",
+            HTTP_X_AUTHENTICATED_USER_ID="1",
+            HTTP_X_AUTHENTICATED_USER_EMAIL="tests@solutis.com.br",
+            HTTP_X_AUTHENTICATED_USER_FULL_NAME="Test User",
+            HTTP_X_AUTHENTICATED_USER_GROUP="Compras",
+        )
 
         self.business_sector = baker.make(DomBusinessSector, name="Tecnologia")
         self.category = baker.make(DomCategory, name="Software")

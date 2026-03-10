@@ -55,7 +55,16 @@ class TestAddressSerializer(TestCase):
 
     def test_meta_fields(self):
         """Test that Meta.fields contains expected fields."""
-        expected_fields = ["id", "postal_code", "number", "complement"]
+        expected_fields = [
+            "id",
+            "postal_code",
+            "number",
+            "complement",
+            "street",
+            "city",
+            "state",
+            "neighbourhood",
+        ]
         self.assertEqual(AddressSerializer.Meta.fields, expected_fields)
 
     def test_meta_read_only_fields(self):
