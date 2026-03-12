@@ -46,14 +46,14 @@ class AddressSerializer(BaseSerializer):
 
         model = Address
         fields = [
-                "id",
-                "postal_code",
-                "number",
-                "complement",
-                "street",
-                "city",
-                "state",
-                "neighbourhood",
+            "id",
+            "postal_code",
+            "number",
+            "complement",
+            "street",
+            "city",
+            "state",
+            "neighbourhood",
         ]
         read_only_fields = ("id",)
 
@@ -146,6 +146,7 @@ class ContactSerializer(BaseSerializer):
         if (
             self.parent
             and self.parent.instance
+            and getattr(self.parent.instance, "contact", None)
             and self.parent.instance.contact.email == value
         ):
             return value

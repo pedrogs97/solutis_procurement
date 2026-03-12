@@ -191,3 +191,26 @@ CORS_ALLOW_ALL_ORIGINS = True
 EMAIL_SOLUTIS_365 = "agile@solutis.com.br"
 EMAIL_PASSWORD_SOLUTIS_365 = os.getenv("EMAIL_PASSWORD_SOLUTIS_365")
 APP_URL = os.getenv("URL_FRONTEND", "http://localhost:3000")
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        }
+    },
+    "loggers": {
+        "src.supplier.views.supplier": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "src.supplier.services.approval_workflow": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+    },
+}

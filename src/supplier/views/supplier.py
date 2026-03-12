@@ -3,8 +3,11 @@ Views for supplier-related operations in the procurement service.
 This module defines views for managing suppliers, including listing and retrieving supplier details.
 """
 
+from logging import getLogger
+
 from django.db import transaction
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -16,6 +19,8 @@ from src.supplier.models.supplier import Supplier
 from src.supplier.serializers.inbound.supplier import SupplierInSerializer
 from src.supplier.serializers.outbound.supplier import SupplierOutSerializer
 from src.supplier.services.approval_workflow import ApprovalWorkflowService
+
+logger = getLogger(__name__)
 
 
 class SupplierView(BaseAPIView):
@@ -58,9 +63,17 @@ class SupplierView(BaseAPIView):
                 initial_approver.name = user_full_name or user_email
                 initial_approver.save(update_fields=["name"])
 
-            ApprovalWorkflowService().initialize_approval_flow(
-                new_instance, initial_approver
-            )
+            try:
+                ApprovalWorkflowService().initialize_approval_flow(
+                    new_instance, initial_approver
+                )
+            except ValueError as exc:
+                logger.warning(
+                    "Failed to initialize approval flow for supplier %s: %s",
+                    new_instance.pk,
+                    exc,
+                )
+                raise ValidationError({"approvalWorkflow": [str(exc)]}) from exc
 
         return Response(return_data, status=status.HTTP_201_CREATED)
 

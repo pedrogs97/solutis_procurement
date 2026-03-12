@@ -105,13 +105,17 @@ class SupplierInSerializer(BaseSerializer):
     Converts field names to camelCase representation.
     """
 
-    address = AddressSerializer()
-    contact = ContactSerializer()
-    contract = ContractInSerializer()
-    payment_details = PaymentDetailsInSerializer()
-    organizational_details = OrganizationalDetailsInSerializer()
-    fiscal_details = FiscalDetailsInSerializer()
-    company_information = CompanyInformationInSerializer()
+    address = AddressSerializer(required=False, allow_null=True)
+    contact = ContactSerializer(required=False, allow_null=True)
+    contract = ContractInSerializer(required=False, allow_null=True)
+    payment_details = PaymentDetailsInSerializer(required=False, allow_null=True)
+    organizational_details = OrganizationalDetailsInSerializer(
+        required=False, allow_null=True
+    )
+    fiscal_details = FiscalDetailsInSerializer(required=False, allow_null=True)
+    company_information = CompanyInformationInSerializer(
+        required=False, allow_null=True
+    )
 
     class Meta(BaseSerializer.Meta):
         """
@@ -133,13 +137,15 @@ class SupplierInSerializer(BaseSerializer):
         Returns:
             Supplier: The created Supplier instance.
         """
-        address_data = validated_data.pop("address")
-        contact_data = validated_data.pop("contact")
-        payment_details_data = validated_data.pop("payment_details")
-        contract_data = validated_data.pop("contract")
-        organizational_details_data = validated_data.pop("organizational_details")
-        fiscal_details_data = validated_data.pop("fiscal_details")
-        company_information_data = validated_data.pop("company_information")
+        address_data = validated_data.pop("address", None)
+        contact_data = validated_data.pop("contact", None)
+        payment_details_data = validated_data.pop("payment_details", None)
+        contract_data = validated_data.pop("contract", None)
+        organizational_details_data = validated_data.pop(
+            "organizational_details", None
+        )
+        fiscal_details_data = validated_data.pop("fiscal_details", None)
+        company_information_data = validated_data.pop("company_information", None)
 
         address = {}
         contact = {}

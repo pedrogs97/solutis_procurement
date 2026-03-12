@@ -18,6 +18,9 @@ class SupplierAttachmentOutSerializer(BaseSerializer):
     attachment_type_name = serializers.CharField(
         source="attachment_type.name", read_only=True
     )
+    attachment_type_id = serializers.IntegerField(
+        source="attachment_type.id", read_only=True
+    )
     file_name = serializers.ReadOnlyField()
 
     class Meta(BaseSerializer.Meta):
@@ -28,6 +31,7 @@ class SupplierAttachmentOutSerializer(BaseSerializer):
         model = SupplierAttachment
         fields = [
             "id",
+            "attachment_type_id",
             "attachment_type_name",
             "file_name",
             "description",
