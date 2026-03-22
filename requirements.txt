@@ -12,6 +12,7 @@ colorama==0.4.6 ; (sys_platform == "win32" or platform_system == "Windows") and 
 django==5.2.4 ; python_version >= "3.11"
 django-cors-headers==4.7.0 ; python_version >= "3.11"
 django-filter==25.1 ; python_version >= "3.11"
+django-ninja>=1.1,<2 ; python_version >= "3.11"
 djangorestframework==3.16.0 ; python_version >= "3.11"
 frozenlist==1.7.0 ; python_version >= "3.11"
 h11==0.16.0 ; python_version >= "3.11"

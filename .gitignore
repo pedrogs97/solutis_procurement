@@ -7,3 +7,7 @@ db.sqlite3
 /storage
 .env
 *.log
+.codex
+.pytest_cache/
+.venv
+.pylint-cache/*
