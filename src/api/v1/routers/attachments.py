@@ -14,7 +14,6 @@ from ninja.errors import HttpError
 from ninja.files import UploadedFile
 
 from src.api.v1.schemas.attachments import (
-    AttachmentOut,
     AttachmentTypeOut,
     AttachmentUploadIn,
     serialize_attachment,
@@ -156,9 +155,11 @@ def list_attachment_types(request):
         AttachmentTypeOut(
             id=item.id,
             name=item.name,
-            risk_level=DomainRefOut.model_validate(item.risk_level)
-            if item.risk_level
-            else None,
+            risk_level=(
+                DomainRefOut.model_validate(item.risk_level)
+                if item.risk_level
+                else None
+            ),
         ).model_dump(by_alias=True)
         for item in queryset
     ]
@@ -174,7 +175,9 @@ def get_attachment_type(request, pk: int):
     return AttachmentTypeOut(
         id=attachment_type.id,
         name=attachment_type.name,
-        risk_level=DomainRefOut.model_validate(attachment_type.risk_level)
-        if attachment_type.risk_level
-        else None,
+        risk_level=(
+            DomainRefOut.model_validate(attachment_type.risk_level)
+            if attachment_type.risk_level
+            else None
+        ),
     ).model_dump(by_alias=True)
