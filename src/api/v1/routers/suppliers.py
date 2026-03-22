@@ -150,11 +150,10 @@ def list_suppliers(
     filtered_qs = SupplierFilters(request.GET, queryset=queryset).qs
 
     if search:
-        filtered_qs = filtered_qs.filter(
-            Q(trade_name__icontains=search)
-            | Q(legal_name__icontains=search)
-            | Q(tax_id__icontains=search)
-        )
+        search_filter = Q(trade_name__icontains=search)
+        search_filter.add(Q(legal_name__icontains=search), Q.OR)
+        search_filter.add(Q(tax_id__icontains=search), Q.OR)
+        filtered_qs = filtered_qs.filter(search_filter)
 
     filtered_qs = filtered_qs.distinct().order_by("id")
     return _paginate(request, filtered_qs, page, size)

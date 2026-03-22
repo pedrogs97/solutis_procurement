@@ -1,4 +1,5 @@
 """Evaluation schemas and serializers for Ninja v1."""
+# pylint: disable=duplicate-code
 
 from decimal import Decimal
 from typing import Optional

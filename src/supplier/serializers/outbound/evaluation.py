@@ -2,6 +2,7 @@
 Serializer for Evaluation models output.
 This module provides serializers for output representations of supplier evaluation models.
 """
+# pylint: disable=duplicate-code
 
 from django.db.models import Avg, Max, Min
 from rest_framework import serializers
