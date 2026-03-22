@@ -1,4 +1,5 @@
 """Supplier endpoints for Ninja API v1."""
+# pylint: disable=duplicate-code
 
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
@@ -8,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from ninja import Query, Router
 from ninja.errors import HttpError
 
+from src.api.v1.pagination import build_page_link
 from src.api.v1.schemas.suppliers import (
     SupplierCreateIn,
     SupplierListOut,
@@ -38,24 +40,21 @@ def _paginate(request, queryset, page: int, size: int):
         else []
     )
 
-    def _build_link(page_number: int | None):
-        if page_number is None:
-            return None
-        base_url = request.build_absolute_uri(request.path)
-        query = request.GET.copy()
-        query["page"] = page_number
-        query["size"] = size
-        return f"{base_url}?{query.urlencode()}"
-
     return SupplierListOut(
         count=paginator.count,
-        next=_build_link(
-            current_page.next_page_number() if current_page.has_next() else None
+        next=build_page_link(
+            request,
+            current_page.next_page_number() if current_page.has_next() else None,
+            size,
         )
         if paginator.count
         else None,
-        previous=_build_link(
-            current_page.previous_page_number() if current_page.has_previous() else None
+        previous=build_page_link(
+            request,
+            current_page.previous_page_number()
+            if current_page.has_previous()
+            else None,
+            size,
         )
         if paginator.count
         else None,
@@ -75,7 +74,9 @@ def create_supplier(request, payload: SupplierCreateIn):
 
     if not user_email:
         return JsonResponse(
-            {"detail": "UsuÃ¡rio autenticado sem e-mail para iniciar aprovaÃ§Ã£o."},
+            {
+                "detail": "UsuÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio autenticado sem e-mail para iniciar aprovaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o."
+            },
             status=403,
         )
 

@@ -8,6 +8,8 @@ from rest_framework.test import APIClient
 
 from src.supplier.models.approval_workflow import ApprovalStep
 from src.supplier.models.attachments import DomAttachmentType
+from src.supplier.models.domain import DomBusinessSector, DomCategory, DomTypeSupplier
+from src.supplier.models.evaluation import EvaluationCriterion, EvaluationPeriod
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
 
@@ -168,3 +170,70 @@ def test_ninja_v1_responsibility_matrix_crud_and_delete_blocked():
     delete_response = client.delete(f"/api/v1/responsibility-matrix/{supplier.pk}/")
     assert delete_response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
     assert ResponsibilityMatrix.objects.filter(supplier=supplier).exists()
+
+
+@pytest.mark.django_db
+def test_ninja_v1_domain_endpoints():
+    baker.make(DomBusinessSector, name="Tecnologia")
+    client = _auth_client()
+
+    response = client.get("/api/v1/domain/business-sectors/")
+    assert response.status_code == status.HTTP_200_OK
+    payload = response.json()
+    assert isinstance(payload, list)
+    assert payload[0]["name"] == "Tecnologia"
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_endpoints():
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor Avaliado",
+        tax_id="11122233344411",
+        category=baker.make(DomCategory, name="Categoria A"),
+        type=baker.make(DomTypeSupplier, name="Tipo A"),
+    )
+    period = EvaluationPeriod.objects.order_by("year", "period_number").first()
+    if not period:
+        period = baker.make(
+            EvaluationPeriod,
+            name="Primeiro Quadrimestre 2026",
+            start_date="2026-01-01",
+            end_date="2026-04-30",
+            year=2026,
+            period_number=1,
+        )
+    criterion = baker.make(
+        EvaluationCriterion,
+        name="Qualidade",
+        description="Qualidade do serviço",
+        weight="50.00",
+        order=1,
+    )
+    client = _auth_client()
+
+    create_response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "period": period.pk,
+            "evaluatorName": "Avaliador Teste",
+            "comments": "Avaliação inicial",
+            "criterionScores": [
+                {"criterion": criterion.pk, "score": "80.00", "comments": "Bom"}
+            ],
+        },
+        format="json",
+    )
+    assert create_response.status_code == status.HTTP_201_CREATED
+
+    list_response = client.get("/api/v1/evaluation/evaluations-list/")
+    assert list_response.status_code == status.HTTP_200_OK
+    list_payload = list_response.json()
+    assert list_payload["count"] >= 1
+
+    evaluation_id = list_payload["results"][0]["id"]
+    detail_response = client.get(f"/api/v1/evaluation/evaluations/{evaluation_id}/")
+    assert detail_response.status_code == status.HTTP_200_OK
+    detail_payload = detail_response.json()
+    assert detail_payload["supplier"]["id"] == supplier.pk
