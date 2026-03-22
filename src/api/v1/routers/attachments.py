@@ -50,12 +50,7 @@ def list_attachments(request, supplier_id: int):
     queryset = SupplierAttachment.objects.filter(
         supplier_id=supplier_id
     ).select_related("attachment_type")
-    return [
-        AttachmentOut.model_validate(serialize_attachment(item)).model_dump(
-            by_alias=True
-        )
-        for item in queryset
-    ]
+    return [serialize_attachment(item) for item in queryset]
 
 
 @router.post("/attachments/upload/", url_name="supplier-attachment-upload-v1")
