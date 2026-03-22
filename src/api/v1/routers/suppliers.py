@@ -1,6 +1,8 @@
 """Supplier endpoints for Ninja API v1."""
 # pylint: disable=duplicate-code
 
+from typing import Optional
+
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
 from django.db.models import Q
@@ -141,7 +143,7 @@ def list_suppliers(
     request,
     page: int = Query(1, ge=1),
     size: int = Query(12, ge=1, le=100),
-    search: str | None = None,
+    search: Optional[str] = None,
 ):
     """List suppliers with filters, search, and pagination."""
     queryset = Supplier.objects.all()

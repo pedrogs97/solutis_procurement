@@ -1,6 +1,8 @@
 """Evaluation endpoints for Ninja API v1."""
 # pylint: disable=duplicate-code
 
+from typing import Optional
+
 from django.core.paginator import EmptyPage, Paginator
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
@@ -143,9 +145,9 @@ def list_evaluations(
     request,
     page: int = Query(1, ge=1),
     size: int = Query(12, ge=1, le=100),
-    supplier: int | None = None,
-    period: int | None = None,
-    year: int | None = None,
+    supplier: Optional[int] = None,
+    period: Optional[int] = None,
+    year: Optional[int] = None,
 ):
     """List supplier evaluations with filters and pagination."""
     queryset = SupplierEvaluation.objects.select_related("supplier", "period").all()
@@ -243,7 +245,7 @@ def evaluation_summary(request):
 
 
 @router.get("/supplier-history/", url_name="evaluation-supplier-history-v1")
-def supplier_history(request, supplier: int | None = None):
+def supplier_history(request, supplier: Optional[int] = None):
     """Return evaluation history for a supplier."""
     if not supplier:
         raise HttpError(

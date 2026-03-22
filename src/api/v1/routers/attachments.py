@@ -2,6 +2,7 @@
 
 import mimetypes
 import os
+from typing import Optional
 
 from django.db.models import Q
 from django.http import FileResponse, JsonResponse
@@ -61,8 +62,8 @@ def list_attachments(request, supplier_id: int):
 def upload_attachment(
     request,
     supplier: int = Form(...),
-    attachment_type: int | None = Form(None),
-    description: str | None = Form(None),
+    attachment_type: Optional[int] = Form(None),
+    description: Optional[str] = Form(None),
     file: UploadedFile = File(...),
 ):
     """Upload or replace a supplier attachment."""

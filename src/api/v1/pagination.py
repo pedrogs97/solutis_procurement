@@ -1,7 +1,9 @@
 """Pagination helpers for Ninja v1 routers."""
 
+from typing import Optional
 
-def build_page_link(request, page_number: int | None, size: int) -> str | None:
+
+def build_page_link(request, page_number: Optional[int], size: int) -> Optional[str]:
     """Build a pagination link preserving current query params."""
     if page_number is None:
         return None

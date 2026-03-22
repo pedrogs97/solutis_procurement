@@ -1,6 +1,7 @@
 """Evaluation schemas and serializers for Ninja v1."""
 
 from decimal import Decimal
+from typing import Optional
 
 from django.db.models import Avg, Max, Min
 
@@ -14,7 +15,7 @@ from src.supplier.models.evaluation import (
 )
 
 
-def _decimal_to_str(value: Decimal | None) -> str | None:
+def _decimal_to_str(value: Optional[Decimal]) -> Optional[str]:
     if value is None:
         return None
     return f"{value:.2f}"
@@ -32,10 +33,10 @@ class EvaluationCriterionIn(CamelSchema):
 class EvaluationCriterionPatchIn(CamelSchema):
     """Payload for partial evaluation criterion updates."""
 
-    name: str | None = None
-    description: str | None = None
-    weight: Decimal | None = None
-    order: int | None = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    weight: Optional[Decimal] = None
+    order: Optional[int] = None
 
 
 class EvaluationCriterionOut(CamelSchema):
@@ -73,20 +74,20 @@ class SupplierEvaluationIn(CamelSchema):
     supplier: int
     period: int
     evaluator_name: str
-    evaluation_date: str | None = None
+    evaluation_date: Optional[str] = None
     comments: str = ""
-    criterion_scores: list[CriterionScoreIn] | None = None
+    criterion_scores: Optional[list[CriterionScoreIn]] = None
 
 
 class SupplierEvaluationPatchIn(CamelSchema):
     """Payload for partial supplier evaluation updates."""
 
-    supplier: int | None = None
-    period: int | None = None
-    evaluator_name: str | None = None
-    evaluation_date: str | None = None
-    comments: str | None = None
-    criterion_scores: list[CriterionScoreIn] | None = None
+    supplier: Optional[int] = None
+    period: Optional[int] = None
+    evaluator_name: Optional[str] = None
+    evaluation_date: Optional[str] = None
+    comments: Optional[str] = None
+    criterion_scores: Optional[list[CriterionScoreIn]] = None
 
 
 def serialize_evaluation_criterion(item: EvaluationCriterion) -> dict:

@@ -1,5 +1,7 @@
 """Domain schemas for Ninja v1."""
 
+from typing import Optional
+
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
 
 
@@ -15,4 +17,4 @@ class SupplierSituationOut(CamelSchema):
 
     id: int
     name: str
-    pendency_type: DomainRefOut | None = None
+    pendency_type: Optional[DomainRefOut] = None

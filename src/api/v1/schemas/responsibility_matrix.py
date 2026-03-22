@@ -1,5 +1,7 @@
 """Responsibility matrix schemas for Ninja v1."""
 
+from typing import Optional
+
 from src.api.v1.schemas.common import CamelSchema
 from src.utils.parse import to_camel_case
 
@@ -7,7 +9,7 @@ from src.utils.parse import to_camel_case
 class ResponsibilityMatrixIn(CamelSchema):
     """Payload for responsibility matrix create/update operations."""
 
-    supplier: int | None = None
+    supplier: Optional[int] = None
 
 
 def serialize_responsibility_matrix(instance) -> dict:

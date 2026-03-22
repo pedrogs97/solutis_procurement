@@ -1,5 +1,7 @@
 """Approval schemas for Ninja v1."""
 
+from typing import Optional
+
 from src.api.v1.schemas.common import CamelSchema
 
 
@@ -18,7 +20,7 @@ class SetResponsibleApproverIn(CamelSchema):
     email: str
     workflow_id: int
     step_id: int
-    observations: str | None = ""
+    observations: Optional[str] = ""
 
 
 class ApproveCurrentStepIn(CamelSchema):
@@ -53,11 +55,11 @@ class ApprovalFlowOut(CamelSchema):
     id: int
     step: ApprovalStepOut
     supplier: int
-    approver_id: int | None = None
-    approver: ApproverOut | None = None
+    approver_id: Optional[int] = None
+    approver: Optional[ApproverOut] = None
     is_approved: bool
     is_reproved: bool
-    approved_at: str | None = None
-    reproved_at: str | None = None
+    approved_at: Optional[str] = None
+    reproved_at: Optional[str] = None
     observations: str
-    next_step: int | None = None
+    next_step: Optional[int] = None

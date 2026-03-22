@@ -1,6 +1,6 @@
 """Shared schema primitives for Ninja v1."""
 
-from typing import Any
+from typing import Any, Union
 
 from ninja import Schema
 from pydantic import ConfigDict
@@ -26,7 +26,7 @@ class DomainRefOut(CamelSchema):
     name: str
 
 
-def dump_schema(data: CamelSchema | dict[str, Any]) -> dict[str, Any]:
+def dump_schema(data: Union[CamelSchema, dict[str, Any]]) -> dict[str, Any]:
     """Dump schema to a camelCase dict."""
     if isinstance(data, CamelSchema):
         return data.model_dump(by_alias=True, exclude_none=True)
