@@ -47,12 +47,12 @@ def create_responsibility_matrix(request):
     raw_data = get_request_data(request)
     payload = ResponsibilityMatrixIn.model_validate(raw_data)
     if not payload.supplier:
-        raise HttpError(400, {"supplier": ["Este campo Ã© obrigatÃ³rio."]})
+        raise HttpError(400, {"supplier": ["Este campo é obrigatório."]})
 
     supplier = get_object_or_404(Supplier, pk=payload.supplier)
     if hasattr(supplier, "responsibility_matrix") and supplier.responsibility_matrix:
         raise HttpError(
-            400, "Matriz de responsabilidade jÃ¡ existe para este fornecedor."
+            400, "Matriz de responsabilidade já existe para este fornecedor."
         )
 
     matrix = ResponsibilityMatrix.objects.create(supplier=supplier)
