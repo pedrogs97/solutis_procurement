@@ -249,7 +249,7 @@ def supplier_history(request, supplier: Optional[int] = None):
     """Return evaluation history for a supplier."""
     if not supplier:
         raise HttpError(
-            400, {"message": "Ã‰ necessÃ¡rio fornecer um ID de fornecedor."}
+            400, {"message": "É necessário fornecer um ID de fornecedor."}
         )
     queryset = (
         SupplierEvaluation.objects.select_related("period")
