@@ -3,10 +3,10 @@ Supplier synchronization service.
 This module handles the synchronization of supplier data from TOTVS to local database.
 """
 
-import logging
 from typing import Dict, List, Optional
 
 from django.db import transaction
+from loguru import logger
 
 from src.shared.models import Address, Contact
 from src.supplier.models.domain import (
@@ -31,8 +31,6 @@ from src.sync.queries import (
     GET_SUPPLIERS_BY_TAX_IDS,
 )
 from src.sync.services.database_connection import DatabaseConnectionService
-
-logger = logging.getLogger(__name__)
 
 
 class SupplierSyncService:

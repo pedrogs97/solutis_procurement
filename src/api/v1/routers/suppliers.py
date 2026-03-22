@@ -1,21 +1,20 @@
 """Supplier endpoints for Ninja API v1."""
+
 # pylint: disable=duplicate-code
 
-import logging
 from typing import Optional
 
-from django.core.paginator import EmptyPage, Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
-from ninja import Query, Router
+from loguru import logger
+from ninja import Router
 from ninja.errors import HttpError
 
-from src.api.v1.pagination import build_page_link
+from src.api.v1.pagination import paginate
 from src.api.v1.schemas.suppliers import (
     SupplierCreateIn,
-    SupplierListOut,
     SupplierUpdateIn,
     apply_supplier_payload,
     serialize_supplier,
@@ -25,46 +24,7 @@ from src.supplier.models.approval_workflow import Approver
 from src.supplier.models.supplier import Supplier
 from src.supplier.services.approval_workflow import ApprovalWorkflowService
 
-logger = logging.getLogger(__name__)
-
 router = Router(tags=["suppliers"])
-
-
-def _paginate(request, queryset, page: int, size: int):
-    paginator = Paginator(queryset, size)
-    try:
-        current_page = paginator.page(page)
-    except EmptyPage:
-        current_page = (
-            paginator.page(paginator.num_pages) if paginator.num_pages else []
-        )
-
-    results = (
-        [serialize_supplier(item) for item in current_page.object_list]
-        if paginator.count
-        else []
-    )
-
-    return SupplierListOut(
-        count=paginator.count,
-        next=build_page_link(
-            request,
-            current_page.next_page_number() if current_page.has_next() else None,
-            size,
-        )
-        if paginator.count
-        else None,
-        previous=build_page_link(
-            request,
-            current_page.previous_page_number()
-            if current_page.has_previous()
-            else None,
-            size,
-        )
-        if paginator.count
-        else None,
-        results=results,
-    ).model_dump(by_alias=True)
 
 
 @router.post("/suppliers/", url_name="supplier-v1")
@@ -88,7 +48,7 @@ def create_supplier(request, payload: SupplierCreateIn):
             new_instance = apply_supplier_payload(None, payload)
         except (TypeError, ValueError, IntegrityError) as exc:
             logger.exception("Falha ao criar fornecedor")
-            raise HttpError(400, {"detail": "Dados do fornecedor invalidos."}) from exc
+            raise HttpError(400, "Dados do fornecedor invalidos.") from exc
 
         initial_approver, _ = Approver.objects.get_or_create(
             email=user_email,
@@ -104,7 +64,7 @@ def create_supplier(request, payload: SupplierCreateIn):
                 new_instance, initial_approver
             )
         except ValueError as exc:
-            raise HttpError(400, {"approvalWorkflow": [str(exc)]}) from exc
+            raise HttpError(400, str(exc)) from exc
 
     return JsonResponse(serialize_supplier(new_instance), status=201)
 
@@ -143,10 +103,10 @@ def delete_supplier(request, pk: int):
 @router.get("/suppliers-list/", url_name="supplier-list-v1")
 def list_suppliers(
     request,
-    page: int = Query(1, ge=1),
-    size: int = Query(12, ge=1, le=100),
+    page: int = 1,
+    size: int = 12,
     search: Optional[str] = None,
-):
+) -> JsonResponse:
     """List suppliers with filters, search, and pagination."""
     queryset = Supplier.objects.all()
     filtered_qs = SupplierFilters(request.GET, queryset=queryset).qs
@@ -157,5 +117,8 @@ def list_suppliers(
         search_filter.add(Q(tax_id__icontains=search), Q.OR)
         filtered_qs = filtered_qs.filter(search_filter)
 
-    filtered_qs = filtered_qs.distinct().order_by("id")
-    return _paginate(request, filtered_qs, page, size)
+    filtered_qs = filtered_qs.order_by("id")
+    return JsonResponse(
+        paginate(request, filtered_qs, page, size, serialize_supplier),
+        status=200,
+    )

@@ -155,15 +155,6 @@ class SupplierUpdateIn(CamelSchema):
     contract: Optional[ContractPayload] = None
 
 
-class SupplierListOut(CamelSchema):
-    """Paginated supplier list response."""
-
-    count: int
-    next: Optional[str] = None
-    previous: Optional[str] = None
-    results: list[dict[str, Any]]
-
-
 def _domain_ref(instance):
     if not instance:
         return None
@@ -217,12 +208,12 @@ def serialize_supplier(instance: Supplier) -> dict[str, Any]:
             "id": situation.id,
             "supplier": situation.supplier_id,
             "status": _domain_ref(situation.status),
-            "createdAt": situation.created_at.isoformat()
-            if situation.created_at
-            else None,
-            "updatedAt": situation.updated_at.isoformat()
-            if situation.updated_at
-            else None,
+            "createdAt": (
+                situation.created_at.isoformat() if situation.created_at else None
+            ),
+            "updatedAt": (
+                situation.updated_at.isoformat() if situation.updated_at else None
+            ),
         }
     else:
         data["situation"] = None

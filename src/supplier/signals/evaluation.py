@@ -2,15 +2,12 @@
 Signals for the evaluation app.
 """
 
-import logging
 
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 
 from src.supplier.models.evaluation import EvaluationPeriod
-
-logger = logging.getLogger(__name__)
 
 
 @receiver(post_migrate)

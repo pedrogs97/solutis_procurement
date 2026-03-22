@@ -10,10 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import logging
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
+from loguru import logger
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -193,22 +196,93 @@ EMAIL_PASSWORD_SOLUTIS_365 = os.getenv("EMAIL_PASSWORD_SOLUTIS_365")
 APP_URL = os.getenv("URL_FRONTEND", "http://localhost:3000")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        frame = logging.currentframe()
+        depth = 2
+        while frame and frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
+
+
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FORMAT = (
+    "{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message}"
+)
+
+logger.remove()
+if DEBUG:
+    logger.add(
+        sys.stderr,
+        level=LOG_LEVEL,
+        format=LOG_FORMAT,
+        backtrace=True,
+        diagnose=True,
+    )
+else:
+    logger.add(
+        LOG_DIR / "{time:YYYY-MM-DD}.log",
+        level=LOG_LEVEL,
+        format=LOG_FORMAT,
+        rotation="00:00",
+        retention="15 days",
+        backtrace=True,
+        diagnose=True,
+        encoding="utf-8",
+    )
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
+        "default": {
+            "()": InterceptHandler,
         }
     },
+    "root": {
+        "handlers": ["default"],
+        "level": LOG_LEVEL,
+    },
     "loggers": {
+        "django": {
+            "handlers": ["default"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["default"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["default"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.utils.autoreload": {
+            "handlers": ["default"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "src.supplier.views.supplier": {
-            "handlers": ["console"],
+            "handlers": ["default"],
             "level": LOG_LEVEL,
             "propagate": False,
         },
         "src.supplier.services.approval_workflow": {
-            "handlers": ["console"],
+            "handlers": ["default"],
             "level": LOG_LEVEL,
             "propagate": False,
         },

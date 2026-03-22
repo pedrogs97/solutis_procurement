@@ -1,6 +1,5 @@
 """Attachment endpoints for Ninja API v1."""
 
-import logging
 import mimetypes
 import os
 from typing import Optional
@@ -9,6 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from loguru import logger
 from ninja import File, Form, Router
 from ninja.errors import HttpError
 from ninja.files import UploadedFile
@@ -21,8 +21,6 @@ from src.api.v1.schemas.attachments import (
 from src.api.v1.schemas.common import DomainRefOut
 from src.supplier.models.attachments import DomAttachmentType, SupplierAttachment
 from src.supplier.models.supplier import Supplier
-
-logger = logging.getLogger(__name__)
 
 router = Router(tags=["attachments"])
 

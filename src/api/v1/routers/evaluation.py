@@ -2,13 +2,13 @@
 
 # pylint: disable=duplicate-code
 
-import logging
 from typing import Optional
 
 from django.core.paginator import EmptyPage, Paginator
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from loguru import logger
 from ninja import Query, Router
 from ninja.errors import HttpError
 
@@ -30,8 +30,6 @@ from src.supplier.models.evaluation import (
     EvaluationCriterion,
     SupplierEvaluation,
 )
-
-logger = logging.getLogger(__name__)
 
 router = Router(tags=["evaluation"])
 
