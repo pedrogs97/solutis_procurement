@@ -1,6 +1,8 @@
 """Evaluation endpoints for Ninja API v1."""
+
 # pylint: disable=duplicate-code
 
+import logging
 from typing import Optional
 
 from django.core.paginator import EmptyPage, Paginator
@@ -28,6 +30,8 @@ from src.supplier.models.evaluation import (
     EvaluationCriterion,
     SupplierEvaluation,
 )
+
+logger = logging.getLogger(__name__)
 
 router = Router(tags=["evaluation"])
 
@@ -68,22 +72,28 @@ def _paginate(request, queryset, page: int, size: int, serializer_fn):
 
     return {
         "count": paginator.count,
-        "next": build_page_link(
-            request,
-            current_page.next_page_number() if current_page.has_next() else None,
-            size,
-        )
-        if paginator.count
-        else None,
-        "previous": build_page_link(
-            request,
-            current_page.previous_page_number()
-            if current_page.has_previous()
-            else None,
-            size,
-        )
-        if paginator.count
-        else None,
+        "next": (
+            build_page_link(
+                request,
+                current_page.next_page_number() if current_page.has_next() else None,
+                size,
+            )
+            if paginator.count
+            else None
+        ),
+        "previous": (
+            build_page_link(
+                request,
+                (
+                    current_page.previous_page_number()
+                    if current_page.has_previous()
+                    else None
+                ),
+                size,
+            )
+            if paginator.count
+            else None
+        ),
         "results": results,
     }
 
@@ -176,7 +186,8 @@ def create_evaluation(request, payload: SupplierEvaluationIn):
             )
             evaluation.save()
     except IntegrityError as exc:
-        raise HttpError(400, str(exc)) from exc
+        logger.exception("Falha ao criar avaliacao de fornecedor")
+        raise HttpError(400, {"detail": "Dados de avaliacao invalidos."}) from exc
     return JsonResponse(serialize_supplier_evaluation(evaluation), status=201)
 
 
@@ -248,9 +259,7 @@ def evaluation_summary(request):
 def supplier_history(request, supplier: Optional[int] = None):
     """Return evaluation history for a supplier."""
     if not supplier:
-        raise HttpError(
-            400, {"message": "É necessário fornecer um ID de fornecedor."}
-        )
+        raise HttpError(400, {"message": "É necessário fornecer um ID de fornecedor."})
     queryset = (
         SupplierEvaluation.objects.select_related("period")
         .filter(supplier_id=supplier)

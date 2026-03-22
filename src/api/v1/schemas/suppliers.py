@@ -14,6 +14,17 @@ from src.supplier.models.supplier import (
 )
 
 
+def _writable_model_fields(model_cls) -> set[str]:
+    return {
+        field.name
+        for field in model_cls._meta.fields  # pylint: disable=protected-access
+        if field.name not in {"id", "created_at", "updated_at"}
+    }
+
+
+SUPPLIER_WRITABLE_FIELDS = _writable_model_fields(Supplier)
+
+
 class AddressPayload(CamelSchema):
     """Address payload used in supplier create/update."""
 
@@ -166,6 +177,9 @@ def _serialize_model(model):
     for field in model._meta.fields:  # pylint: disable=protected-access
         if field.name in {"id", "created_at", "updated_at"}:
             continue
+        if field.is_relation:
+            data[field.name] = getattr(model, field.attname)
+            continue
         data[field.name] = getattr(model, field.name)
     data["id"] = model.id
     data["createdAt"] = model.created_at.isoformat() if model.created_at else None
@@ -270,6 +284,16 @@ def apply_supplier_payload(
         "fiscal_details": supplier_data.pop("fiscal_details", None),
         "company_information": supplier_data.pop("company_information", None),
         "contract": supplier_data.pop("contract", None),
+    }
+    unknown_supplier_fields = sorted(set(supplier_data) - SUPPLIER_WRITABLE_FIELDS)
+    if unknown_supplier_fields:
+        unknown_str = ", ".join(unknown_supplier_fields)
+        raise ValueError(f"Campos invalidos para fornecedor: {unknown_str}")
+
+    supplier_data = {
+        key: value
+        for key, value in supplier_data.items()
+        if key in SUPPLIER_WRITABLE_FIELDS
     }
 
     if instance is None:

@@ -1,9 +1,11 @@
 """Attachment endpoints for Ninja API v1."""
 
+import logging
 import mimetypes
 import os
 from typing import Optional
 
+from django.db import transaction
 from django.db.models import Q
 from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -21,6 +23,8 @@ from src.api.v1.schemas.common import DomainRefOut
 from src.supplier.models.attachments import DomAttachmentType, SupplierAttachment
 from src.supplier.models.supplier import Supplier
 
+logger = logging.getLogger(__name__)
+
 router = Router(tags=["attachments"])
 
 ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"]
@@ -29,19 +33,19 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 def _validate_upload(payload: AttachmentUploadIn, file: UploadedFile) -> None:
     if not Supplier.objects.filter(pk=payload.supplier).exists():
-        raise HttpError(400, {"supplier": ["Fornecedor nÃ£o encontrado."]})
+        raise HttpError(400, {"supplier": ["Fornecedor nao encontrado."]})
 
     if not DomAttachmentType.objects.filter(pk=payload.attachment_type).exists():
-        raise HttpError(400, {"attachmentType": ["Tipo de anexo nÃ£o encontrado."]})
+        raise HttpError(400, {"attachmentType": ["Tipo de anexo nao encontrado."]})
 
     if not file:
-        raise HttpError(400, {"file": ["Arquivo Ã© obrigatÃ³rio."]})
+        raise HttpError(400, {"file": ["Arquivo e obrigatorio."]})
 
     if file.size > MAX_FILE_SIZE:
-        raise HttpError(400, {"file": ["Arquivo muito grande. Tamanho mÃ¡ximo: 10MB."]})
+        raise HttpError(400, {"file": ["Arquivo muito grande. Tamanho maximo: 10MB."]})
 
     if not any(file.name.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
-        raise HttpError(400, {"file": ["Tipo de arquivo nÃ£o permitido."]})
+        raise HttpError(400, {"file": ["Tipo de arquivo nao permitido."]})
 
 
 @router.get("/attachments-list/{supplier_id}/", url_name="supplier-attachment-list-v1")
@@ -66,7 +70,7 @@ def upload_attachment(
         raw_attachment_type = request.POST.get("attachmentType")
         attachment_type = int(raw_attachment_type) if raw_attachment_type else None
     if attachment_type is None:
-        raise HttpError(400, {"attachmentType": ["Este campo Ã© obrigatÃ³rio."]})
+        raise HttpError(400, {"attachmentType": ["Este campo e obrigatorio."]})
 
     payload = AttachmentUploadIn(
         supplier=supplier,
@@ -75,20 +79,39 @@ def upload_attachment(
     )
     _validate_upload(payload, file)
 
-    existing = SupplierAttachment.objects.filter(
-        supplier_id=payload.supplier,
-        attachment_type_id=payload.attachment_type,
-    ).first()
-    if existing:
-        existing.file.delete(save=False)
-        existing.delete()
+    old_file_name = None
+    old_file_storage = None
+    with transaction.atomic():
+        existing = (
+            SupplierAttachment.objects.select_for_update()
+            .filter(
+                supplier_id=payload.supplier,
+                attachment_type_id=payload.attachment_type,
+            )
+            .first()
+        )
 
-    created = SupplierAttachment.objects.create(
-        supplier_id=payload.supplier,
-        attachment_type_id=payload.attachment_type,
-        description=payload.description,
-        file=file,
-    )
+        if existing:
+            if existing.file:
+                old_file_name = existing.file.name
+                old_file_storage = existing.file.storage
+            existing.description = payload.description
+            existing.file = file
+            existing.save()
+            created = existing
+        else:
+            created = SupplierAttachment.objects.create(
+                supplier_id=payload.supplier,
+                attachment_type_id=payload.attachment_type,
+                description=payload.description,
+                file=file,
+            )
+
+    if old_file_name and old_file_name != created.file.name:
+        transaction.on_commit(
+            lambda: old_file_storage.delete(old_file_name) if old_file_storage else None
+        )
+
     return JsonResponse(serialize_attachment(created), status=201)
 
 
@@ -98,10 +121,10 @@ def download_attachment(request, pk: int):
     attachment = get_object_or_404(SupplierAttachment, pk=pk)
 
     if not attachment.file:
-        return JsonResponse({"error": "Arquivo nÃ£o encontrado"}, status=404)
+        return JsonResponse({"error": "Arquivo nao encontrado"}, status=404)
 
     if attachment.storage_path and not os.path.exists(attachment.storage_path):
-        return JsonResponse({"error": "Arquivo nÃ£o existe no servidor"}, status=404)
+        return JsonResponse({"error": "Arquivo nao existe no servidor"}, status=404)
 
     try:
         content_type, _ = mimetypes.guess_type(attachment.file.name)
@@ -115,8 +138,9 @@ def download_attachment(request, pk: int):
             as_attachment=True,
             filename=filename,
         )
-    except Exception as exc:  # pragma: no cover - file IO branch
-        return JsonResponse({"error": f"Erro ao baixar arquivo: {exc}"}, status=500)
+    except Exception:  # pragma: no cover - file IO branch
+        logger.exception("Falha ao baixar anexo", extra={"attachment_id": pk})
+        return JsonResponse({"error": "Erro interno ao baixar arquivo."}, status=500)
 
 
 @router.get("/attachment-types/", url_name="supplier-attachment-type-v1")

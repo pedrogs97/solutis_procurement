@@ -1,10 +1,11 @@
 """Supplier endpoints for Ninja API v1."""
 # pylint: disable=duplicate-code
 
+import logging
 from typing import Optional
 
 from django.core.paginator import EmptyPage, Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -23,6 +24,8 @@ from src.supplier.filters.supplier import SupplierFilters
 from src.supplier.models.approval_workflow import Approver
 from src.supplier.models.supplier import Supplier
 from src.supplier.services.approval_workflow import ApprovalWorkflowService
+
+logger = logging.getLogger(__name__)
 
 router = Router(tags=["suppliers"])
 
@@ -76,17 +79,16 @@ def create_supplier(request, payload: SupplierCreateIn):
 
     if not user_email:
         return JsonResponse(
-            {
-                "detail": "UsuÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio autenticado sem e-mail para iniciar aprovaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o."
-            },
+            {"detail": "Usuario autenticado sem e-mail para iniciar aprovacao."},
             status=403,
         )
 
     with transaction.atomic():
         try:
             new_instance = apply_supplier_payload(None, payload)
-        except Exception as exc:  # pragma: no cover - defensive fallback
-            raise HttpError(400, str(exc)) from exc
+        except (TypeError, ValueError, IntegrityError) as exc:
+            logger.exception("Falha ao criar fornecedor")
+            raise HttpError(400, {"detail": "Dados do fornecedor invalidos."}) from exc
 
         initial_approver, _ = Approver.objects.get_or_create(
             email=user_email,

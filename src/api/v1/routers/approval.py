@@ -77,20 +77,18 @@ def set_step_responsible(request, payload: SetResponsibleApproverIn):
     try:
         step = ApprovalStep.objects.get(id=payload.step_id)
     except ApprovalStep.DoesNotExist as exc:
-        raise HttpError(400, "Passo de aprovaÃ§Ã£o nÃ£o encontrado.") from exc
+        raise HttpError(400, "Passo de aprovacao nao encontrado.") from exc
 
     next_step = (
         ApprovalStep.objects.filter(order__gt=step.order).order_by("order").first()
     )
     if not next_step:
-        raise HttpError(
-            400, "NÃ£o hÃ¡ prÃ³ximo passo definido no fluxo de aprovaÃ§Ã£o."
-        )
+        raise HttpError(400, "Nao ha proximo passo definido no fluxo de aprovacao.")
 
     try:
         workflow = ApprovalFlow.objects.get(id=payload.workflow_id, step=step)
     except ApprovalFlow.DoesNotExist as exc:
-        raise HttpError(400, "Fluxo de aprovaÃ§Ã£o nÃ£o encontrado.") from exc
+        raise HttpError(400, "Fluxo de aprovacao nao encontrado.") from exc
 
     approver, _ = Approver.objects.get_or_create(
         email=payload.email,
@@ -122,7 +120,7 @@ def approve_current_step(request, payload: ApproveCurrentStepIn):
     try:
         workflow = ApprovalFlow.objects.get(id=payload.workflow_id)
     except ApprovalFlow.DoesNotExist as exc:
-        raise HttpError(400, "Fluxo de aprovaÃ§Ã£o nÃ£o encontrado.") from exc
+        raise HttpError(400, "Fluxo de aprovacao nao encontrado.") from exc
 
     if payload.is_approved:
         workflow.approve()
@@ -143,7 +141,7 @@ def supplier_approval_flows(request, supplier_id: int):
     """List approval flow history for a supplier."""
     supplier = get_object_or_404(Supplier, id=supplier_id)
     if not ApprovalFlow.objects.filter(supplier=supplier).exists():
-        raise NotFound("Nenhum fluxo de aprovaÃ§Ã£o encontrado para este fornecedor.")
+        raise NotFound("Nenhum fluxo de aprovacao encontrado para este fornecedor.")
 
     approve_flow = (
         supplier.approval_flow_history.select_related("step", "approver")
