@@ -55,8 +55,8 @@ pytest = "==8.4.1"
 black = "==25.1.0"
 pre-commit = "==4.2.0"
 pylint = "==3.3.7"
-model-bakery = "==1.19.5"
 pytest-django = "==4.11.1"
+model-bakery = "==1.19.5"
 
 [requires]
 python_version = "3.11"
