@@ -174,6 +174,9 @@ class OrganizationalDetails(TimestampedModel):
     responsible_executive = models.CharField(
         max_length=255, help_text="Executivo Responsável", blank=True, default=""
     )
+    responsible_manager = models.CharField(
+        max_length=255, help_text="Gestor Responsável", blank=True, default=""
+    )
 
     payer_type = models.ForeignKey(
         DomPayerType,

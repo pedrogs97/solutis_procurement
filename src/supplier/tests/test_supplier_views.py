@@ -127,6 +127,139 @@ def test_patch_supplier_allows_clearing_contact_email():
 
 
 @pytest.mark.django_db
+@patch("src.shared.serializers.get_address_from_cep")
+def test_create_supplier_accepts_responsible_manager(mock_get_address):
+    """
+    Supplier creation should accept the new responsible manager field while keeping legacy fields optional.
+    """
+    mock_get_address.return_value = {
+        "street": "Avenida Paulista",
+        "district": "Bela Vista",
+        "city": "São Paulo",
+        "uf": "SP",
+    }
+
+    baker.make(
+        ApprovalStep,
+        order=1,
+        name="Cadastro inicial",
+        description="Validação inicial",
+        department="Compras",
+        is_mandatory=True,
+    )
+
+    client = _build_authenticated_client()
+    payload = {
+        "legalName": "Fornecedor com gestor",
+        "taxId": "11122233344459",
+        "address": {
+            "postalCode": "01310100",
+            "number": 123,
+            "street": "",
+            "neighbourhood": "",
+            "city": "",
+            "state": "",
+            "complement": "",
+        },
+        "contact": {
+            "name": "Contato Teste",
+            "phone": "11999999999",
+            "email": "gestor@solutis.com.br",
+        },
+        "organizationalDetails": {
+            "costCenter": "CC-001",
+            "businessUnit": "TI",
+            "responsibleExecutive": "Maria Silva",
+            "responsibleManager": "João Souza",
+        },
+    }
+
+    response = client.post("/api/suppliers/", payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["organizationalDetails"]["responsibleManager"] == "João Souza"
+
+
+@pytest.mark.django_db
+@patch("src.shared.serializers.get_address_from_cep")
+def test_create_supplier_accepts_payload_without_hidden_front_fields(mock_get_address):
+    """
+    Supplier creation should work when the frontend omits the fields hidden from the new UI.
+    """
+    mock_get_address.return_value = {
+        "street": "Avenida Paulista",
+        "district": "Bela Vista",
+        "city": "São Paulo",
+        "uf": "SP",
+    }
+
+    baker.make(
+        ApprovalStep,
+        order=1,
+        name="Cadastro inicial",
+        description="Validação inicial",
+        department="Compras",
+        is_mandatory=True,
+    )
+
+    client = _build_authenticated_client()
+    payload = {
+        "legalName": "Fornecedor sem campos ocultos",
+        "taxId": "11122233344460",
+        "address": {
+            "postalCode": "01310100",
+            "number": 123,
+            "street": "",
+            "neighbourhood": "",
+            "city": "",
+            "state": "",
+            "complement": "",
+        },
+        "contact": {
+            "name": "Contato Teste",
+            "phone": "11999999999",
+            "email": "sem-campos-ocultos@solutis.com.br",
+        },
+        "organizationalDetails": {
+            "costCenter": "CC-001",
+            "businessUnit": "TI",
+            "responsibleExecutive": "Maria Silva",
+            "responsibleManager": "João Souza",
+            "businessSector": None,
+        },
+        "fiscalDetails": {
+            "simplesNacionalParticipant": False,
+        },
+        "companyInformation": {
+            "companySize": None,
+        },
+        "contract": {
+            "hasContractRenewal": False,
+            "warningContractRenewal": False,
+            "warningOnTermination": False,
+            "warningOnRenewal": False,
+            "warningOnPeriod": False,
+        },
+    }
+
+    response = client.post("/api/suppliers/", payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["organizationalDetails"]["responsibleManager"] == "João Souza"
+    assert response.data["organizationalDetails"]["payerType"] is None
+    assert response.data["organizationalDetails"]["taxpayerClassification"] is None
+    assert response.data["organizationalDetails"]["publicEntity"] is None
+    assert response.data["fiscalDetails"]["issWithholding"] is None
+    assert response.data["fiscalDetails"]["issRegime"] is None
+    assert response.data["fiscalDetails"]["withholdingTaxNature"] is None
+    assert response.data["companyInformation"]["taxationRegime"] is None
+    assert response.data["companyInformation"]["icmsTaxpayer"] is None
+    assert response.data["companyInformation"]["incomeType"] is None
+    assert response.data["companyInformation"]["taxationMethod"] is None
+    assert response.data["companyInformation"]["customerType"] is None
+
+
+@pytest.mark.django_db
 def test_create_supplier_without_approval_steps_returns_validation_error():
     """
     Supplier creation should return validation error (not 500) when no approval steps exist.
