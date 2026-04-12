@@ -1,25 +1,23 @@
 """Supplier endpoints for Ninja API v1."""
 
-# pylint: disable=duplicate-code
-
-from typing import Optional
-
 from django.db import IntegrityError, transaction
-from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from loguru import logger
-from ninja import Router
+from ninja import Query, Router
 from ninja.errors import HttpError
 
+from src.api.v1.controllers.suppliers import (
+    apply_supplier_payload,
+    serialize_supplier_list,
+)
+from src.api.v1.filters.suppliers import SupplierListFilters
 from src.api.v1.pagination import paginate
 from src.api.v1.schemas.suppliers import (
     SupplierCreateIn,
     SupplierUpdateIn,
-    apply_supplier_payload,
     serialize_supplier,
 )
-from src.supplier.filters.supplier import SupplierFilters
 from src.supplier.models.approval_workflow import Approver
 from src.supplier.models.supplier import Supplier
 from src.supplier.services.approval_workflow import ApprovalWorkflowService
@@ -103,22 +101,13 @@ def delete_supplier(request, pk: int):
 @router.get("/suppliers-list/", url_name="supplier-list-v1")
 def list_suppliers(
     request,
+    filters: Query[SupplierListFilters],
     page: int = 1,
     size: int = 12,
-    search: Optional[str] = None,
 ) -> JsonResponse:
     """List suppliers with filters, search, and pagination."""
-    queryset = Supplier.objects.all()
-    filtered_qs = SupplierFilters(request.GET, queryset=queryset).qs
-
-    if search:
-        search_filter = Q(trade_name__icontains=search)
-        search_filter.add(Q(legal_name__icontains=search), Q.OR)
-        search_filter.add(Q(tax_id__icontains=search), Q.OR)
-        filtered_qs = filtered_qs.filter(search_filter)
-
-    filtered_qs = filtered_qs.order_by("id")
+    filtered_qs = filters.filter(Supplier.objects.all()).order_by("id")
     return JsonResponse(
-        paginate(request, filtered_qs, page, size, serialize_supplier),
+        paginate(request, filtered_qs, page, size, serialize_supplier_list),
         status=200,
     )

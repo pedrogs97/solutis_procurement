@@ -5,7 +5,10 @@ from typing import Any, Dict
 from django.db.transaction import atomic
 from rest_framework import serializers
 
-from src.supplier.models.attachments import SupplierAttachment
+from src.supplier.models.attachments import (
+    SupplierAttachment,
+    SupplierAttachmentHistory,
+)
 
 
 class AttachmentService:
@@ -36,10 +39,24 @@ class AttachmentService:
             supplier_id=supplier_id,
             attachment_type_id=attachment_type_id,
         ).first()
-        if existing_attachment:
-            existing_attachment.file.delete(save=False)
-            existing_attachment.delete()
-
         serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
+
+        if existing_attachment:
+            if existing_attachment.file:
+                SupplierAttachmentHistory.objects.create(
+                    supplier_id=existing_attachment.supplier_id,
+                    attachment_type_id=existing_attachment.attachment_type_id,
+                    file=existing_attachment.file.name,
+                    description=existing_attachment.description,
+                    source_attachment=existing_attachment,
+                )
+
+            existing_attachment.description = serializer.validated_data.get(
+                "description"
+            )
+            existing_attachment.file = serializer.validated_data.get("file")
+            existing_attachment.save()
+            return existing_attachment
+
         return serializer.save()

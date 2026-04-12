@@ -1,28 +1,9 @@
 """Supplier schemas and mappers for Ninja v1."""
 
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
-from src.shared.models import Address, Contact
-from src.supplier.models.supplier import (
-    CompanyInformation,
-    Contract,
-    FiscalDetails,
-    OrganizationalDetails,
-    PaymentDetails,
-    Supplier,
-)
-
-
-def _writable_model_fields(model_cls) -> set[str]:
-    return {
-        field.name
-        for field in model_cls._meta.fields  # pylint: disable=protected-access
-        if field.name not in {"id", "created_at", "updated_at"}
-    }
-
-
-SUPPLIER_WRITABLE_FIELDS = _writable_model_fields(Supplier)
+from src.supplier.models.supplier import Supplier
 
 
 class AddressPayload(CamelSchema):
@@ -238,82 +219,3 @@ def serialize_supplier(instance: Supplier) -> dict[str, Any]:
         data["responsibilityMatrix"] = None
 
     return data
-
-
-def _payload_to_dict(payload):
-    if payload is None:
-        return None
-    return payload.model_dump(by_alias=False, exclude_none=True)
-
-
-def _create_or_update_related(instance, attr_name: str, payload, model_cls):
-    data = _payload_to_dict(payload)
-    if data is None:
-        return
-
-    related_obj = getattr(instance, attr_name, None)
-    if related_obj:
-        for key, value in data.items():
-            setattr(related_obj, key, value)
-        related_obj.save()
-    else:
-        related_obj = model_cls.objects.create(**data)
-        setattr(instance, attr_name, related_obj)
-
-
-def apply_supplier_payload(
-    instance: Optional[Supplier],
-    payload: Union[SupplierCreateIn, SupplierUpdateIn],
-) -> Supplier:
-    """Persist supplier payload and nested objects."""
-    supplier_data = payload.model_dump(by_alias=False, exclude_none=True)
-    nested = {
-        "address": supplier_data.pop("address", None),
-        "contact": supplier_data.pop("contact", None),
-        "payment_details": supplier_data.pop("payment_details", None),
-        "organizational_details": supplier_data.pop("organizational_details", None),
-        "fiscal_details": supplier_data.pop("fiscal_details", None),
-        "company_information": supplier_data.pop("company_information", None),
-        "contract": supplier_data.pop("contract", None),
-    }
-    unknown_supplier_fields = sorted(set(supplier_data) - SUPPLIER_WRITABLE_FIELDS)
-    if unknown_supplier_fields:
-        unknown_str = ", ".join(unknown_supplier_fields)
-        raise ValueError(f"Campos invalidos para fornecedor: {unknown_str}")
-
-    supplier_data = {
-        key: value
-        for key, value in supplier_data.items()
-        if key in SUPPLIER_WRITABLE_FIELDS
-    }
-
-    if instance is None:
-        instance = Supplier.objects.create(**supplier_data)
-    else:
-        for key, value in supplier_data.items():
-            setattr(instance, key, value)
-
-    _create_or_update_related(instance, "address", nested["address"], Address)
-    _create_or_update_related(instance, "contact", nested["contact"], Contact)
-    _create_or_update_related(
-        instance, "payment_details", nested["payment_details"], PaymentDetails
-    )
-    _create_or_update_related(
-        instance,
-        "organizational_details",
-        nested["organizational_details"],
-        OrganizationalDetails,
-    )
-    _create_or_update_related(
-        instance, "fiscal_details", nested["fiscal_details"], FiscalDetails
-    )
-    _create_or_update_related(
-        instance,
-        "company_information",
-        nested["company_information"],
-        CompanyInformation,
-    )
-    _create_or_update_related(instance, "contract", nested["contract"], Contract)
-
-    instance.save()
-    return instance

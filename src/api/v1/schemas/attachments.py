@@ -3,7 +3,10 @@
 from typing import Optional
 
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
-from src.supplier.models.attachments import SupplierAttachment
+from src.supplier.models.attachments import (
+    SupplierAttachment,
+    SupplierAttachmentHistory,
+)
 
 
 class AttachmentUploadIn(CamelSchema):
@@ -24,6 +27,18 @@ class AttachmentOut(CamelSchema):
     description: Optional[str] = None
 
 
+class AttachmentVersionOut(CamelSchema):
+    """Serialized attachment version (current or historical)."""
+
+    id: int
+    attachment_type_id: int
+    attachment_type_name: str
+    file_name: Optional[str] = None
+    description: Optional[str] = None
+    is_current: bool
+    uploaded_at: str
+
+
 class AttachmentTypeOut(CamelSchema):
     """Serialized attachment type."""
 
@@ -40,4 +55,21 @@ def serialize_attachment(instance: SupplierAttachment) -> dict:
         attachment_type_name=instance.attachment_type.name,
         file_name=instance.file_name,
         description=instance.description,
+    ).model_dump(by_alias=True)
+
+
+def serialize_attachment_version(
+    instance: SupplierAttachment | SupplierAttachmentHistory,
+    *,
+    is_current: bool,
+) -> dict:
+    """Map current or historical attachment model into versioned API output format."""
+    return AttachmentVersionOut(
+        id=instance.id,
+        attachment_type_id=instance.attachment_type_id,
+        attachment_type_name=instance.attachment_type.name,
+        file_name=instance.file_name,
+        description=instance.description,
+        is_current=is_current,
+        uploaded_at=instance.created_at.isoformat(),
     ).model_dump(by_alias=True)

@@ -16,10 +16,16 @@ from ninja.files import UploadedFile
 from src.api.v1.schemas.attachments import (
     AttachmentTypeOut,
     AttachmentUploadIn,
+    AttachmentVersionOut,
     serialize_attachment,
+    serialize_attachment_version,
 )
 from src.api.v1.schemas.common import DomainRefOut
-from src.supplier.models.attachments import DomAttachmentType, SupplierAttachment
+from src.supplier.models.attachments import (
+    DomAttachmentType,
+    SupplierAttachment,
+    SupplierAttachmentHistory,
+)
 from src.supplier.models.supplier import Supplier
 
 router = Router(tags=["attachments"])
@@ -76,8 +82,6 @@ def upload_attachment(
     )
     _validate_upload(payload, file)
 
-    old_file_name = None
-    old_file_storage = None
     with transaction.atomic():
         existing = (
             SupplierAttachment.objects.select_for_update()
@@ -90,8 +94,13 @@ def upload_attachment(
 
         if existing:
             if existing.file:
-                old_file_name = existing.file.name
-                old_file_storage = existing.file.storage
+                SupplierAttachmentHistory.objects.create(
+                    supplier_id=existing.supplier_id,
+                    attachment_type_id=existing.attachment_type_id,
+                    file=existing.file.name,
+                    description=existing.description,
+                    source_attachment=existing,
+                )
             existing.description = payload.description
             existing.file = file
             existing.save()
@@ -104,12 +113,64 @@ def upload_attachment(
                 file=file,
             )
 
-    if old_file_name and old_file_name != created.file.name:
-        transaction.on_commit(
-            lambda: old_file_storage.delete(old_file_name) if old_file_storage else None
-        )
-
     return JsonResponse(serialize_attachment(created), status=201)
+
+
+@router.get(
+    "/attachments/history/{supplier_id}/{attachment_type_id}/",
+    url_name="supplier-attachment-history-v1",
+)
+def list_attachment_history(request, supplier_id: int, attachment_type_id: int):
+    """List full attachment version history for supplier and attachment type."""
+    current = (
+        SupplierAttachment.objects.filter(
+            supplier_id=supplier_id,
+            attachment_type_id=attachment_type_id,
+        )
+        .select_related("attachment_type")
+        .first()
+    )
+
+    history = SupplierAttachmentHistory.objects.filter(
+        supplier_id=supplier_id,
+        attachment_type_id=attachment_type_id,
+    ).order_by("-created_at")
+
+    versions = [
+        serialize_attachment_version(item, is_current=False) for item in history
+    ]
+    if current:
+        versions.insert(0, serialize_attachment_version(current, is_current=True))
+
+    return [AttachmentVersionOut(**item).model_dump(by_alias=True) for item in versions]
+
+
+@router.get(
+    "/attachments/history-download/{pk}/",
+    url_name="supplier-attachment-history-download-v1",
+)
+def download_attachment_history(request, pk: int):
+    """Download an attachment file from history."""
+    attachment = get_object_or_404(SupplierAttachmentHistory, pk=pk)
+
+    if not attachment.file:
+        return JsonResponse({"error": "Arquivo nao encontrado"}, status=404)
+
+    try:
+        content_type, _ = mimetypes.guess_type(attachment.file.name)
+        if not content_type:
+            content_type = "application/octet-stream"
+
+        filename = attachment.file_name or "download"
+        return FileResponse(
+            attachment.file.open("rb"),
+            content_type=content_type,
+            as_attachment=True,
+            filename=filename,
+        )
+    except Exception:  # pragma: no cover - file IO branch
+        logger.exception("Falha ao baixar anexo historico", extra={"history_id": pk})
+        return JsonResponse({"error": "Erro interno ao baixar arquivo."}, status=500)
 
 
 @router.get("/attachments/{pk}/download/", url_name="supplier-attachment-download-v1")

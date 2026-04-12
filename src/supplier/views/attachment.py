@@ -16,12 +16,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from src.shared.views import BaseAPIView
-from src.supplier.models.attachments import DomAttachmentType, SupplierAttachment
+from src.supplier.models.attachments import (
+    DomAttachmentType,
+    SupplierAttachment,
+    SupplierAttachmentHistory,
+)
 from src.supplier.serializers.inbound.attachment import (
     SupplierAttachmentInSerializer,
     SupplierAttachmentTypeSerializer,
 )
-from src.supplier.serializers.outbound.attachment import SupplierAttachmentOutSerializer
+from src.supplier.serializers.outbound.attachment import (
+    SupplierAttachmentHistoryOutSerializer,
+    SupplierAttachmentOutSerializer,
+)
 from src.supplier.services.attachment import AttachmentService
 
 
@@ -145,5 +152,32 @@ class SupplierAttachmentTypeView(BaseAPIView):
         Handle GET requests for listing attachment types.
         """
         queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class SupplierAttachmentHistoryView(ListAPIView):
+    """List historical files for a supplier and a specific attachment type."""
+
+    queryset = SupplierAttachmentHistory.objects.select_related("attachment_type")
+    serializer_class = SupplierAttachmentHistoryOutSerializer
+
+    def get(self, request, supplier_id=None, attachment_type_id=None, *args, **kwargs):
+        """Handle GET requests for attachment history listing."""
+        if not supplier_id or not attachment_type_id:
+            return Response(
+                {
+                    "error": (
+                        "supplier_id and attachment_type_id are required for this endpoint"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = self.get_queryset().filter(
+            supplier_id=supplier_id,
+            attachment_type_id=attachment_type_id,
+        )
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

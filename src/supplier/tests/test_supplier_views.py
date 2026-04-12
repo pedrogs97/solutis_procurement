@@ -12,7 +12,10 @@ from rest_framework.test import APIClient
 
 from src.shared.models import Contact
 from src.supplier.models.approval_workflow import ApprovalStep
-from src.supplier.models.attachments import SupplierAttachment
+from src.supplier.models.attachments import (
+    SupplierAttachment,
+    SupplierAttachmentHistory,
+)
 from src.supplier.models.domain import DomAttachmentType, DomRiskLevel
 from src.supplier.models.supplier import Supplier
 
@@ -177,3 +180,48 @@ def test_attachment_list_returns_attachment_type_id_for_frontend_mapping():
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == 1
     assert response.data[0]["attachmentTypeId"] == attachment_type.pk
+
+
+@pytest.mark.django_db
+def test_attachment_history_view_returns_previous_versions_for_type():
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor historico api",
+        tax_id="11122233344459",
+    )
+    attachment_type = baker.make(DomAttachmentType, name="Documento Fiscal")
+
+    current_attachment = baker.make(
+        SupplierAttachment,
+        supplier=supplier,
+        attachment_type=attachment_type,
+        file=SimpleUploadedFile(
+            "doc-fiscal-v2.pdf",
+            b"fake-content-v2",
+            content_type="application/pdf",
+        ),
+        description="Versao atual",
+    )
+
+    baker.make(
+        SupplierAttachmentHistory,
+        supplier=supplier,
+        attachment_type=attachment_type,
+        source_attachment=current_attachment,
+        file=SimpleUploadedFile(
+            "doc-fiscal-v1.pdf",
+            b"fake-content-v1",
+            content_type="application/pdf",
+        ),
+        description="Versao anterior",
+    )
+
+    client = _build_authenticated_client()
+    response = client.get(
+        f"/api/attachments/history/{supplier.pk}/{attachment_type.pk}/"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 1
+    assert response.data[0]["attachmentTypeId"] == attachment_type.pk
+    assert response.data[0]["description"] == "Versao anterior"

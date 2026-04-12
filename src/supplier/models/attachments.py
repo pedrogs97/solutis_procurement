@@ -86,3 +86,56 @@ class SupplierAttachment(TimestampedModel):
             "supplier",
             "attachment_type",
         )
+
+
+class SupplierAttachmentHistory(TimestampedModel):
+    """Model representing a historical version of a supplier attachment."""
+
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.CASCADE,
+        related_name="attachment_history",
+        help_text="Fornecedor relacionado ao anexo historico",
+    )
+    attachment_type = models.ForeignKey(
+        DomAttachmentType,
+        on_delete=models.PROTECT,
+        related_name="attachment_history",
+        help_text="Tipo de Anexo",
+    )
+    file = models.FileField(
+        upload_to=supplier_attachment_upload_path,
+        help_text="Arquivo do Anexo",
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Descricao do Anexo",
+    )
+    source_attachment = models.ForeignKey(
+        SupplierAttachment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="history_entries",
+        help_text="Anexo atual que originou esta versao",
+    )
+
+    def __str__(self):
+        return (
+            f"Historico {self.attachment_type} - {self.description or 'No Description'}"
+        )
+
+    @property
+    def file_name(self):
+        """Returns only the file name without the path."""
+        if self.file:
+            return os.path.basename(self.file.name)
+        return None
+
+    class Meta(TimestampedModel.Meta):
+        """Meta options for SupplierAttachmentHistory."""
+
+        db_table = "supplier_attachment_history"
+        verbose_name = "Historico de Anexo de Fornecedor"
+        verbose_name_plural = "Historicos de Anexo de Fornecedor"
+        abstract = False

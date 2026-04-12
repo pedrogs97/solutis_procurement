@@ -149,3 +149,25 @@ def supplier_approval_flows(request, supplier_id: int):
         .order_by("step__order")
     )
     return [_serialize_flow(flow) for flow in approve_flow]
+
+
+@router.delete(
+    "/supplier/{supplier_id}/flows/reset/", url_name="approval-reset-flows-v1"
+)
+def reset_supplier_approval_flows(request, supplier_id: int):
+    """Reset and remove the current approval flow history for a supplier."""
+    supplier = get_object_or_404(Supplier, id=supplier_id)
+    queryset = ApprovalFlow.objects.filter(supplier=supplier)
+    deleted_flows = queryset.count()
+    queryset.delete()
+
+    if deleted_flows == 0:
+        raise NotFound("Nenhum fluxo de aprovacao encontrado para este fornecedor.")
+
+    return JsonResponse(
+        {
+            "supplierId": supplier.pk,
+            "deletedFlows": deleted_flows,
+        },
+        status=200,
+    )

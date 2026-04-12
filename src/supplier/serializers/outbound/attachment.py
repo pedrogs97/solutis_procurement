@@ -6,7 +6,10 @@ This module provides serializers for output representations of the SupplierAttac
 from rest_framework import serializers
 
 from src.shared.serializers import BaseSerializer
-from src.supplier.models.attachments import SupplierAttachment
+from src.supplier.models.attachments import (
+    SupplierAttachment,
+    SupplierAttachmentHistory,
+)
 
 
 class SupplierAttachmentOutSerializer(BaseSerializer):
@@ -77,3 +80,29 @@ class SupplierAttachmentBasicOutSerializer(BaseSerializer):
                 return request.build_absolute_uri(obj.get_file_url())
             return obj.get_file_url()
         return None
+
+
+class SupplierAttachmentHistoryOutSerializer(BaseSerializer):
+    """Serializer for historical attachment versions."""
+
+    attachment_type_name = serializers.CharField(
+        source="attachment_type.name", read_only=True
+    )
+    attachment_type_id = serializers.IntegerField(
+        source="attachment_type.id", read_only=True
+    )
+    file_name = serializers.ReadOnlyField()
+
+    class Meta(BaseSerializer.Meta):
+        """Meta options for historical attachment output."""
+
+        model = SupplierAttachmentHistory
+        fields = [
+            "id",
+            "attachment_type_id",
+            "attachment_type_name",
+            "file_name",
+            "description",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]

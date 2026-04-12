@@ -95,6 +95,60 @@ def test_ninja_v1_attachments_upload_list_and_download():
 
 
 @pytest.mark.django_db
+def test_ninja_v1_attachment_history_by_type():
+    supplier = baker.make(
+        Supplier, legal_name="Fornecedor Historico", tax_id="11122233344433"
+    )
+    attachment_type = baker.make(DomAttachmentType, name="Comprovante")
+    client = _auth_client()
+
+    first_upload = client.post(
+        "/api/v1/attachments/upload/",
+        {
+            "supplier": supplier.pk,
+            "attachmentType": attachment_type.pk,
+            "description": "Versao 1",
+            "file": SimpleUploadedFile(
+                "comprovante-v1.pdf",
+                b"fake-content-v1",
+                content_type="application/pdf",
+            ),
+        },
+    )
+    assert first_upload.status_code == status.HTTP_201_CREATED
+
+    second_upload = client.post(
+        "/api/v1/attachments/upload/",
+        {
+            "supplier": supplier.pk,
+            "attachmentType": attachment_type.pk,
+            "description": "Versao 2",
+            "file": SimpleUploadedFile(
+                "comprovante-v2.pdf",
+                b"fake-content-v2",
+                content_type="application/pdf",
+            ),
+        },
+    )
+    assert second_upload.status_code == status.HTTP_201_CREATED
+
+    history_response = client.get(
+        f"/api/v1/attachments/history/{supplier.pk}/{attachment_type.pk}/"
+    )
+    assert history_response.status_code == status.HTTP_200_OK
+    versions = history_response.json()
+    assert len(versions) == 2
+    assert versions[0]["isCurrent"] is True
+    assert versions[0]["description"] == "Versao 2"
+    assert versions[1]["isCurrent"] is False
+    assert versions[1]["description"] == "Versao 1"
+
+    history_id = versions[1]["id"]
+    history_download = client.get(f"/api/v1/attachments/history-download/{history_id}/")
+    assert history_download.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
 def test_ninja_v1_approval_endpoints_steps_and_flows():
     step_one = baker.make(
         ApprovalStep,
