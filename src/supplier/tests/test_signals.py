@@ -84,6 +84,7 @@ class TestSupplierSignals(TestCase):
         org.cost_center = "CC123"
         org.business_unit = "BU1"
         org.responsible_executive = "Executivo"
+        org.responsible_manager = "Gestor"
         if org.payer_type is None:
             org.payer_type = baker.make("supplier.DomPayerType")
         if org.business_sector is None:
