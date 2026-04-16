@@ -31,9 +31,6 @@ router = Router(tags=["evaluation"])
 DUPLICATE_PERIOD_ERROR = (
     "Já existe uma avaliação para este fornecedor no período selecionado."
 )
-LEGACY_PAYLOAD_ERROR = (
-    "Campos legados não são suportados. Use `periodType` e `periodNumber`."
-)
 INVALID_PERIOD_ERROR = "Combinação inválida para tipo e número do período."
 
 
@@ -73,9 +70,6 @@ def _validate_period_payload(data: dict) -> None:
 
 
 def _parse_supplier_evaluation_payload(payload: dict, partial: bool = False):
-    if "period" in payload or "quadrimester" in payload:
-        raise HttpError(400, LEGACY_PAYLOAD_ERROR)
-
     schema = SupplierEvaluationPatchIn if partial else SupplierEvaluationIn
     # ValidationError → handler em exceptions.py
     parsed = schema.model_validate(payload)

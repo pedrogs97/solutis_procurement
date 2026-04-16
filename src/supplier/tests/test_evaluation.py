@@ -157,16 +157,6 @@ class SupplierEvaluationViewSetTestCase(BaseEvaluationViewTestCase):
         self.assertEqual(result["periodNumber"], 2)
         self.assertIsNone(result["finalScore"])
 
-    def test_rejects_legacy_period_payload(self):
-        url = "/api/v1/evaluation/evaluations/"
-        data = {
-            "supplier": self.supplier.pk,
-            "period": 99,
-            "evaluatorName": "Legacy Client",
-        }
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_duplicate_supplier_year_period_returns_400(self):
         url = "/api/v1/evaluation/evaluations/"
         data = {

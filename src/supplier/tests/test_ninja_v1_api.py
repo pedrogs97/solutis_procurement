@@ -363,30 +363,6 @@ def test_ninja_v1_evaluation_endpoints():
 
 
 @pytest.mark.django_db
-def test_ninja_v1_evaluation_rejects_legacy_period_payload():
-    supplier = baker.make(
-        Supplier,
-        legal_name="Fornecedor Antigo",
-        tax_id="11122233344999",
-        category=baker.make(DomCategory, name="Categoria Legacy"),
-        type=baker.make(DomTypeSupplier, name="Tipo Legacy"),
-    )
-    client = _auth_client()
-
-    response = client.post(
-        "/api/v1/evaluation/evaluations/",
-        {
-            "supplier": supplier.pk,
-            "period": 1,
-            "evaluatorName": "Avaliador Legado",
-        },
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-@pytest.mark.django_db
 def test_ninja_v1_evaluation_rejects_mixed_period_type_same_supplier_year():
     supplier = baker.make(
         Supplier,
