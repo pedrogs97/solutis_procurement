@@ -8,8 +8,13 @@ from rest_framework.test import APIClient
 
 from src.supplier.models.approval_workflow import ApprovalStep
 from src.supplier.models.attachments import DomAttachmentType
-from src.supplier.models.domain import DomBusinessSector, DomCategory, DomTypeSupplier
-from src.supplier.models.evaluation import EvaluationCriterion, EvaluationPeriod
+from src.supplier.models.domain import (
+    DomBusinessSector,
+    DomCategory,
+    DomRiskLevel,
+    DomTypeSupplier,
+)
+from src.supplier.models.evaluation import EvaluationCriterion
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
 
@@ -149,6 +154,75 @@ def test_ninja_v1_attachment_history_by_type():
 
 
 @pytest.mark.django_db
+def test_ninja_v1_attachment_type_crud():
+    risk_level = baker.make(DomRiskLevel, name="Alto")
+    client = _auth_client()
+
+    create_response = client.post(
+        "/api/v1/attachment-types/",
+        {"name": "Comprovante Fiscal", "riskLevel": risk_level.pk},
+        format="json",
+    )
+    assert create_response.status_code == status.HTTP_201_CREATED
+    created_payload = create_response.json()
+    assert created_payload["name"] == "Comprovante Fiscal"
+    assert created_payload["riskLevel"] == risk_level.pk
+
+    attachment_type_id = created_payload["id"]
+    patch_response = client.patch(
+        f"/api/v1/attachment-types/{attachment_type_id}/",
+        {"name": "Comprovante Fiscal Atualizado"},
+        format="json",
+    )
+    assert patch_response.status_code == status.HTTP_200_OK
+    assert patch_response.json()["name"] == "Comprovante Fiscal Atualizado"
+
+    delete_response = client.delete(f"/api/v1/attachment-types/{attachment_type_id}/")
+    assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.django_db
+def test_ninja_v1_attachment_type_rejects_invalid_risk_level():
+    client = _auth_client()
+
+    response = client.post(
+        "/api/v1/attachment-types/",
+        {"name": "Comprovante Invalido", "riskLevel": 9999999},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Nivel de risco nao encontrado." in response.json()["detail"]
+
+
+@pytest.mark.django_db
+def test_ninja_v1_attachment_type_delete_rejects_when_in_use():
+    supplier = baker.make(
+        Supplier, legal_name="Fornecedor Attach Delete", tax_id="11122233344455"
+    )
+    attachment_type = baker.make(DomAttachmentType, name="Documento Uso")
+    client = _auth_client()
+
+    upload_response = client.post(
+        "/api/v1/attachments/upload/",
+        {
+            "supplier": supplier.pk,
+            "attachmentType": attachment_type.pk,
+            "description": "Documento em uso",
+            "file": SimpleUploadedFile(
+                "documento.pdf",
+                b"fake-content",
+                content_type="application/pdf",
+            ),
+        },
+    )
+    assert upload_response.status_code == status.HTTP_201_CREATED
+
+    delete_response = client.delete(f"/api/v1/attachment-types/{attachment_type.pk}/")
+    assert delete_response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
 def test_ninja_v1_approval_endpoints_steps_and_flows():
     step_one = baker.make(
         ApprovalStep,
@@ -247,16 +321,6 @@ def test_ninja_v1_evaluation_endpoints():
         category=baker.make(DomCategory, name="Categoria A"),
         type=baker.make(DomTypeSupplier, name="Tipo A"),
     )
-    period = EvaluationPeriod.objects.order_by("year", "period_number").first()
-    if not period:
-        period = baker.make(
-            EvaluationPeriod,
-            name="Primeiro Quadrimestre 2026",
-            start_date="2026-01-01",
-            end_date="2026-04-30",
-            year=2026,
-            period_number=1,
-        )
     criterion = baker.make(
         EvaluationCriterion,
         name="Qualidade",
@@ -270,7 +334,9 @@ def test_ninja_v1_evaluation_endpoints():
         "/api/v1/evaluation/evaluations/",
         {
             "supplier": supplier.pk,
-            "period": period.pk,
+            "evaluationYear": 2026,
+            "periodType": "QUADRIMESTER",
+            "periodNumber": 1,
             "evaluatorName": "Avaliador Teste",
             "comments": "Avaliação inicial",
             "criterionScores": [
@@ -291,3 +357,203 @@ def test_ninja_v1_evaluation_endpoints():
     assert detail_response.status_code == status.HTTP_200_OK
     detail_payload = detail_response.json()
     assert detail_payload["supplier"]["id"] == supplier.pk
+    assert detail_payload["evaluationYear"] == 2026
+    assert detail_payload["periodType"] == "QUADRIMESTER"
+    assert detail_payload["periodNumber"] == 1
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_rejects_legacy_period_payload():
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor Antigo",
+        tax_id="11122233344999",
+        category=baker.make(DomCategory, name="Categoria Legacy"),
+        type=baker.make(DomTypeSupplier, name="Tipo Legacy"),
+    )
+    client = _auth_client()
+
+    response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "period": 1,
+            "evaluatorName": "Avaliador Legado",
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_rejects_mixed_period_type_same_supplier_year():
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor Misto",
+        tax_id="11122233344888",
+        category=baker.make(DomCategory, name="Categoria Misto"),
+        type=baker.make(DomTypeSupplier, name="Tipo Misto"),
+    )
+    criterion = baker.make(
+        EvaluationCriterion,
+        name="Atendimento",
+        description="Qualidade do atendimento",
+        weight="40.00",
+        order=2,
+    )
+    client = _auth_client()
+
+    first_response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "SEMESTER",
+            "periodNumber": 1,
+            "evaluatorName": "Avaliador 1",
+            "criterionScores": [
+                {"criterion": criterion.pk, "score": "70.00", "comments": "ok"}
+            ],
+        },
+        format="json",
+    )
+    assert first_response.status_code == status.HTTP_201_CREATED
+
+    second_response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "QUADRIMESTER",
+            "periodNumber": 2,
+            "evaluatorName": "Avaliador 2",
+        },
+        format="json",
+    )
+
+    assert second_response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_create_with_evaluation_date_returns_iso_string():
+    """POST with evaluationDate must not raise AttributeError on serialization."""
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor Com Data",
+        tax_id="11122233300001",
+        category=baker.make(DomCategory, name="Categoria Data"),
+        type=baker.make(DomTypeSupplier, name="Tipo Data"),
+    )
+    client = _auth_client()
+
+    response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "QUADRIMESTER",
+            "periodNumber": 1,
+            "evaluatorName": "Avaliador Data",
+            "evaluationDate": "2026-04-14",
+        },
+        format="json",
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    data = response.json()
+    assert data["evaluationDate"] == "2026-04-14"
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_put_with_evaluation_date_no_attribute_error():
+    """PUT with evaluationDate must not raise AttributeError on serialization."""
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor PUT Data",
+        tax_id="11122233300002",
+        category=baker.make(DomCategory, name="Categoria PUT"),
+        type=baker.make(DomTypeSupplier, name="Tipo PUT"),
+    )
+    client = _auth_client()
+
+    create_response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "SEMESTER",
+            "periodNumber": 1,
+            "evaluatorName": "Avaliador PUT",
+        },
+        format="json",
+    )
+    assert create_response.status_code == status.HTTP_201_CREATED
+    evaluation_id = create_response.json()["id"]
+
+    put_response = client.put(
+        f"/api/v1/evaluation/evaluations/{evaluation_id}/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "SEMESTER",
+            "periodNumber": 1,
+            "evaluatorName": "Avaliador PUT Atualizado",
+            "evaluationDate": "2026-03-01",
+        },
+        format="json",
+    )
+    assert put_response.status_code == status.HTTP_200_OK
+    assert put_response.json()["evaluationDate"] == "2026-03-01"
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_patch_with_evaluation_date_no_attribute_error():
+    """PATCH with evaluationDate must not raise AttributeError on serialization."""
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor PATCH Data",
+        tax_id="11122233300003",
+        category=baker.make(DomCategory, name="Categoria PATCH"),
+        type=baker.make(DomTypeSupplier, name="Tipo PATCH"),
+    )
+    client = _auth_client()
+
+    create_response = client.post(
+        "/api/v1/evaluation/evaluations/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "SEMESTER",
+            "periodNumber": 2,
+            "evaluatorName": "Avaliador PATCH",
+        },
+        format="json",
+    )
+    assert create_response.status_code == status.HTTP_201_CREATED
+    evaluation_id = create_response.json()["id"]
+
+    patch_response = client.patch(
+        f"/api/v1/evaluation/evaluations/{evaluation_id}/",
+        {"evaluationDate": "2026-02-15"},
+        format="json",
+    )
+    assert patch_response.status_code == status.HTTP_200_OK
+    assert patch_response.json()["evaluationDate"] == "2026-02-15"
+
+
+@pytest.mark.django_db
+def test_legacy_drf_supplier_routes_are_not_exposed_anymore():
+    client = _auth_client()
+
+    legacy_paths = [
+        "/api/suppliers-list/",
+        "/api/domain/business-sectors/",
+        "/api/evaluation/evaluations-list/",
+        "/api/approval/steps/",
+        "/api/attachments-list/1/",
+        "/api/responsibility-matrix/1/",
+    ]
+
+    for path in legacy_paths:
+        response = client.get(path)
+        assert response.status_code == status.HTTP_404_NOT_FOUND

@@ -6,7 +6,8 @@ from typing import Optional
 
 from django.db import transaction
 from django.db.models import Q
-from django.http import FileResponse, JsonResponse
+from django.db.models.deletion import ProtectedError
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from loguru import logger
 from ninja import File, Form, Router
@@ -14,18 +15,20 @@ from ninja.errors import HttpError
 from ninja.files import UploadedFile
 
 from src.api.v1.schemas.attachments import (
+    AttachmentTypeCreateIn,
+    AttachmentTypePatchIn,
     AttachmentTypeOut,
     AttachmentUploadIn,
     AttachmentVersionOut,
     serialize_attachment,
     serialize_attachment_version,
 )
-from src.api.v1.schemas.common import DomainRefOut
 from src.supplier.models.attachments import (
     DomAttachmentType,
     SupplierAttachment,
     SupplierAttachmentHistory,
 )
+from src.supplier.models.domain import DomRiskLevel
 from src.supplier.models.supplier import Supplier
 
 router = Router(tags=["attachments"])
@@ -36,19 +39,34 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 def _validate_upload(payload: AttachmentUploadIn, file: UploadedFile) -> None:
     if not Supplier.objects.filter(pk=payload.supplier).exists():
-        raise HttpError(400, {"supplier": ["Fornecedor nao encontrado."]})
+        raise HttpError(400, "Fornecedor nao encontrado.")
 
     if not DomAttachmentType.objects.filter(pk=payload.attachment_type).exists():
-        raise HttpError(400, {"attachmentType": ["Tipo de anexo nao encontrado."]})
+        raise HttpError(400, "Tipo de anexo nao encontrado.")
 
     if not file:
-        raise HttpError(400, {"file": ["Arquivo e obrigatorio."]})
+        raise HttpError(400, "Arquivo e obrigatorio.")
 
     if file.size > MAX_FILE_SIZE:
-        raise HttpError(400, {"file": ["Arquivo muito grande. Tamanho maximo: 10MB."]})
+        raise HttpError(400, "Arquivo muito grande. Tamanho maximo: 10MB.")
 
     if not any(file.name.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
-        raise HttpError(400, {"file": ["Tipo de arquivo nao permitido."]})
+        raise HttpError(400, "Tipo de arquivo nao permitido.")
+
+
+def _serialize_attachment_type(item: DomAttachmentType) -> dict:
+    return AttachmentTypeOut(
+        id=item.id,
+        name=item.name,
+        risk_level=item.risk_level_id,
+    ).model_dump(by_alias=True)
+
+
+def _validate_risk_level(risk_level_id: Optional[int]) -> None:
+    if risk_level_id is None:
+        return
+    if not DomRiskLevel.objects.filter(pk=risk_level_id).exists():
+        raise HttpError(400, "Nivel de risco nao encontrado.")
 
 
 @router.get("/attachments-list/{supplier_id}/", url_name="supplier-attachment-list-v1")
@@ -73,7 +91,7 @@ def upload_attachment(
         raw_attachment_type = request.POST.get("attachmentType")
         attachment_type = int(raw_attachment_type) if raw_attachment_type else None
     if attachment_type is None:
-        raise HttpError(400, {"attachmentType": ["Este campo e obrigatorio."]})
+        raise HttpError(400, "attachmentType: este campo e obrigatorio.")
 
     payload = AttachmentUploadIn(
         supplier=supplier,
@@ -154,7 +172,7 @@ def download_attachment_history(request, pk: int):
     attachment = get_object_or_404(SupplierAttachmentHistory, pk=pk)
 
     if not attachment.file:
-        return JsonResponse({"error": "Arquivo nao encontrado"}, status=404)
+        return JsonResponse({"detail": "Arquivo nao encontrado"}, status=404)
 
     try:
         content_type, _ = mimetypes.guess_type(attachment.file.name)
@@ -170,7 +188,7 @@ def download_attachment_history(request, pk: int):
         )
     except Exception:  # pragma: no cover - file IO branch
         logger.exception("Falha ao baixar anexo historico", extra={"history_id": pk})
-        return JsonResponse({"error": "Erro interno ao baixar arquivo."}, status=500)
+        return JsonResponse({"detail": "Erro interno ao baixar arquivo."}, status=500)
 
 
 @router.get("/attachments/{pk}/download/", url_name="supplier-attachment-download-v1")
@@ -179,10 +197,10 @@ def download_attachment(request, pk: int):
     attachment = get_object_or_404(SupplierAttachment, pk=pk)
 
     if not attachment.file:
-        return JsonResponse({"error": "Arquivo nao encontrado"}, status=404)
+        return JsonResponse({"detail": "Arquivo nao encontrado"}, status=404)
 
     if attachment.storage_path and not os.path.exists(attachment.storage_path):
-        return JsonResponse({"error": "Arquivo nao existe no servidor"}, status=404)
+        return JsonResponse({"detail": "Arquivo nao existe no servidor"}, status=404)
 
     try:
         content_type, _ = mimetypes.guess_type(attachment.file.name)
@@ -198,7 +216,7 @@ def download_attachment(request, pk: int):
         )
     except Exception:  # pragma: no cover - file IO branch
         logger.exception("Falha ao baixar anexo", extra={"attachment_id": pk})
-        return JsonResponse({"error": "Erro interno ao baixar arquivo."}, status=500)
+        return JsonResponse({"detail": "Erro interno ao baixar arquivo."}, status=500)
 
 
 @router.get("/attachment-types/", url_name="supplier-attachment-type-v1")
@@ -210,18 +228,7 @@ def list_attachment_types(request):
         queryset = queryset.filter(
             Q(risk_level=risk_level) | Q(risk_level__isnull=True)
         )
-    return [
-        AttachmentTypeOut(
-            id=item.id,
-            name=item.name,
-            risk_level=(
-                DomainRefOut.model_validate(item.risk_level)
-                if item.risk_level
-                else None
-            ),
-        ).model_dump(by_alias=True)
-        for item in queryset
-    ]
+    return [_serialize_attachment_type(item) for item in queryset]
 
 
 @router.get("/attachment-types/{pk}/", url_name="supplier-attachment-type-detail-v1")
@@ -231,12 +238,50 @@ def get_attachment_type(request, pk: int):
         DomAttachmentType.objects.select_related("risk_level"),
         pk=pk,
     )
-    return AttachmentTypeOut(
-        id=attachment_type.id,
-        name=attachment_type.name,
-        risk_level=(
-            DomainRefOut.model_validate(attachment_type.risk_level)
-            if attachment_type.risk_level
-            else None
-        ),
-    ).model_dump(by_alias=True)
+    return _serialize_attachment_type(attachment_type)
+
+
+@router.post("/attachment-types/", url_name="supplier-attachment-type-create-v1")
+def create_attachment_type(request, payload: AttachmentTypeCreateIn):
+    """Create an attachment type."""
+    data = payload.model_dump(by_alias=False, exclude_none=False)
+    risk_level_id = data.pop("risk_level", None)
+    _validate_risk_level(risk_level_id)
+    data["risk_level_id"] = risk_level_id
+
+    created = DomAttachmentType.objects.create(**data)
+    return JsonResponse(_serialize_attachment_type(created), status=201)
+
+
+@router.patch("/attachment-types/{pk}/", url_name="supplier-attachment-type-update-v1")
+def patch_attachment_type(request, pk: int, payload: AttachmentTypePatchIn):
+    """Partially update an attachment type."""
+    attachment_type = get_object_or_404(DomAttachmentType, pk=pk)
+
+    data = payload.model_dump(by_alias=False, exclude_unset=True)
+    if "risk_level" in data:
+        _validate_risk_level(data["risk_level"])
+        data["risk_level_id"] = data.pop("risk_level")
+
+    for key, value in data.items():
+        setattr(attachment_type, key, value)
+    attachment_type.save()
+
+    return _serialize_attachment_type(attachment_type)
+
+
+@router.delete(
+    "/attachment-types/{pk}/",
+    url_name="supplier-attachment-type-delete-v1",
+)
+def delete_attachment_type(request, pk: int):
+    """Delete an attachment type."""
+    attachment_type = get_object_or_404(DomAttachmentType, pk=pk)
+    try:
+        attachment_type.delete()
+    except ProtectedError as exc:
+        raise HttpError(
+            400,
+            "Nao e possivel excluir o tipo de anexo pois ele esta em uso.",
+        ) from exc
+    return HttpResponse(status=204)

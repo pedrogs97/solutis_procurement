@@ -24,6 +24,23 @@ from src.supplier.services.approval_workflow import ApprovalWorkflowService
 
 router = Router(tags=["suppliers"])
 
+_SUPPLIER_UNIQUE_FIELD_ERRORS = {
+    "tax_id": ("taxId", "CPF/CNPJ já cadastrado."),
+    "legal_name": ("legalName", "Razão Social já cadastrada."),
+}
+
+
+def _supplier_integrity_error_response(exc: IntegrityError) -> JsonResponse:
+    """Return a 400 with field-level error for known unique constraint violations."""
+    error_text = str(exc).lower()
+    for db_field, (api_field, message) in _SUPPLIER_UNIQUE_FIELD_ERRORS.items():
+        if db_field in error_text:
+            return JsonResponse(
+                {"detail": "Dados inválidos.", "errors": [{"field": api_field, "message": message}]},
+                status=400,
+            )
+    return JsonResponse({"detail": "Dados do fornecedor invalidos."}, status=400)
+
 
 @router.post("/suppliers/", url_name="supplier-v1")
 def create_supplier(request, payload: SupplierCreateIn):
@@ -41,28 +58,33 @@ def create_supplier(request, payload: SupplierCreateIn):
             status=403,
         )
 
-    with transaction.atomic():
-        try:
-            new_instance = apply_supplier_payload(None, payload)
-        except (TypeError, ValueError, IntegrityError) as exc:
-            logger.exception("Falha ao criar fornecedor")
-            raise HttpError(400, "Dados do fornecedor invalidos.") from exc
+    try:
+        with transaction.atomic():
+            try:
+                new_instance = apply_supplier_payload(None, payload)
+            except (TypeError, ValueError) as exc:
+                logger.exception("Falha ao criar fornecedor")
+                raise HttpError(400, "Dados do fornecedor invalidos.") from exc
 
-        initial_approver, _ = Approver.objects.get_or_create(
-            email=user_email,
-            defaults={"name": user_full_name or user_email},
-        )
-
-        if not initial_approver.name:
-            initial_approver.name = user_full_name or user_email
-            initial_approver.save(update_fields=["name"])
-
-        try:
-            ApprovalWorkflowService().initialize_approval_flow(
-                new_instance, initial_approver
+            initial_approver, _ = Approver.objects.get_or_create(
+                email=user_email,
+                defaults={"name": user_full_name or user_email},
             )
-        except ValueError as exc:
-            raise HttpError(400, str(exc)) from exc
+
+            if not initial_approver.name:
+                initial_approver.name = user_full_name or user_email
+                initial_approver.save(update_fields=["name"])
+
+            try:
+                ApprovalWorkflowService().initialize_approval_flow(
+                    new_instance, initial_approver
+                )
+            except ValueError as exc:
+                raise HttpError(400, str(exc)) from exc
+
+    except IntegrityError as exc:
+        logger.exception("Falha ao criar fornecedor — IntegrityError")
+        return _supplier_integrity_error_response(exc)
 
     return JsonResponse(serialize_supplier(new_instance), status=201)
 
@@ -78,7 +100,11 @@ def get_supplier(request, pk: int):
 def put_supplier(request, pk: int, payload: SupplierUpdateIn):
     """Update a supplier with full payload semantics."""
     supplier = get_object_or_404(Supplier, pk=pk)
-    updated = apply_supplier_payload(supplier, payload)
+    try:
+        updated = apply_supplier_payload(supplier, payload)
+    except IntegrityError as exc:
+        logger.exception("Falha ao atualizar fornecedor — IntegrityError")
+        return _supplier_integrity_error_response(exc)
     return serialize_supplier(updated)
 
 
@@ -86,7 +112,11 @@ def put_supplier(request, pk: int, payload: SupplierUpdateIn):
 def patch_supplier(request, pk: int, payload: SupplierUpdateIn):
     """Partially update a supplier."""
     supplier = get_object_or_404(Supplier, pk=pk)
-    updated = apply_supplier_payload(supplier, payload)
+    try:
+        updated = apply_supplier_payload(supplier, payload)
+    except IntegrityError as exc:
+        logger.exception("Falha ao atualizar fornecedor — IntegrityError")
+        return _supplier_integrity_error_response(exc)
     return serialize_supplier(updated)
 
 

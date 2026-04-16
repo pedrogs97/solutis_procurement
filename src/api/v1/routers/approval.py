@@ -151,7 +151,7 @@ def supplier_approval_flows(request, supplier_id: int):
     return [_serialize_flow(flow) for flow in approve_flow]
 
 
-@router.delete(
+@router.post(
     "/supplier/{supplier_id}/flows/reset/", url_name="approval-reset-flows-v1"
 )
 def reset_supplier_approval_flows(request, supplier_id: int):

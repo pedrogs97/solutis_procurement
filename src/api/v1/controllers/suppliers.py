@@ -18,13 +18,31 @@ from src.supplier.models.supplier import (
 )
 
 
+def _to_payload_dict(payload: Any) -> Dict[str, Any]:
+    """Normalize payloads coming from Ninja schemas or plain dictionaries."""
+    if payload is None:
+        return {}
+    if isinstance(payload, dict):
+        return payload
+
+    model_dump = getattr(payload, "model_dump", None)
+    if callable(model_dump):
+        return model_dump(by_alias=False, exclude_none=True)
+
+    dict_method = getattr(payload, "dict", None)
+    if callable(dict_method):
+        return dict_method(by_alias=False, exclude_none=True)
+
+    raise TypeError(f"Unsupported payload type: {type(payload)!r}")
+
+
 def _create_or_update_related(
     instance, attr_name: str, payload: Optional[CamelSchema], model_cls: Type[Model]
 ):
     """Create or update a related object based on the provided payload."""
     if payload is None:
         return
-    data = payload.dict(by_alias=False, exclude_none=True)
+    data = _to_payload_dict(payload)
 
     related_obj = getattr(instance, attr_name, None)
     if related_obj:
@@ -42,7 +60,7 @@ def apply_supplier_payload(
     payload: Union[SupplierCreateIn, SupplierUpdateIn],
 ) -> Supplier:
     """Persist supplier payload and nested objects."""
-    supplier_data = payload.dict(by_alias=False, exclude_none=True)
+    supplier_data = _to_payload_dict(payload)
     nested = {
         "address": supplier_data.pop("address", None),
         "contact": supplier_data.pop("contact", None),

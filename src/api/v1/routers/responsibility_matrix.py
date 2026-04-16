@@ -1,6 +1,6 @@
 """Responsibility matrix endpoints for Ninja API v1."""
 
-from django.http import Http404, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja.errors import HttpError
@@ -47,7 +47,7 @@ def create_responsibility_matrix(request):
     raw_data = get_request_data(request)
     payload = ResponsibilityMatrixIn.model_validate(raw_data)
     if not payload.supplier:
-        raise HttpError(400, {"supplier": ["Este campo é obrigatório."]})
+        raise HttpError(400, "supplier: este campo e obrigatorio.")
 
     supplier = get_object_or_404(Supplier, pk=payload.supplier)
     if hasattr(supplier, "responsibility_matrix") and supplier.responsibility_matrix:
@@ -87,3 +87,15 @@ def patch_responsibility_matrix(request, pk: int):
     matrix = _get_matrix_by_supplier_id(pk)
     updated = _update_matrix(matrix, raw_data)
     return serialize_responsibility_matrix(updated)
+
+
+@router.delete(
+    "/responsibility-matrix/{pk}/",
+    url_name="responsibility-matrix-delete-not-allowed-v1",
+    include_in_schema=False,
+)
+def delete_responsibility_matrix_not_allowed(request, pk: int):
+    """DELETE is not supported — responsibility matrices are removed with the supplier."""
+    response = HttpResponse(status=405)
+    response["Allow"] = "GET, PUT, PATCH"
+    return response

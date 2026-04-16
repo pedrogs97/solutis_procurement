@@ -22,25 +22,11 @@ from django.http import HttpResponse
 from django.urls import include, path
 
 from src.api.v1.api import api_v1
-from src.supplier.urls.approval_workflow import urlpatterns as approval_workflow_urls
-from src.supplier.urls.attachment import urlpatterns as attachment_urls
-from src.supplier.urls.domain import urlpatterns as domain_urls
-from src.supplier.urls.evaluation import urlpatterns as evaluation_urls
-from src.supplier.urls.responsibility_matrix import (
-    urlpatterns as responsibility_matrix_urls,
-)
-from src.supplier.urls.supplier import urlpatterns as supplier_urls
 from src.sync.urls import urlpatterns as sync_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", api_v1.urls),
-    path("api/", include(supplier_urls)),
-    path("api/", include(attachment_urls)),
-    path("api/", include(responsibility_matrix_urls)),
-    path("api/domain/", include(domain_urls)),
-    path("api/evaluation/", include(evaluation_urls)),
-    path("api/approval/", include(approval_workflow_urls)),
     path("api/", lambda request: HttpResponse(status=200), name="healthcheck"),
     path("api/sync/", include(sync_urls)),
 ]

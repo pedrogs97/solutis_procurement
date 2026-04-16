@@ -5,13 +5,15 @@ This module provides serializers for input representations of supplier evaluatio
 
 from typing import Dict
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.transaction import atomic
+from rest_framework import serializers
 
 from src.shared.serializers import BaseSerializer
 from src.supplier.models.evaluation import (
     CriterionScore,
     EvaluationCriterion,
-    EvaluationPeriod,
+    EvaluationPeriodType,
     SupplierEvaluation,
 )
 
@@ -30,22 +32,6 @@ class EvaluationCriterionInSerializer(BaseSerializer):
         model = EvaluationCriterion
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
-
-
-class EvaluationPeriodInSerializer(BaseSerializer):
-    """
-    Serializer for EvaluationPeriod model.
-    Converts field names to camelCase representation.
-    """
-
-    class Meta(BaseSerializer.Meta):
-        """
-        Meta options for the EvaluationPeriod model serializer.
-        """
-
-        model = EvaluationPeriod
-        fields = "__all__"
-        read_only_fields = ("id", "year", "created_at", "updated_at")
 
 
 class CriterionScoreInSerializer(BaseSerializer):
@@ -81,6 +67,21 @@ class SupplierEvaluationInSerializer(BaseSerializer):
         fields = "__all__"
         read_only_fields = ("id", "final_score", "created_at", "updated_at")
 
+    def validate(self, attrs):
+        period_type = attrs.get("period_type")
+        period_number = attrs.get("period_number")
+        if period_type and period_number is not None:
+            valid = (
+                period_type == EvaluationPeriodType.QUADRIMESTER and period_number in [1, 2, 3]
+            ) or (
+                period_type == EvaluationPeriodType.SEMESTER and period_number in [1, 2]
+            )
+            if not valid:
+                raise serializers.ValidationError(
+                    {"period_number": "Combinação inválida para tipo e número do período."}
+                )
+        return attrs
+
     @atomic
     def create(self, validated_data: Dict) -> SupplierEvaluation:
         """
@@ -94,16 +95,26 @@ class SupplierEvaluationInSerializer(BaseSerializer):
         """
         criterion_scores_data = validated_data.pop("criterion_scores", [])
 
-        supplier_evaluation = SupplierEvaluation.objects.create(**validated_data)
+        try:
+            supplier_evaluation = SupplierEvaluation.objects.create(**validated_data)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
 
-        supplier_evaluation.save()
-        supplier_evaluation.refresh_from_db()
         CriterionScore.objects.bulk_create(
             [
                 CriterionScore(evaluation=supplier_evaluation, **score_data)
                 for score_data in criterion_scores_data
             ]
         )
+        try:
+            supplier_evaluation.save()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        supplier_evaluation.refresh_from_db()
 
         return supplier_evaluation
 
@@ -136,6 +147,11 @@ class SupplierEvaluationInSerializer(BaseSerializer):
                 ]
             )
 
-        instance.save()
+        try:
+            instance.save()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
 
         return instance

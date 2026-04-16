@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from src.api.v1.schemas.common import CamelSchema, DomainRefOut
+from src.api.v1.schemas.common import CamelSchema
 from src.supplier.models.attachments import (
     SupplierAttachment,
     SupplierAttachmentHistory,
@@ -44,7 +44,21 @@ class AttachmentTypeOut(CamelSchema):
 
     id: int
     name: str
-    risk_level: Optional[DomainRefOut] = None
+    risk_level: Optional[int] = None
+
+
+class AttachmentTypeCreateIn(CamelSchema):
+    """Payload to create an attachment type."""
+
+    name: str
+    risk_level: Optional[int] = None
+
+
+class AttachmentTypePatchIn(CamelSchema):
+    """Payload to partially update an attachment type."""
+
+    name: Optional[str] = None
+    risk_level: Optional[int] = None
 
 
 def serialize_attachment(instance: SupplierAttachment) -> dict:

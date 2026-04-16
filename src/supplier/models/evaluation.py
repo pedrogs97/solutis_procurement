@@ -1,16 +1,28 @@
 """Evaluation models for supplier assessments."""
 
-from datetime import date, datetime
 from decimal import Decimal
-from typing import List, Optional
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from src.shared.models import TimestampedModel
 from src.supplier.models.supplier import Supplier
+
+
+class EvaluationPeriodType(models.TextChoices):
+    """Supported fixed period types for supplier evaluation."""
+
+    QUADRIMESTER = "QUADRIMESTER", _("Quadrimestre")
+    SEMESTER = "SEMESTER", _("Semestre")
+
+
+MIXED_PERIOD_TYPE_ERROR = _(
+    "Já existe avaliação para este fornecedor nesse ano com outro tipo de período."
+)
 
 
 class EvaluationCriterion(TimestampedModel):
@@ -33,9 +45,7 @@ class EvaluationCriterion(TimestampedModel):
         return f"{self.name} - {self.weight}%"
 
     class Meta(TimestampedModel.Meta):
-        """
-        Meta configuration for EvaluationCriterion model.
-        """
+        """Meta configuration for EvaluationCriterion model."""
 
         db_table = "evaluation_criterion"
         verbose_name = _("Critério de Avaliação")
@@ -44,122 +54,37 @@ class EvaluationCriterion(TimestampedModel):
         abstract = False
 
 
-class EvaluationPeriod(TimestampedModel):
+class SupplierEvaluationYearCycle(TimestampedModel):
     """
-    Model representing evaluation periods for supplier assessments.
-    Defines the time period for supplier evaluations.
+    One period-type lock per supplier and year.
+    Prevents mixing quadrimester and semester in the same supplier/year.
     """
 
-    name = models.CharField(max_length=100, verbose_name=_("Nome do Período"))
-    start_date = models.DateField(verbose_name=_("Data Início"))
-    end_date = models.DateField(verbose_name=_("Data Fim"))
-    year = models.PositiveSmallIntegerField(
-        verbose_name=_("Ano"),
-        editable=False,  # Ano será gerado automaticamente
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.CASCADE,
+        related_name="evaluation_year_cycles",
+        verbose_name=_("Fornecedor"),
     )
-    period_number = models.PositiveSmallIntegerField(
-        verbose_name=_("Número do Período"),
-        validators=[MinValueValidator(1), MaxValueValidator(3)],
-        help_text=_("Número do período no ano (1-3)"),
+    evaluation_year = models.PositiveSmallIntegerField(verbose_name=_("Ano"))
+    period_type = models.CharField(
+        max_length=20,
+        choices=EvaluationPeriodType.choices,
+        verbose_name=_("Tipo de Período"),
     )
-
-    def save(self, *args, **kwargs):
-        """Set the year based on the start_date if not provided."""
-        if not self.year and self.start_date:
-            self.year = self.start_date.year
-
-        elif not self.year:
-            self.year = timezone.now().year
-
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_current_evaluation_period(cls) -> Optional["EvaluationPeriod"]:
-        """
-        Gets the current evaluation period based on today's date.
-
-        Returns:
-            The current EvaluationPeriod or None if not found.
-        """
-        today = date.today()
-
-        current_period = EvaluationPeriod.objects.filter(
-            start_date__lte=today, end_date__gte=today
-        ).first()
-
-        return current_period
-
-    @classmethod
-    def create_evaluation_periods_for_year(
-        cls,
-        year: Optional[int] = None,
-    ) -> List["EvaluationPeriod"]:
-        """
-        Creates the three evaluation periods for a given year.
-        If no year is provided, uses the current year.
-
-        Args:
-            year: The year to create periods for.
-
-        Returns:
-            List of created EvaluationPeriod instances.
-        """
-        if year is None:
-            year = datetime.now().year
-
-        period_dates = [
-            {
-                "name": f"Primeiro Quadrimestre {year}",
-                "start_date": date(year, 1, 1),
-                "end_date": date(year, 4, 30),
-                "period_number": 1,
-            },
-            {
-                "name": f"Segundo Quadrimestre {year}",
-                "start_date": date(year, 5, 1),
-                "end_date": date(year, 8, 31),
-                "period_number": 2,
-            },
-            {
-                "name": f"Terceiro Quadrimestre {year}",
-                "start_date": date(year, 9, 1),
-                "end_date": date(year, 12, 31),
-                "period_number": 3,
-            },
-        ]
-
-        created_periods = []
-
-        period_number_list = [
-            period_data["period_number"] for period_data in period_dates
-        ]
-        existing = EvaluationPeriod.objects.filter(
-            period_number__in=period_number_list, start_date__year=year
-        ).exists()
-
-        if not existing:
-            created_periods = EvaluationPeriod.objects.bulk_create(
-                [
-                    EvaluationPeriod(**period_data, year=year)
-                    for period_data in period_dates
-                ]
-            )
-
-        return created_periods
-
-    def __str__(self):
-        return f"{self.name} ({self.start_date} - {self.end_date})"
 
     class Meta(TimestampedModel.Meta):
-        """
-        Meta configuration for EvaluationPeriod model.
-        """
+        """Meta configuration for SupplierEvaluationYearCycle model."""
 
-        db_table = "evaluation_period"
-        verbose_name = _("Período de Avaliação")
-        verbose_name_plural = _("Períodos de Avaliação")
-        ordering = ["-year", "period_number"]
-        unique_together = [["year", "period_number"]]
+        db_table = "supplier_evaluation_year_cycle"
+        verbose_name = _("Ciclo Anual de Avaliação")
+        verbose_name_plural = _("Ciclos Anuais de Avaliação")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["supplier", "evaluation_year"],
+                name="supplier_eval_year_cycle_unique",
+            )
+        ]
         abstract = False
 
 
@@ -174,11 +99,15 @@ class SupplierEvaluation(TimestampedModel):
         related_name="evaluations",
         verbose_name=_("Fornecedor"),
     )
-    period = models.ForeignKey(
-        EvaluationPeriod,
-        on_delete=models.CASCADE,
-        related_name="evaluations",
-        verbose_name=_("Período"),
+    evaluation_year = models.PositiveSmallIntegerField(verbose_name=_("Ano"))
+    period_type = models.CharField(
+        max_length=20,
+        choices=EvaluationPeriodType.choices,
+        verbose_name=_("Tipo de Período"),
+    )
+    period_number = models.PositiveSmallIntegerField(
+        verbose_name=_("Número do Período"),
+        validators=[MinValueValidator(1), MaxValueValidator(3)],
     )
     evaluator_name = models.CharField(
         max_length=255, verbose_name=_("Nome do Avaliador")
@@ -197,7 +126,7 @@ class SupplierEvaluation(TimestampedModel):
     )
 
     def calculate_final_score(self):
-        """Calculate the final weighted score for this evaluation"""
+        """Calculate the final weighted score for this evaluation."""
         criterion_scores = (
             self.criterion_scores.all() if hasattr(self, "pk") and self.pk else []
         )
@@ -222,42 +151,139 @@ class SupplierEvaluation(TimestampedModel):
 
         return result.quantize(Decimal("0.01"))
 
-    def save(self, *args, **kwargs):
-        """
-        Override save method to set final_score before saving.
-        """
-        self.final_score = self.calculate_final_score()
-        super().save(*args, **kwargs)
+    @staticmethod
+    def _resolve_period_label(period_type: str, period_number: int) -> str:
+        if period_type == EvaluationPeriodType.QUADRIMESTER:
+            return f"{period_number}º Quadrimestre"
+        if period_type == EvaluationPeriodType.SEMESTER:
+            return f"{period_number}º Semestre"
+        return ""
 
-    def get_last_criterion_score(self) -> Optional[EvaluationPeriod]:
-        """
-        Get the last criterion score for the supplier evaluation.
-        """
-        current_period = EvaluationPeriod.get_current_evaluation_period()
+    @property
+    def period_label(self) -> str:
+        """Human-readable period label."""
+        return self._resolve_period_label(self.period_type, self.period_number)
 
-        if not current_period:
-            EvaluationPeriod.create_evaluation_periods_for_year(datetime.now().year)
-            current_period = EvaluationPeriod.get_current_evaluation_period()
-
-        return (
-            self.criterion_scores.select_related("period")
-            .filter(period=current_period)
-            .first()
+    @classmethod
+    def sync_year_cycle_lock(cls, supplier_id: int, evaluation_year: int) -> None:
+        """
+        Keep lock table in sync with existing evaluations for supplier/year.
+        """
+        existing_period_types = list(
+            cls.objects.filter(supplier_id=supplier_id, evaluation_year=evaluation_year)
+            .values_list("period_type", flat=True)
+            .distinct()
         )
 
+        if not existing_period_types:
+            SupplierEvaluationYearCycle.objects.filter(
+                supplier_id=supplier_id, evaluation_year=evaluation_year
+            ).delete()
+            return
+
+        locked_period_type = existing_period_types[0]
+        SupplierEvaluationYearCycle.objects.update_or_create(
+            supplier_id=supplier_id,
+            evaluation_year=evaluation_year,
+            defaults={"period_type": locked_period_type},
+        )
+
+    def _ensure_year_cycle_lock(self) -> None:
+        lock, created = SupplierEvaluationYearCycle.objects.get_or_create(
+            supplier_id=self.supplier_id,
+            evaluation_year=self.evaluation_year,
+            defaults={"period_type": self.period_type},
+        )
+        if not created and lock.period_type != self.period_type:
+            raise ValidationError({"period_type": MIXED_PERIOD_TYPE_ERROR})
+
+    def save(self, *args, **kwargs):
+        """
+        Override save method to set final_score and enforce annual cycle lock.
+        """
+        previous_state = None
+        if self.pk:
+            previous_state = (
+                SupplierEvaluation.objects.filter(pk=self.pk)
+                .values("supplier_id", "evaluation_year")
+                .first()
+            )
+
+        self.final_score = self.calculate_final_score()
+
+        with transaction.atomic():
+            self._ensure_year_cycle_lock()
+            super().save(*args, **kwargs)
+            self.sync_year_cycle_lock(self.supplier_id, self.evaluation_year)
+
+            if previous_state and (
+                previous_state["supplier_id"] != self.supplier_id
+                or previous_state["evaluation_year"] != self.evaluation_year
+            ):
+                self.sync_year_cycle_lock(
+                    previous_state["supplier_id"], previous_state["evaluation_year"]
+                )
+
+    def delete(self, *args, **kwargs):
+        """
+        Override delete method to keep annual cycle locks consistent.
+        """
+        previous_supplier_id = self.supplier_id
+        previous_evaluation_year = self.evaluation_year
+
+        with transaction.atomic():
+            result = super().delete(*args, **kwargs)
+            self.sync_year_cycle_lock(previous_supplier_id, previous_evaluation_year)
+
+        return result
+
     def __str__(self):
-        return f"Avaliação de {self.supplier} - {self.period} ({self.final_score}%)"
+        return (
+            f"Avaliação de {self.supplier} - {self.period_label}/{self.evaluation_year} "
+            f"({self.final_score}%)"
+        )
 
     class Meta(TimestampedModel.Meta):
-        """
-        Meta configuration for SupplierEvaluation model.
-        """
+        """Meta configuration for SupplierEvaluation model."""
 
         db_table = "supplier_evaluation"
         verbose_name = _("Avaliação de Fornecedor")
         verbose_name_plural = _("Avaliações de Fornecedores")
-        ordering = ["-evaluation_date"]
-        unique_together = [["supplier", "period"]]
+        ordering = [
+            "-evaluation_year",
+            "period_type",
+            "-period_number",
+            "-evaluation_date",
+            "-id",
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(
+                    period_type__in=[
+                        EvaluationPeriodType.QUADRIMESTER,
+                        EvaluationPeriodType.SEMESTER,
+                    ]
+                ),
+                name="supplier_eval_period_type_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        period_type=EvaluationPeriodType.QUADRIMESTER,
+                        period_number__in=[1, 2, 3],
+                    )
+                    | Q(
+                        period_type=EvaluationPeriodType.SEMESTER,
+                        period_number__in=[1, 2],
+                    )
+                ),
+                name="supplier_eval_period_number_by_type_valid",
+            ),
+            models.UniqueConstraint(
+                fields=["supplier", "evaluation_year", "period_type", "period_number"],
+                name="supplier_eval_supplier_year_type_number_uniq",
+            ),
+        ]
         abstract = False
 
 
@@ -290,9 +316,7 @@ class CriterionScore(TimestampedModel):
         return f"{self.criterion.name}: {self.score}%"
 
     class Meta(TimestampedModel.Meta):
-        """
-        Meta configuration for CriterionScore model.
-        """
+        """Meta configuration for CriterionScore model."""
 
         db_table = "criterion_score"
         verbose_name = _("Nota de Critério")

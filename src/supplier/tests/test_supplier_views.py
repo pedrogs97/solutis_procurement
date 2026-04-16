@@ -87,12 +87,13 @@ def test_create_supplier_allows_missing_optional_nested_blocks(mock_get_address)
         "companyInformation": {},
     }
 
-    response = client.post("/api/suppliers/", payload, format="json")
+    response = client.post("/api/v1/suppliers/", payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.data["legalName"] == "Fornecedor API"
-    assert response.data["paymentDetails"] is None
-    assert response.data["organizationalDetails"] is None
+    response_payload = response.json()
+    assert response_payload["legalName"] == "Fornecedor API"
+    assert response_payload["paymentDetails"] is None
+    assert response_payload["organizationalDetails"] is None
 
 
 @pytest.mark.django_db
@@ -119,7 +120,9 @@ def test_patch_supplier_allows_clearing_contact_email():
         }
     }
 
-    response = client.patch(f"/api/suppliers/{supplier.pk}/", payload, format="json")
+    response = client.patch(
+        f"/api/v1/suppliers/{supplier.pk}/", payload, format="json"
+    )
 
     assert response.status_code == status.HTTP_200_OK
     supplier.refresh_from_db()
@@ -174,10 +177,11 @@ def test_create_supplier_accepts_responsible_manager(mock_get_address):
         },
     }
 
-    response = client.post("/api/suppliers/", payload, format="json")
+    response = client.post("/api/v1/suppliers/", payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.data["organizationalDetails"]["responsibleManager"] == "João Souza"
+    response_payload = response.json()
+    assert response_payload["organizationalDetails"]["responsibleManager"] == "João Souza"
 
 
 @pytest.mark.django_db
@@ -242,21 +246,22 @@ def test_create_supplier_accepts_payload_without_hidden_front_fields(mock_get_ad
         },
     }
 
-    response = client.post("/api/suppliers/", payload, format="json")
+    response = client.post("/api/v1/suppliers/", payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.data["organizationalDetails"]["responsibleManager"] == "João Souza"
-    assert response.data["organizationalDetails"]["payerType"] is None
-    assert response.data["organizationalDetails"]["taxpayerClassification"] is None
-    assert response.data["organizationalDetails"]["publicEntity"] is None
-    assert response.data["fiscalDetails"]["issWithholding"] is None
-    assert response.data["fiscalDetails"]["issRegime"] is None
-    assert response.data["fiscalDetails"]["withholdingTaxNature"] is None
-    assert response.data["companyInformation"]["taxationRegime"] is None
-    assert response.data["companyInformation"]["icmsTaxpayer"] is None
-    assert response.data["companyInformation"]["incomeType"] is None
-    assert response.data["companyInformation"]["taxationMethod"] is None
-    assert response.data["companyInformation"]["customerType"] is None
+    response_payload = response.json()
+    assert response_payload["organizationalDetails"]["responsibleManager"] == "João Souza"
+    assert response_payload["organizationalDetails"]["payerType"] is None
+    assert response_payload["organizationalDetails"]["taxpayerClassification"] is None
+    assert response_payload["organizationalDetails"]["publicEntity"] is None
+    assert response_payload["fiscalDetails"]["issWithholding"] is None
+    assert response_payload["fiscalDetails"]["issRegime"] is None
+    assert response_payload["fiscalDetails"]["withholdingTaxNature"] is None
+    assert response_payload["companyInformation"]["taxationRegime"] is None
+    assert response_payload["companyInformation"]["icmsTaxpayer"] is None
+    assert response_payload["companyInformation"]["incomeType"] is None
+    assert response_payload["companyInformation"]["taxationMethod"] is None
+    assert response_payload["companyInformation"]["customerType"] is None
 
 
 @pytest.mark.django_db
@@ -272,11 +277,11 @@ def test_create_supplier_without_approval_steps_returns_validation_error():
         "taxId": "11122233344457",
     }
 
-    response = client.post("/api/suppliers/", payload, format="json")
+    response = client.post("/api/v1/suppliers/", payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "approvalWorkflow" in response.data
-    assert "Nenhum passo de aprovação definido." in response.data["approvalWorkflow"][0]
+    response_payload = response.json()
+    assert "Nenhum passo de aprovação definido." in response_payload["detail"]
     assert not Supplier.objects.filter(legal_name=payload["legalName"]).exists()
 
 
@@ -308,11 +313,12 @@ def test_attachment_list_returns_attachment_type_id_for_frontend_mapping():
     )
 
     client = _build_authenticated_client()
-    response = client.get(f"/api/attachments-list/{supplier.pk}/")
+    response = client.get(f"/api/v1/attachments-list/{supplier.pk}/")
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]["attachmentTypeId"] == attachment_type.pk
+    response_payload = response.json()
+    assert len(response_payload) == 1
+    assert response_payload[0]["attachmentTypeId"] == attachment_type.pk
 
 
 @pytest.mark.django_db
@@ -351,10 +357,15 @@ def test_attachment_history_view_returns_previous_versions_for_type():
 
     client = _build_authenticated_client()
     response = client.get(
-        f"/api/attachments/history/{supplier.pk}/{attachment_type.pk}/"
+        f"/api/v1/attachments/history/{supplier.pk}/{attachment_type.pk}/"
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]["attachmentTypeId"] == attachment_type.pk
-    assert response.data[0]["description"] == "Versao anterior"
+    response_payload = response.json()
+    assert len(response_payload) == 2
+    assert response_payload[0]["attachmentTypeId"] == attachment_type.pk
+    assert response_payload[0]["description"] == "Versao atual"
+    assert response_payload[0]["isCurrent"] is True
+    assert response_payload[1]["attachmentTypeId"] == attachment_type.pk
+    assert response_payload[1]["description"] == "Versao anterior"
+    assert response_payload[1]["isCurrent"] is False

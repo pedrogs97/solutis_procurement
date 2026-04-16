@@ -54,7 +54,7 @@ class SupplierEvaluationListView(ListAPIView):
     View for listing supplier evaluations.
     """
 
-    queryset = SupplierEvaluation.objects.all().select_related("supplier", "period")
+    queryset = SupplierEvaluation.objects.all().select_related("supplier")
     serializer_class = SupplierEvaluationSerializer
     filterset_class = SupplierEvaluationFilters
 
@@ -64,7 +64,7 @@ class SupplierEvaluationView(BaseAPIView):
     View for managing supplier evaluations CRUD operations.
     """
 
-    queryset = SupplierEvaluation.objects.all().select_related("supplier", "period")
+    queryset = SupplierEvaluation.objects.all().select_related("supplier")
     serializer_class_in = SupplierEvaluationInSerializer
     serializer_class_out = SupplierEvaluationSerializer
 
@@ -88,7 +88,7 @@ class EvaluationSummaryView(BaseAPIView):
         """
         Get a summary of all evaluations.
         """
-        queryset = SupplierEvaluation.objects.all().select_related("supplier", "period")
+        queryset = SupplierEvaluation.objects.all().select_related("supplier")
         serializer = EvaluationSummarySerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -111,7 +111,11 @@ class SupplierHistoryView(BaseAPIView):
 
         supplier = get_object_or_404(Supplier, pk=supplier_id)
         evaluations = SupplierEvaluation.objects.filter(supplier=supplier).order_by(
-            "-evaluation_date"
+            "-evaluation_year",
+            "period_type",
+            "-period_number",
+            "-evaluation_date",
+            "-id",
         )
 
         serializer = SupplierEvaluationHistorySerializer(evaluations, many=True)

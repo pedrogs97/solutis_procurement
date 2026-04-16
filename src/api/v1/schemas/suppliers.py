@@ -4,6 +4,7 @@ from typing import Any, Optional
 
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
 from src.supplier.models.supplier import Supplier
+from src.utils.parse import to_camel_case
 
 
 class AddressPayload(CamelSchema):
@@ -65,6 +66,7 @@ class OrganizationalDetailsPayload(CamelSchema):
     cost_center: Optional[str] = None
     business_unit: Optional[str] = None
     responsible_executive: Optional[str] = None
+    responsible_manager: Optional[str] = None
     payer_type: Optional[int] = None
     business_sector: Optional[int] = None
     taxpayer_classification: Optional[int] = None
@@ -149,14 +151,16 @@ def _serialize_model(model):
     for field in model._meta.fields:  # pylint: disable=protected-access
         if field.name in {"id", "created_at", "updated_at"}:
             continue
+        key = to_camel_case(field.name)
         if field.is_relation:
-            data[field.name] = getattr(model, field.attname)
+            data[key] = getattr(model, field.attname)
             continue
-        data[field.name] = getattr(model, field.name)
+        value = getattr(model, field.name)
+        data[key] = value.isoformat() if hasattr(value, "isoformat") else value
     data["id"] = model.id
     data["createdAt"] = model.created_at.isoformat() if model.created_at else None
     data["updatedAt"] = model.updated_at.isoformat() if model.updated_at else None
-    return CamelSchema.model_validate(data).model_dump(by_alias=True)
+    return data
 
 
 def serialize_supplier(instance: Supplier) -> dict[str, Any]:

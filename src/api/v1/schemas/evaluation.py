@@ -1,6 +1,7 @@
 """Evaluation schemas and serializers for Ninja v1."""
 # pylint: disable=duplicate-code
 
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 
@@ -11,7 +12,7 @@ from src.api.v1.schemas.suppliers import serialize_supplier
 from src.supplier.models.evaluation import (
     CriterionScore,
     EvaluationCriterion,
-    EvaluationPeriod,
+    EvaluationPeriodType,
     SupplierEvaluation,
 )
 
@@ -20,6 +21,14 @@ def _decimal_to_str(value: Optional[Decimal]) -> Optional[str]:
     if value is None:
         return None
     return f"{value:.2f}"
+
+
+def _period_label(period_type: str, period_number: int) -> str:
+    if period_type == EvaluationPeriodType.QUADRIMESTER:
+        return f"{period_number}º Quadrimestre"
+    if period_type == EvaluationPeriodType.SEMESTER:
+        return f"{period_number}º Semestre"
+    return ""
 
 
 class EvaluationCriterionIn(CamelSchema):
@@ -58,24 +67,15 @@ class CriterionScoreIn(CamelSchema):
     comments: str = ""
 
 
-class EvaluationPeriodOut(CamelSchema):
-    """Serialized evaluation period."""
-
-    id: int
-    name: str
-    start_date: str
-    end_date: str
-    year: int
-    period_number: int
-
-
 class SupplierEvaluationIn(CamelSchema):
     """Payload for supplier evaluation create/update."""
 
     supplier: int
-    period: int
+    evaluation_year: int
+    period_type: str
+    period_number: int
     evaluator_name: str
-    evaluation_date: Optional[str] = None
+    evaluation_date: Optional[date] = None
     comments: str = ""
     criterion_scores: Optional[list[CriterionScoreIn]] = None
 
@@ -84,9 +84,11 @@ class SupplierEvaluationPatchIn(CamelSchema):
     """Payload for partial supplier evaluation updates."""
 
     supplier: Optional[int] = None
-    period: Optional[int] = None
+    evaluation_year: Optional[int] = None
+    period_type: Optional[str] = None
+    period_number: Optional[int] = None
     evaluator_name: Optional[str] = None
-    evaluation_date: Optional[str] = None
+    evaluation_date: Optional[date] = None
     comments: Optional[str] = None
     criterion_scores: Optional[list[CriterionScoreIn]] = None
 
@@ -99,18 +101,6 @@ def serialize_evaluation_criterion(item: EvaluationCriterion) -> dict:
         description=item.description,
         weight=_decimal_to_str(item.weight) or "0.00",
         order=item.order,
-    ).model_dump(by_alias=True)
-
-
-def serialize_period(item: EvaluationPeriod) -> dict:
-    """Serialize evaluation period."""
-    return EvaluationPeriodOut(
-        id=item.id,
-        name=item.name,
-        start_date=item.start_date.isoformat(),
-        end_date=item.end_date.isoformat(),
-        year=item.year,
-        period_number=item.period_number,
     ).model_dump(by_alias=True)
 
 
@@ -129,7 +119,10 @@ def serialize_supplier_evaluation(item: SupplierEvaluation) -> dict:
     return {
         "id": item.id,
         "supplier": serialize_supplier(item.supplier),
-        "period": serialize_period(item.period),
+        "evaluationYear": item.evaluation_year,
+        "periodType": item.period_type,
+        "periodNumber": item.period_number,
+        "periodLabel": _period_label(item.period_type, item.period_number),
         "evaluatorName": item.evaluator_name,
         "evaluationDate": item.evaluation_date.isoformat()
         if item.evaluation_date
@@ -206,8 +199,11 @@ def serialize_supplier_evaluation_detail(item: SupplierEvaluation) -> dict:
     """Serialize detailed supplier evaluation output."""
     return {
         "id": item.id,
-        "period": serialize_period(item.period),
         "supplier": serialize_supplier(item.supplier),
+        "evaluationYear": item.evaluation_year,
+        "periodType": item.period_type,
+        "periodNumber": item.period_number,
+        "periodLabel": _period_label(item.period_type, item.period_number),
         "evaluatorName": item.evaluator_name,
         "evaluationDate": item.evaluation_date.isoformat()
         if item.evaluation_date
@@ -232,9 +228,10 @@ def serialize_evaluation_summary(item: SupplierEvaluation) -> dict:
         "supplier": item.supplier_id,
         "supplierName": item.supplier.legal_name,
         "supplierTradeName": item.supplier.trade_name,
-        "periodName": item.period.name,
-        "periodYear": item.period.year,
-        "periodNumber": item.period.period_number,
+        "evaluationYear": item.evaluation_year,
+        "periodType": item.period_type,
+        "periodNumber": item.period_number,
+        "periodLabel": _period_label(item.period_type, item.period_number),
         "finalScore": _decimal_to_str(item.final_score),
         "evaluationDate": item.evaluation_date.isoformat()
         if item.evaluation_date
@@ -246,7 +243,10 @@ def serialize_evaluation_history(item: SupplierEvaluation) -> dict:
     """Serialize supplier evaluation history item."""
     return {
         "id": item.id,
-        "period": serialize_period(item.period),
+        "evaluationYear": item.evaluation_year,
+        "periodType": item.period_type,
+        "periodNumber": item.period_number,
+        "periodLabel": _period_label(item.period_type, item.period_number),
         "evaluationDate": item.evaluation_date.isoformat()
         if item.evaluation_date
         else None,

@@ -11,7 +11,6 @@ from src.shared.serializers import BaseSerializer
 from src.supplier.models.evaluation import (
     CriterionScore,
     EvaluationCriterion,
-    EvaluationPeriod,
     SupplierEvaluation,
 )
 from src.supplier.serializers.outbound.supplier import SupplierOutSerializer
@@ -30,21 +29,6 @@ class EvaluationCriterionSerializer(BaseSerializer):
 
         model = EvaluationCriterion
         fields = ["id", "name", "description", "weight", "order"]
-
-
-class EvaluationPeriodSerializer(BaseSerializer):
-    """
-    Serializer for EvaluationPeriod model output.
-    Converts field names to camelCase representation.
-    """
-
-    class Meta(BaseSerializer.Meta):
-        """
-        Meta options for the EvaluationPeriod model serializer.
-        """
-
-        model = EvaluationPeriod
-        fields = ["id", "name", "start_date", "end_date", "year", "period_number"]
 
 
 class CriterionScoreSerializer(BaseSerializer):
@@ -71,7 +55,7 @@ class SupplierEvaluationSerializer(BaseSerializer):
     """
 
     supplier = SupplierOutSerializer(read_only=True)
-    period = EvaluationPeriodSerializer(read_only=True)
+    period_label = serializers.CharField(read_only=True)
 
     class Meta(BaseSerializer.Meta):
         """
@@ -82,7 +66,10 @@ class SupplierEvaluationSerializer(BaseSerializer):
         fields = (
             "id",
             "supplier",
-            "period",
+            "evaluation_year",
+            "period_type",
+            "period_number",
+            "period_label",
             "evaluator_name",
             "evaluation_date",
             "comments",
@@ -96,9 +83,9 @@ class SupplierEvaluationDetailSerializer(BaseSerializer):
     Includes all related data for a comprehensive view.
     """
 
-    period = EvaluationPeriodSerializer(read_only=True)
     supplier = SupplierOutSerializer(read_only=True)
     criterion_scores = CriterionScoreSerializer(many=True, read_only=True)
+    period_label = serializers.CharField(read_only=True)
 
     # Estatísticas de avaliação
     average_score = serializers.SerializerMethodField()
@@ -191,11 +178,7 @@ class EvaluationSummarySerializer(BaseSerializer):
     Provides an overview of evaluation scores for a supplier across periods.
     """
 
-    period_name = serializers.CharField(source="period.name", read_only=True)
-    period_year = serializers.IntegerField(source="period.year", read_only=True)
-    period_number = serializers.IntegerField(
-        source="period.period_number", read_only=True
-    )
+    period_label = serializers.CharField(read_only=True)
     supplier_name = serializers.CharField(source="supplier.legal_name", read_only=True)
     supplier_trade_name = serializers.CharField(
         source="supplier.trade_name", read_only=True
@@ -212,9 +195,10 @@ class EvaluationSummarySerializer(BaseSerializer):
             "supplier",
             "supplier_name",
             "supplier_trade_name",
-            "period_name",
-            "period_year",
+            "evaluation_year",
+            "period_type",
             "period_number",
+            "period_label",
             "final_score",
             "evaluation_date",
         )
@@ -226,7 +210,7 @@ class SupplierEvaluationHistorySerializer(BaseSerializer):
     Includes trend analysis and comparison between periods.
     """
 
-    period = EvaluationPeriodSerializer(read_only=True)
+    period_label = serializers.CharField(read_only=True)
 
     class Meta(BaseSerializer.Meta):
         """
@@ -236,7 +220,10 @@ class SupplierEvaluationHistorySerializer(BaseSerializer):
         model = SupplierEvaluation
         fields = (
             "id",
-            "period",
+            "evaluation_year",
+            "period_type",
+            "period_number",
+            "period_label",
             "evaluation_date",
             "evaluator_name",
             "final_score",
