@@ -10,15 +10,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from src.shared.models import TimestampedModel
+from src.supplier.models.choices.evaluation import EvaluationPeriodType
 from src.supplier.models.supplier import Supplier
-
-
-class EvaluationPeriodType(models.TextChoices):
-    """Supported fixed period types for supplier evaluation."""
-
-    QUADRIMESTER = "QUADRIMESTER", _("Quadrimestre")
-    SEMESTER = "SEMESTER", _("Semestre")
-
 
 MIXED_PERIOD_TYPE_ERROR = _(
     "Já existe avaliação para este fornecedor nesse ano com outro tipo de período."
@@ -163,6 +156,19 @@ class SupplierEvaluation(TimestampedModel):
     def period_label(self) -> str:
         """Human-readable period label."""
         return self._resolve_period_label(self.period_type, self.period_number)
+
+    @property
+    def final_classification(self) -> str:
+        """Human-readable final classification."""
+        if self.final_score is None:
+            return ""
+        if self.final_score >= 95:
+            return "Excelente"
+        if self.final_score >= 90:
+            return "Muito Bom"
+        if self.final_score >= 80:
+            return "Regular"
+        return "Insatisfatório"
 
     @classmethod
     def sync_year_cycle_lock(cls, supplier_id: int, evaluation_year: int) -> None:

@@ -1,4 +1,5 @@
 """Evaluation schemas and serializers for Ninja v1."""
+
 # pylint: disable=duplicate-code
 
 from datetime import date
@@ -124,9 +125,9 @@ def serialize_supplier_evaluation(item: SupplierEvaluation) -> dict:
         "periodNumber": item.period_number,
         "periodLabel": _period_label(item.period_type, item.period_number),
         "evaluatorName": item.evaluator_name,
-        "evaluationDate": item.evaluation_date.isoformat()
-        if item.evaluation_date
-        else None,
+        "evaluationDate": (
+            item.evaluation_date.isoformat() if item.evaluation_date else None
+        ),
         "comments": item.comments,
         "finalScore": _decimal_to_str(item.final_score),
     }
@@ -205,9 +206,9 @@ def serialize_supplier_evaluation_detail(item: SupplierEvaluation) -> dict:
         "periodNumber": item.period_number,
         "periodLabel": _period_label(item.period_type, item.period_number),
         "evaluatorName": item.evaluator_name,
-        "evaluationDate": item.evaluation_date.isoformat()
-        if item.evaluation_date
-        else None,
+        "evaluationDate": (
+            item.evaluation_date.isoformat() if item.evaluation_date else None
+        ),
         "comments": item.comments,
         "finalScore": _decimal_to_str(item.final_score),
         "criterionScores": [
@@ -233,9 +234,10 @@ def serialize_evaluation_summary(item: SupplierEvaluation) -> dict:
         "periodNumber": item.period_number,
         "periodLabel": _period_label(item.period_type, item.period_number),
         "finalScore": _decimal_to_str(item.final_score),
-        "evaluationDate": item.evaluation_date.isoformat()
-        if item.evaluation_date
-        else None,
+        "evaluationDate": (
+            item.evaluation_date.isoformat() if item.evaluation_date else None
+        ),
+        "finalClassification": item.final_classification,
     }
 
 
@@ -247,9 +249,9 @@ def serialize_evaluation_history(item: SupplierEvaluation) -> dict:
         "periodType": item.period_type,
         "periodNumber": item.period_number,
         "periodLabel": _period_label(item.period_type, item.period_number),
-        "evaluationDate": item.evaluation_date.isoformat()
-        if item.evaluation_date
-        else None,
+        "evaluationDate": (
+            item.evaluation_date.isoformat() if item.evaluation_date else None
+        ),
         "evaluatorName": item.evaluator_name,
         "finalScore": _decimal_to_str(item.final_score),
         "comments": item.comments,
