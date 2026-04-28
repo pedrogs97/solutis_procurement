@@ -57,8 +57,8 @@ class PaymentDetailsPayload(CamelSchema):
     bank: Optional[str] = None
     bank_code: Optional[str] = None
     agency: Optional[str] = None
-    payment_method: Optional[int] = None
-    pix_key_type: Optional[int] = None
+    payment_method_id: Optional[int] = Field(alias="paymentMethod", default=None)
+    pix_key_type_id: Optional[int] = Field(alias="pixKeyType", default=None)
     pix_key: Optional[str] = None
 
 
@@ -69,32 +69,36 @@ class OrganizationalDetailsPayload(CamelSchema):
     business_unit: Optional[str] = None
     responsible_executive: Optional[str] = None
     responsible_manager: Optional[str] = None
-    payer_type: Optional[int] = None
-    business_sector: Optional[int] = None
-    taxpayer_classification: Optional[int] = None
-    public_entity: Optional[int] = None
+    payer_type_id: Optional[int] = Field(alias="payerType", default=None)
+    business_sector_id: Optional[int] = Field(alias="businessSector", default=None)
+    taxpayer_classification_id: Optional[int] = Field(
+        alias="taxpayerClassification", default=None
+    )
+    public_entity_id: Optional[int] = Field(alias="publicEntity", default=None)
 
 
 class FiscalDetailsPayload(CamelSchema):
     """Fiscal details payload used in supplier create/update."""
 
-    iss_withholding: Optional[int] = None
-    iss_regime: Optional[int] = None
+    iss_withholding_id: Optional[int] = Field(alias="issWithholding", default=None)
+    iss_regime_id: Optional[int] = Field(alias="issRegime", default=None)
     iss_taxpayer: Optional[bool] = None
     simples_nacional_participant: Optional[bool] = None
     cooperative_member: Optional[bool] = None
-    withholding_tax_nature: Optional[int] = None
+    withholding_tax_nature_id: Optional[int] = Field(
+        alias="withholdingTaxNature", default=None
+    )
 
 
 class CompanyInformationPayload(CamelSchema):
     """Company information payload used in supplier create/update."""
 
-    company_size: Optional[int] = None
-    icms_taxpayer: Optional[int] = None
-    taxation_regime: Optional[int] = None
-    income_type: Optional[int] = None
-    taxation_method: Optional[int] = None
-    customer_type: Optional[int] = None
+    company_size_id: Optional[int] = Field(alias="companySize", default=None)
+    icms_taxpayer: Optional[bool] = None
+    taxation_regime_id: Optional[int] = Field(alias="taxationRegime", default=None)
+    income_type_id: Optional[int] = Field(alias="incomeType", default=None)
+    taxation_method_id: Optional[int] = Field(alias="taxationMethod", default=None)
+    customer_type_id: Optional[int] = Field(alias="customerType", default=None)
     nit: Optional[str] = None
 
 
