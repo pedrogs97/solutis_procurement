@@ -2,6 +2,8 @@
 
 from typing import Any, Optional
 
+from pydantic import Field
+
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
 from src.supplier.models.supplier import Supplier
 from src.utils.parse import to_camel_case
@@ -104,10 +106,10 @@ class SupplierCreateIn(CamelSchema):
     trade_name: Optional[str] = None
     state_business_registration: Optional[str] = None
     municipal_business_registration: Optional[str] = None
-    classification: Optional[int] = None
-    category: Optional[int] = None
-    risk_level: Optional[int] = None
-    type: Optional[int] = None
+    classification_id: Optional[int] = Field(alias="classification", default=None)
+    category_id: Optional[int] = Field(alias="category", default=None)
+    risk_level_id: Optional[int] = Field(alias="riskLevel", default=None)
+    type_id: Optional[int] = Field(alias="type", default=None)
     address: Optional[AddressPayload] = None
     contact: Optional[ContactPayload] = None
     payment_details: Optional[PaymentDetailsPayload] = None
@@ -125,10 +127,10 @@ class SupplierUpdateIn(CamelSchema):
     trade_name: Optional[str] = None
     state_business_registration: Optional[str] = None
     municipal_business_registration: Optional[str] = None
-    classification: Optional[int] = None
-    category: Optional[int] = None
-    risk_level: Optional[int] = None
-    type: Optional[int] = None
+    classification_id: Optional[int] = Field(alias="classification", default=None)
+    category_id: Optional[int] = Field(alias="category", default=None)
+    risk_level_id: Optional[int] = Field(alias="riskLevel", default=None)
+    type_id: Optional[int] = Field(alias="type", default=None)
     address: Optional[AddressPayload] = None
     contact: Optional[ContactPayload] = None
     payment_details: Optional[PaymentDetailsPayload] = None
