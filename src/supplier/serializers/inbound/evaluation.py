@@ -68,17 +68,23 @@ class SupplierEvaluationInSerializer(BaseSerializer):
         read_only_fields = ("id", "final_score", "created_at", "updated_at")
 
     def validate(self, attrs):
+        """
+        Validate the supplier evaluation data.
+        """
         period_type = attrs.get("period_type")
         period_number = attrs.get("period_number")
         if period_type and period_number is not None:
             valid = (
-                period_type == EvaluationPeriodType.QUADRIMESTER and period_number in [1, 2, 3]
+                period_type == EvaluationPeriodType.QUADRIMESTER
+                and period_number in [1, 2, 3]
             ) or (
                 period_type == EvaluationPeriodType.SEMESTER and period_number in [1, 2]
             )
             if not valid:
                 raise serializers.ValidationError(
-                    {"period_number": "Combinação inválida para tipo e número do período."}
+                    {
+                        "period_number": "Combinação inválida para tipo e número do período."
+                    }
                 )
         return attrs
 

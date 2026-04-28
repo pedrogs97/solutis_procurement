@@ -13,18 +13,27 @@ from django.shortcuts import get_object_or_404
 from loguru import logger
 from ninja import Query, Router
 from ninja.errors import HttpError
+
 from src.api.v1.pagination import build_page_link
 from src.api.v1.schemas.evaluation import (
-    CriterionScoreIn, EvaluationCriterionIn, EvaluationCriterionPatchIn,
-    SupplierEvaluationIn, SupplierEvaluationPatchIn,
-    serialize_evaluation_criterion, serialize_evaluation_history,
-    serialize_evaluation_summary, serialize_supplier_evaluation,
-    serialize_supplier_evaluation_detail)
-from src.supplier.models.evaluation import (MIXED_PERIOD_TYPE_ERROR,
-                                            CriterionScore,
-                                            EvaluationCriterion,
-                                            EvaluationPeriodType,
-                                            SupplierEvaluation)
+    CriterionScoreIn,
+    EvaluationCriterionIn,
+    EvaluationCriterionPatchIn,
+    SupplierEvaluationIn,
+    SupplierEvaluationPatchIn,
+    serialize_evaluation_criterion,
+    serialize_evaluation_history,
+    serialize_evaluation_summary,
+    serialize_supplier_evaluation,
+    serialize_supplier_evaluation_detail,
+)
+from src.supplier.models.evaluation import (
+    MIXED_PERIOD_TYPE_ERROR,
+    CriterionScore,
+    EvaluationCriterion,
+    EvaluationPeriodType,
+    SupplierEvaluation,
+)
 
 router = Router(tags=["evaluation"])
 
@@ -58,10 +67,7 @@ def _validate_period_payload(data: dict) -> None:
     if period_type is None or period_number is None:
         return
 
-    if (
-        period_type == EvaluationPeriodType.QUADRIMESTER
-        and period_number in [1, 2, 3]
-    ):
+    if period_type == EvaluationPeriodType.QUADRIMESTER and period_number in [1, 2, 3]:
         return
     if period_type == EvaluationPeriodType.SEMESTER and period_number in [1, 2]:
         return
@@ -101,20 +107,19 @@ def _extract_json_payload(request) -> dict:
 def _serialize_integrity_error(error: IntegrityError) -> str:
     error_text = str(error).lower()
     # PostgreSQL: named constraint in error
-    if "supplier_eval_supplier_year_type_number_uniq" in error_text:
-        return DUPLICATE_PERIOD_ERROR
     if "supplier_eval_year_cycle_unique" in error_text:
         return str(MIXED_PERIOD_TYPE_ERROR)
-    if "supplier_eval_period_type_valid" in error_text:
-        return INVALID_PERIOD_ERROR
-    if "supplier_eval_period_number_by_type_valid" in error_text:
+    if (
+        "supplier_eval_period_type_valid" in error_text
+        or "supplier_eval_period_number_by_type_valid" in error_text
+    ):
         return INVALID_PERIOD_ERROR
     # SQLite: column names instead of named constraints
     if (
         "supplier_evaluation.supplier_id" in error_text
         and "supplier_evaluation.period_type" in error_text
         and "supplier_evaluation.period_number" in error_text
-    ):
+    ) or "supplier_eval_supplier_year_type_number_uniq" in error_text:
         return DUPLICATE_PERIOD_ERROR
     if "supplier_evaluation_year_cycle" in error_text:
         return str(MIXED_PERIOD_TYPE_ERROR)
@@ -196,8 +201,7 @@ def list_criteria(
 @router.post("/criteria/", url_name="evaluation-criteria-create-v1")
 def create_criterion(request, payload: EvaluationCriterionIn):
     """Create a new evaluation criterion."""
-    criterion = EvaluationCriterion.objects.create(
-        **payload.model_dump(by_alias=False))
+    criterion = EvaluationCriterion.objects.create(**payload.model_dump(by_alias=False))
     return JsonResponse(serialize_evaluation_criterion(criterion), status=201)
 
 
@@ -286,16 +290,14 @@ def create_evaluation(request):
         with transaction.atomic():
             evaluation = SupplierEvaluation.objects.create(**data)
             CriterionScore.objects.bulk_create(
-                [CriterionScore(evaluation=evaluation, **score)
-                 for score in scores]
+                [CriterionScore(evaluation=evaluation, **score) for score in scores]
             )
             evaluation.save()
     except (IntegrityError, DjangoValidationError) as exc:
         logger.exception("Falha ao criar avaliacao de fornecedor")
         if isinstance(exc, DjangoValidationError):
             detail = (
-                exc.message_dict.get(
-                    "period_type", [str(MIXED_PERIOD_TYPE_ERROR)])[0]
+                exc.message_dict.get("period_type", [str(MIXED_PERIOD_TYPE_ERROR)])[0]
                 if hasattr(exc, "message_dict")
                 else str(exc)
             )
@@ -325,8 +327,7 @@ def put_evaluation(request, pk: int):
     scores = data.pop("criterion_scores", None)
     _check_duplicate_evaluation(
         supplier_id=data.get("supplier_id", evaluation.supplier_id),
-        evaluation_year=data.get(
-            "evaluation_year", evaluation.evaluation_year),
+        evaluation_year=data.get("evaluation_year", evaluation.evaluation_year),
         period_type=data.get("period_type", evaluation.period_type),
         period_number=data.get("period_number", evaluation.period_number),
         exclude_pk=pk,
@@ -337,16 +338,14 @@ def put_evaluation(request, pk: int):
         scores = _normalize_score_data(scores)
         evaluation.criterion_scores.all().delete()
         CriterionScore.objects.bulk_create(
-            [CriterionScore(evaluation=evaluation, **score)
-             for score in scores]
+            [CriterionScore(evaluation=evaluation, **score) for score in scores]
         )
     try:
         evaluation.save()
     except (IntegrityError, DjangoValidationError) as exc:
         if isinstance(exc, DjangoValidationError):
             detail = (
-                exc.message_dict.get(
-                    "period_type", [str(MIXED_PERIOD_TYPE_ERROR)])[0]
+                exc.message_dict.get("period_type", [str(MIXED_PERIOD_TYPE_ERROR)])[0]
                 if hasattr(exc, "message_dict")
                 else str(exc)
             )
@@ -360,8 +359,7 @@ def patch_evaluation(request, pk: int):
     """Partially update a supplier evaluation."""
     payload = _extract_json_payload(request)
     evaluation = get_object_or_404(SupplierEvaluation, pk=pk)
-    validated_payload = _parse_supplier_evaluation_payload(
-        payload, partial=True)
+    validated_payload = _parse_supplier_evaluation_payload(payload, partial=True)
     data = _normalize_evaluation_data(
         validated_payload.model_dump(by_alias=False, exclude_unset=True)
     )
@@ -379,16 +377,14 @@ def patch_evaluation(request, pk: int):
         scores = _normalize_score_data(scores)
         evaluation.criterion_scores.all().delete()
         CriterionScore.objects.bulk_create(
-            [CriterionScore(evaluation=evaluation, **score)
-             for score in scores]
+            [CriterionScore(evaluation=evaluation, **score) for score in scores]
         )
     try:
         evaluation.save()
     except (IntegrityError, DjangoValidationError) as exc:
         if isinstance(exc, DjangoValidationError):
             detail = (
-                exc.message_dict.get(
-                    "period_type", [str(MIXED_PERIOD_TYPE_ERROR)])[0]
+                exc.message_dict.get("period_type", [str(MIXED_PERIOD_TYPE_ERROR)])[0]
                 if hasattr(exc, "message_dict")
                 else str(exc)
             )
@@ -438,8 +434,7 @@ def add_criterion_scores(request, evaluation_id: int, payload: list[CriterionSco
     """Append criterion scores to an existing evaluation."""
     evaluation = get_object_or_404(SupplierEvaluation, pk=evaluation_id)
     for score in payload:
-        score_data = _normalize_score_data(
-            [score.model_dump(by_alias=False)])[0]
+        score_data = _normalize_score_data([score.model_dump(by_alias=False)])[0]
         CriterionScore.objects.create(
             evaluation=evaluation,
             **score_data,

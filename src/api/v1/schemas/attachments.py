@@ -1,6 +1,6 @@
 """Attachment schemas for Ninja v1."""
 
-from typing import Optional
+from typing import Optional, Union
 
 from src.api.v1.schemas.common import CamelSchema
 from src.supplier.models.attachments import (
@@ -73,7 +73,7 @@ def serialize_attachment(instance: SupplierAttachment) -> dict:
 
 
 def serialize_attachment_version(
-    instance: SupplierAttachment | SupplierAttachmentHistory,
+    instance: Union[SupplierAttachment, SupplierAttachmentHistory],
     *,
     is_current: bool,
 ) -> dict:
