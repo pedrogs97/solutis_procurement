@@ -1,6 +1,6 @@
 """Attachment schemas for Ninja v1."""
 
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from src.api.v1.schemas.common import CamelSchema
 from src.supplier.models.attachments import (
@@ -31,6 +31,8 @@ class AttachmentVersionOut(CamelSchema):
     """Serialized attachment version (current or historical)."""
 
     id: int
+    download_id: int
+    source: Literal["current", "history"]
     attachment_type_id: int
     attachment_type_name: str
     file_name: Optional[str] = None
@@ -80,6 +82,8 @@ def serialize_attachment_version(
     """Map current or historical attachment model into versioned API output format."""
     return AttachmentVersionOut(
         id=instance.id,
+        download_id=instance.id,
+        source="current" if is_current else "history",
         attachment_type_id=instance.attachment_type_id,
         attachment_type_name=instance.attachment_type.name,
         file_name=instance.file_name,

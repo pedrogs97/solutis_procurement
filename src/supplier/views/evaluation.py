@@ -118,7 +118,8 @@ class SupplierHistoryView(BaseAPIView):
             "-id",
         )
 
-        serializer = SupplierEvaluationHistorySerializer(evaluations, many=True)
+        serializer = SupplierEvaluationHistorySerializer(
+            evaluations, many=True)
         return Response(serializer.data)
 
 
@@ -138,7 +139,8 @@ class AddCriterionScoresView(BaseAPIView):
 
         if serializer.is_valid():
             for score_data in serializer.validated_data:
-                CriterionScore.objects.create(evaluation=evaluation, **score_data)
+                CriterionScore.objects.create(
+                    evaluation=evaluation, **score_data)
 
             evaluation.save()
 

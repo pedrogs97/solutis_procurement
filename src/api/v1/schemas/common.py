@@ -22,3 +22,17 @@ class DomainRefOut(CamelSchema):
 
     id: int
     name: str
+
+
+class FieldErrorOut(CamelSchema):
+    """Field-level error returned by API validation."""
+
+    field: str | None = None
+    message: str
+
+
+class ErrorOut(CamelSchema):
+    """Standard error response for documented API operations."""
+
+    detail: str
+    errors: list[FieldErrorOut] | None = None

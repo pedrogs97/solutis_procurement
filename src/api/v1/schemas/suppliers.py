@@ -2,11 +2,190 @@
 
 from typing import Any, Optional
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
 from src.supplier.models.supplier import Supplier
 from src.utils.parse import to_camel_case
+
+
+class TimestampedOut(CamelSchema):
+    """Common timestamp fields returned by persisted nested supplier objects."""
+
+    id: int
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class AddressOut(TimestampedOut):
+    """Supplier address response."""
+
+    postal_code: Optional[str] = None
+    number: Optional[int] = None
+    complement: Optional[str] = None
+    street: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    neighbourhood: Optional[str] = None
+
+
+class ContactOut(TimestampedOut):
+    """Supplier contact response."""
+
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+
+class ContractOut(TimestampedOut):
+    """Supplier contract response."""
+
+    object_contract: Optional[str] = None
+    executed_activities: Optional[str] = None
+    contract_start_date: Optional[str] = None
+    contract_end_date: Optional[str] = None
+    contract_type: Optional[str] = None
+    contract_period: Optional[str] = None
+    has_contract_renewal: Optional[bool] = None
+    warning_contract_renewal: Optional[bool] = None
+    warning_contract_period: Optional[str] = None
+    warning_on_termination: Optional[bool] = None
+    warning_on_renewal: Optional[bool] = None
+    warning_on_period: Optional[bool] = None
+
+
+class PaymentDetailsOut(TimestampedOut):
+    """Supplier payment details response."""
+
+    payment_frequency: Optional[str] = None
+    payment_date: Optional[str] = None
+    contract_total_value: Optional[float] = None
+    contract_monthly_value: Optional[float] = None
+    checking_account: Optional[str] = None
+    bank: Optional[str] = None
+    bank_code: Optional[str] = None
+    agency: Optional[str] = None
+    payment_method: Optional[int] = None
+    pix_key_type: Optional[int] = None
+    pix_key: Optional[str] = None
+
+
+class OrganizationalDetailsOut(TimestampedOut):
+    """Supplier organizational details response."""
+
+    cost_center: Optional[str] = None
+    business_unit: Optional[str] = None
+    responsible_executive: Optional[str] = None
+    responsible_manager: Optional[str] = None
+    payer_type: Optional[int] = None
+    business_sector: Optional[int] = None
+    taxpayer_classification: Optional[int] = None
+    public_entity: Optional[int] = None
+
+
+class FiscalDetailsOut(TimestampedOut):
+    """Supplier fiscal details response."""
+
+    iss_withholding: Optional[int] = None
+    iss_regime: Optional[int] = None
+    iss_taxpayer: Optional[bool] = None
+    simples_nacional_participant: Optional[bool] = None
+    cooperative_member: Optional[bool] = None
+    withholding_tax_nature: Optional[int] = None
+
+
+class CompanyInformationOut(TimestampedOut):
+    """Supplier company information response."""
+
+    company_size: Optional[int] = None
+    icms_taxpayer: Optional[int] = None
+    taxation_regime: Optional[int] = None
+    income_type: Optional[int] = None
+    taxation_method: Optional[int] = None
+    customer_type: Optional[int] = None
+    nit: Optional[str] = None
+
+
+class SupplierSituationOut(CamelSchema):
+    """Current supplier situation response."""
+
+    id: int
+    supplier: int
+    status: Optional[DomainRefOut] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class SupplierOut(CamelSchema):
+    """Supplier detail response."""
+
+    id: int
+    name: Optional[str] = None
+    trade_name: Optional[str] = None
+    legal_name: str
+    tax_id: str
+    state_business_registration: Optional[str] = None
+    municipal_business_registration: Optional[str] = None
+    address: Optional[AddressOut] = None
+    contact: Optional[ContactOut] = None
+    payment_details: Optional[PaymentDetailsOut] = None
+    organizational_details: Optional[OrganizationalDetailsOut] = None
+    fiscal_details: Optional[FiscalDetailsOut] = None
+    company_information: Optional[CompanyInformationOut] = None
+    contract: Optional[ContractOut] = None
+    classification: Optional[DomainRefOut] = None
+    category: Optional[DomainRefOut] = None
+    risk_level: Optional[DomainRefOut] = None
+    type: Optional[DomainRefOut] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    situation: Optional[SupplierSituationOut] = None
+    responsibility_matrix: Optional[dict[str, Any]] = None
+
+
+class SupplierStatusSummaryOut(CamelSchema):
+    """Supplier status summary used in list responses."""
+
+    name: Optional[str] = None
+
+
+class SupplierSituationSummaryOut(CamelSchema):
+    """Supplier situation summary used in list responses."""
+
+    status: SupplierStatusSummaryOut
+
+
+class SupplierRiskLevelSummaryOut(CamelSchema):
+    """Supplier risk level summary used in list responses."""
+
+    name: Optional[str] = None
+
+
+class SupplierContractSummaryOut(CamelSchema):
+    """Supplier contract dates used in list responses."""
+
+    contract_start_date: Optional[str] = None
+    contract_end_date: Optional[str] = None
+
+
+class SupplierListItemOut(CamelSchema):
+    """Supplier item returned by paginated list endpoint."""
+
+    id: int
+    legal_name: str
+    tax_id: str
+    situation: SupplierSituationSummaryOut
+    risk_level: SupplierRiskLevelSummaryOut
+    contract: SupplierContractSummaryOut
+
+
+class PaginatedSupplierListOut(CamelSchema):
+    """Paginated supplier list response."""
+
+    count: int
+    next: Optional[str] = None
+    previous: Optional[str] = None
+    results: list[SupplierListItemOut]
 
 
 class AddressPayload(CamelSchema):
@@ -57,8 +236,16 @@ class PaymentDetailsPayload(CamelSchema):
     bank: Optional[str] = None
     bank_code: Optional[str] = None
     agency: Optional[str] = None
-    payment_method_id: Optional[int] = Field(alias="paymentMethod", default=None)
-    pix_key_type_id: Optional[int] = Field(alias="pixKeyType", default=None)
+    payment_method_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "paymentMethod", "payment_method", "payment_method_id"
+        ),
+    )
+    pix_key_type_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("pixKeyType", "pix_key_type", "pix_key_type_id"),
+    )
     pix_key: Optional[str] = None
 
 
@@ -69,36 +256,93 @@ class OrganizationalDetailsPayload(CamelSchema):
     business_unit: Optional[str] = None
     responsible_executive: Optional[str] = None
     responsible_manager: Optional[str] = None
-    payer_type_id: Optional[int] = Field(alias="payerType", default=None)
-    business_sector_id: Optional[int] = Field(alias="businessSector", default=None)
-    taxpayer_classification_id: Optional[int] = Field(
-        alias="taxpayerClassification", default=None
+    payer_type_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("payerType", "payer_type", "payer_type_id"),
     )
-    public_entity_id: Optional[int] = Field(alias="publicEntity", default=None)
+    business_sector_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "businessSector", "business_sector", "business_sector_id"
+        ),
+    )
+    taxpayer_classification_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "taxpayerClassification",
+            "taxpayer_classification",
+            "taxpayer_classification_id",
+        ),
+    )
+    public_entity_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "publicEntity", "public_entity", "public_entity_id"
+        ),
+    )
 
 
 class FiscalDetailsPayload(CamelSchema):
     """Fiscal details payload used in supplier create/update."""
 
-    iss_withholding_id: Optional[int] = Field(alias="issWithholding", default=None)
-    iss_regime_id: Optional[int] = Field(alias="issRegime", default=None)
+    iss_withholding_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "issWithholding", "iss_withholding", "iss_withholding_id"
+        ),
+    )
+    iss_regime_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("issRegime", "iss_regime", "iss_regime_id"),
+    )
     iss_taxpayer: Optional[bool] = None
     simples_nacional_participant: Optional[bool] = None
     cooperative_member: Optional[bool] = None
     withholding_tax_nature_id: Optional[int] = Field(
-        alias="withholdingTaxNature", default=None
+        default=None,
+        validation_alias=AliasChoices(
+            "withholdingTaxNature",
+            "withholding_tax_nature",
+            "withholding_tax_nature_id",
+        ),
     )
 
 
 class CompanyInformationPayload(CamelSchema):
     """Company information payload used in supplier create/update."""
 
-    company_size_id: Optional[int] = Field(alias="companySize", default=None)
-    icms_taxpayer: Optional[bool] = None
-    taxation_regime_id: Optional[int] = Field(alias="taxationRegime", default=None)
-    income_type_id: Optional[int] = Field(alias="incomeType", default=None)
-    taxation_method_id: Optional[int] = Field(alias="taxationMethod", default=None)
-    customer_type_id: Optional[int] = Field(alias="customerType", default=None)
+    company_size_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("companySize", "company_size", "company_size_id"),
+    )
+    icms_taxpayer_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "icmsTaxpayer", "icms_taxpayer", "icms_taxpayer_id"
+        ),
+    )
+    taxation_regime_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "taxationRegime", "taxation_regime", "taxation_regime_id"
+        ),
+    )
+    income_type_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("incomeType", "income_type", "income_type_id"),
+    )
+    taxation_method_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "taxationMethod", "taxation_method", "taxation_method_id"
+        ),
+    )
+    customer_type_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "customerType", "customer_type", "customer_type_id"
+        ),
+    )
     nit: Optional[str] = None
 
 
@@ -110,10 +354,22 @@ class SupplierCreateIn(CamelSchema):
     trade_name: Optional[str] = None
     state_business_registration: Optional[str] = None
     municipal_business_registration: Optional[str] = None
-    classification_id: Optional[int] = Field(alias="classification", default=None)
-    category_id: Optional[int] = Field(alias="category", default=None)
-    risk_level_id: Optional[int] = Field(alias="riskLevel", default=None)
-    type_id: Optional[int] = Field(alias="type", default=None)
+    classification_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("classification", "classification_id"),
+    )
+    category_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("category", "category_id"),
+    )
+    risk_level_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("riskLevel", "risk_level", "risk_level_id"),
+    )
+    type_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("type", "type_id"),
+    )
     address: Optional[AddressPayload] = None
     contact: Optional[ContactPayload] = None
     payment_details: Optional[PaymentDetailsPayload] = None
@@ -131,10 +387,22 @@ class SupplierUpdateIn(CamelSchema):
     trade_name: Optional[str] = None
     state_business_registration: Optional[str] = None
     municipal_business_registration: Optional[str] = None
-    classification_id: Optional[int] = Field(alias="classification", default=None)
-    category_id: Optional[int] = Field(alias="category", default=None)
-    risk_level_id: Optional[int] = Field(alias="riskLevel", default=None)
-    type_id: Optional[int] = Field(alias="type", default=None)
+    classification_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("classification", "classification_id"),
+    )
+    category_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("category", "category_id"),
+    )
+    risk_level_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("riskLevel", "risk_level", "risk_level_id"),
+    )
+    type_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("type", "type_id"),
+    )
     address: Optional[AddressPayload] = None
     contact: Optional[ContactPayload] = None
     payment_details: Optional[PaymentDetailsPayload] = None

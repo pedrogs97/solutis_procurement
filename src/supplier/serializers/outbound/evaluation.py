@@ -16,6 +16,7 @@ from src.supplier.models.evaluation import (
 from src.supplier.serializers.outbound.supplier import SupplierOutSerializer
 
 
+
 class EvaluationCriterionSerializer(BaseSerializer):
     """
     Serializer for EvaluationCriterion model output.
@@ -56,6 +57,7 @@ class SupplierEvaluationSerializer(BaseSerializer):
 
     supplier = SupplierOutSerializer(read_only=True)
     period_label = serializers.CharField(read_only=True)
+    final_classification = serializers.CharField(read_only=True)
 
     class Meta(BaseSerializer.Meta):
         """
@@ -74,6 +76,7 @@ class SupplierEvaluationSerializer(BaseSerializer):
             "evaluation_date",
             "comments",
             "final_score",
+            "final_classification",
         )
 
 
@@ -86,6 +89,7 @@ class SupplierEvaluationDetailSerializer(BaseSerializer):
     supplier = SupplierOutSerializer(read_only=True)
     criterion_scores = CriterionScoreSerializer(many=True, read_only=True)
     period_label = serializers.CharField(read_only=True)
+    final_classification = serializers.CharField(read_only=True)
 
     # Estatísticas de avaliação
     average_score = serializers.SerializerMethodField()
@@ -211,6 +215,7 @@ class SupplierEvaluationHistorySerializer(BaseSerializer):
     """
 
     period_label = serializers.CharField(read_only=True)
+    final_classification = serializers.CharField(read_only=True)
 
     class Meta(BaseSerializer.Meta):
         """
@@ -227,6 +232,7 @@ class SupplierEvaluationHistorySerializer(BaseSerializer):
             "evaluation_date",
             "evaluator_name",
             "final_score",
+            "final_classification",
             "comments",
         )
 

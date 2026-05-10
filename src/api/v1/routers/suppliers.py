@@ -4,7 +4,7 @@ from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from loguru import logger
-from ninja import Query, Router
+from ninja import Query, Router, Status
 from ninja.errors import HttpError
 
 from src.api.v1.controllers.suppliers import (
@@ -13,8 +13,11 @@ from src.api.v1.controllers.suppliers import (
 )
 from src.api.v1.filters.suppliers import SupplierListFilters
 from src.api.v1.pagination import paginate
+from src.api.v1.schemas.common import ErrorOut
 from src.api.v1.schemas.suppliers import (
+    PaginatedSupplierListOut,
     SupplierCreateIn,
+    SupplierOut,
     SupplierUpdateIn,
     serialize_supplier,
 )
@@ -42,7 +45,13 @@ def _supplier_integrity_error_response(exc: IntegrityError) -> JsonResponse:
     return JsonResponse({"detail": "Dados do fornecedor invalidos."}, status=400)
 
 
-@router.post("/suppliers/", url_name="supplier-v1")
+@router.post(
+    "/suppliers/",
+    response={201: SupplierOut, 400: ErrorOut, 403: ErrorOut, 422: ErrorOut},
+    operation_id="createSupplier",
+    by_alias=True,
+    url_name="supplier-v1",
+)
 def create_supplier(request, payload: SupplierCreateIn):
     """Create a supplier and initialize its approval workflow."""
     user_email = str(getattr(request.user, "email", "") or "").strip()
@@ -86,17 +95,29 @@ def create_supplier(request, payload: SupplierCreateIn):
         logger.exception("Falha ao criar fornecedor — IntegrityError")
         return _supplier_integrity_error_response(exc)
 
-    return JsonResponse(serialize_supplier(new_instance), status=201)
+    return Status(201, serialize_supplier(new_instance))
 
 
-@router.get("/suppliers/{pk}/", url_name="supplier-detail-v1")
+@router.get(
+    "/suppliers/{pk}/",
+    response={200: SupplierOut, 404: ErrorOut},
+    operation_id="getSupplier",
+    by_alias=True,
+    url_name="supplier-detail-v1",
+)
 def get_supplier(request, pk: int):
     """Get supplier details by id."""
     supplier = get_object_or_404(Supplier, pk=pk)
     return serialize_supplier(supplier)
 
 
-@router.put("/suppliers/{pk}/", url_name="supplier-update-v1")
+@router.put(
+    "/suppliers/{pk}/",
+    response={200: SupplierOut, 400: ErrorOut, 404: ErrorOut, 422: ErrorOut},
+    operation_id="updateSupplier",
+    by_alias=True,
+    url_name="supplier-update-v1",
+)
 def put_supplier(request, pk: int, payload: SupplierUpdateIn):
     """Update a supplier with full payload semantics."""
     supplier = get_object_or_404(Supplier, pk=pk)
@@ -108,7 +129,13 @@ def put_supplier(request, pk: int, payload: SupplierUpdateIn):
     return serialize_supplier(updated)
 
 
-@router.patch("/suppliers/{pk}/", url_name="supplier-partial-update-v1")
+@router.patch(
+    "/suppliers/{pk}/",
+    response={200: SupplierOut, 400: ErrorOut, 404: ErrorOut, 422: ErrorOut},
+    operation_id="patchSupplier",
+    by_alias=True,
+    url_name="supplier-partial-update-v1",
+)
 def patch_supplier(request, pk: int, payload: SupplierUpdateIn):
     """Partially update a supplier."""
     supplier = get_object_or_404(Supplier, pk=pk)
@@ -120,7 +147,12 @@ def patch_supplier(request, pk: int, payload: SupplierUpdateIn):
     return serialize_supplier(updated)
 
 
-@router.delete("/suppliers/{pk}/", url_name="supplier-delete-v1")
+@router.delete(
+    "/suppliers/{pk}/",
+    response={204: None, 404: ErrorOut},
+    operation_id="deleteSupplier",
+    url_name="supplier-delete-v1",
+)
 def delete_supplier(request, pk: int):
     """Delete a supplier by id."""
     supplier = get_object_or_404(Supplier, pk=pk)
@@ -128,16 +160,19 @@ def delete_supplier(request, pk: int):
     return HttpResponse(status=204)
 
 
-@router.get("/suppliers-list/", url_name="supplier-list-v1")
+@router.get(
+    "/suppliers-list/",
+    response={200: PaginatedSupplierListOut, 422: ErrorOut},
+    operation_id="listSuppliers",
+    by_alias=True,
+    url_name="supplier-list-v1",
+)
 def list_suppliers(
     request,
     filters: Query[SupplierListFilters],
     page: int = 1,
     size: int = 12,
-) -> JsonResponse:
+):
     """List suppliers with filters, search, and pagination."""
     filtered_qs = filters.filter(Supplier.objects.all()).order_by("id")
-    return JsonResponse(
-        paginate(request, filtered_qs, page, size, serialize_supplier_list),
-        status=200,
-    )
+    return paginate(request, filtered_qs, page, size, serialize_supplier_list)

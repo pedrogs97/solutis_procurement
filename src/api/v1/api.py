@@ -12,8 +12,17 @@ from src.api.v1.routers.responsibility_matrix import (
     router as responsibility_matrix_router,
 )
 from src.api.v1.routers.suppliers import router as suppliers_router
+from src.utils.parse import to_camel_case
 
-api_v1 = NinjaAPI(
+
+class ProcurementNinjaAPI(NinjaAPI):
+    """Ninja API with stable operation ids for generated clients."""
+
+    def get_openapi_operation_id(self, operation) -> str:
+        return to_camel_case(operation.view_func.__name__)
+
+
+api_v1 = ProcurementNinjaAPI(
     title="Solutis Procurement API",
     version="1.0.0",
     auth=ProxyHeaderBearerAuth(),

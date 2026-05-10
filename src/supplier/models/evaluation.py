@@ -30,9 +30,11 @@ class EvaluationCriterion(TimestampedModel):
         max_digits=5,
         decimal_places=2,
         verbose_name=_("Peso (%)"),
-        validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
+        validators=[MinValueValidator(
+            Decimal("0")), MaxValueValidator(Decimal("100"))],
     )
-    order = models.PositiveSmallIntegerField(default=0, verbose_name=_("Ordem"))
+    order = models.PositiveSmallIntegerField(
+        default=0, verbose_name=_("Ordem"))
 
     def __str__(self):
         return f"{self.name} - {self.weight}%"
@@ -176,7 +178,8 @@ class SupplierEvaluation(TimestampedModel):
         Keep lock table in sync with existing evaluations for supplier/year.
         """
         existing_period_types = list(
-            cls.objects.filter(supplier_id=supplier_id, evaluation_year=evaluation_year)
+            cls.objects.filter(supplier_id=supplier_id,
+                               evaluation_year=evaluation_year)
             .values_list("period_type", flat=True)
             .distinct()
         )
@@ -239,7 +242,8 @@ class SupplierEvaluation(TimestampedModel):
 
         with transaction.atomic():
             result = super().delete(*args, **kwargs)
-            self.sync_year_cycle_lock(previous_supplier_id, previous_evaluation_year)
+            self.sync_year_cycle_lock(
+                previous_supplier_id, previous_evaluation_year)
 
         return result
 
@@ -286,7 +290,8 @@ class SupplierEvaluation(TimestampedModel):
                 name="supplier_eval_period_number_by_type_valid",
             ),
             models.UniqueConstraint(
-                fields=["supplier", "evaluation_year", "period_type", "period_number"],
+                fields=["supplier", "evaluation_year",
+                        "period_type", "period_number"],
                 name="supplier_eval_supplier_year_type_number_uniq",
             ),
         ]
@@ -314,7 +319,8 @@ class CriterionScore(TimestampedModel):
         max_digits=5,
         decimal_places=2,
         verbose_name=_("Nota (%)"),
-        validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
+        validators=[MinValueValidator(
+            Decimal("0")), MaxValueValidator(Decimal("100"))],
     )
     comments = models.TextField(blank=True, verbose_name=_("Comentários"))
 

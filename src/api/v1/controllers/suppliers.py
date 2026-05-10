@@ -47,7 +47,10 @@ def _create_or_update_related(
     related_obj = getattr(instance, attr_name, None)
     if related_obj:
         for key, value in data.items():
-            setattr(related_obj, key, value)
+            if hasattr(model_cls, key + "_id") and not isinstance(value, Model):
+                setattr(related_obj, key + "_id", value)
+            else:
+                setattr(related_obj, key, value)
         related_obj.save()
     else:
         related_obj = model_cls.objects.create(**data)
@@ -75,7 +78,10 @@ def apply_supplier_payload(
         instance = Supplier.objects.create(**supplier_data)
     else:
         for key, value in supplier_data.items():
-            setattr(instance, key, value)
+            if hasattr(Supplier, key + "_id") and not isinstance(value, Model):
+                setattr(instance, key + "_id", value)
+            else:
+                setattr(instance, key, value)
 
     _create_or_update_related(instance, "address", nested["address"], Address)
     _create_or_update_related(instance, "contact", nested["contact"], Contact)

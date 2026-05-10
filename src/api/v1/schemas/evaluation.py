@@ -130,6 +130,7 @@ def serialize_supplier_evaluation(item: SupplierEvaluation) -> dict:
         ),
         "comments": item.comments,
         "finalScore": _decimal_to_str(item.final_score),
+        "finalClassification": item.final_classification,
     }
 
 
@@ -211,6 +212,7 @@ def serialize_supplier_evaluation_detail(item: SupplierEvaluation) -> dict:
         ),
         "comments": item.comments,
         "finalScore": _decimal_to_str(item.final_score),
+        "finalClassification": item.final_classification,
         "criterionScores": [
             serialize_criterion_score(score)
             for score in item.criterion_scores.select_related("criterion").all()
