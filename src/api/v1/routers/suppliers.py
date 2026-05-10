@@ -22,6 +22,7 @@ from src.api.v1.schemas.suppliers import (
     serialize_supplier,
 )
 from src.supplier.models.approval_workflow import Approver
+from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
 from src.supplier.services.approval_workflow import ApprovalWorkflowService
 
@@ -71,6 +72,7 @@ def create_supplier(request, payload: SupplierCreateIn):
         with transaction.atomic():
             try:
                 new_instance = apply_supplier_payload(None, payload)
+                ResponsibilityMatrix.objects.get_or_create(supplier=new_instance)
             except (TypeError, ValueError) as exc:
                 logger.exception("Falha ao criar fornecedor")
                 raise HttpError(400, "Dados do fornecedor invalidos.") from exc
@@ -174,5 +176,5 @@ def list_suppliers(
     size: int = 12,
 ):
     """List suppliers with filters, search, and pagination."""
-    filtered_qs = filters.filter(Supplier.objects.all()).order_by("id")
+    filtered_qs = filters.filter(Supplier.objects.all()).order_by("-created_at")
     return paginate(request, filtered_qs, page, size, serialize_supplier_list)

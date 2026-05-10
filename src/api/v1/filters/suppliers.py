@@ -13,7 +13,10 @@ from src.supplier.models.supplier import SupplierSituation
 class SupplierListFilters(BaseFilters):
     """Supplier list query filters for Ninja endpoints."""
 
-    name: Annotated[Optional[str], FilterLookup("name__icontains")] = None
+    name: Annotated[
+        Optional[str],
+        FilterLookup(["legal_name__icontains", "trade_name__icontains"]),
+    ] = None
     cnpj: Annotated[Optional[str], FilterLookup("tax_id__icontains")] = None
     risk_level_id: Optional[int] = Field(
         default=None, ge=0, description="Risk level ID", alias="risk"
@@ -26,25 +29,15 @@ class SupplierListFilters(BaseFilters):
         ),
     ] = None
 
-    def _status_values(self) -> List[int]:
+    def _status_names(self) -> List[str]:
         if not self.status:
             return []
-
-        values: List[int] = []
-        for item in self.status.split(","):
-            item = item.strip()
-            if not item:
-                continue
-            try:
-                values.append(int(item))
-            except ValueError:
-                continue
-        return values
+        return [s.strip().upper() for s in self.status.split(",") if s.strip()]
 
     def filter_status(self, value: str) -> Q:
-        """Filter suppliers by the latest situation status using a CSV string."""
-        status_values = self._status_values()
-        if not status_values:
+        """Filter suppliers by the latest situation status name (CSV)."""
+        status_names = self._status_names()
+        if not status_names:
             return Q()
 
         latest_situation_id_subquery = (
@@ -55,7 +48,7 @@ class SupplierListFilters(BaseFilters):
 
         supplier_ids_with_latest_status = SupplierSituation.objects.filter(
             id=Subquery(latest_situation_id_subquery),
-            status__in=status_values,
+            status__name__in=status_names,
         ).values("supplier_id")
 
         return Q(id__in=Subquery(supplier_ids_with_latest_status))

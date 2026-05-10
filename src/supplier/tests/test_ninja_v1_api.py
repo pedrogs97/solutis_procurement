@@ -11,6 +11,10 @@ from src.supplier.models.attachments import DomAttachmentType
 from src.supplier.models.domain import (
     DomBusinessSector,
     DomCategory,
+    DomClassification,
+    DomCompanySize,
+    DomPaymentMethod,
+    DomPixType,
     DomRiskLevel,
     DomTypeSupplier,
 )
@@ -29,6 +33,10 @@ def _auth_client() -> APIClient:
         HTTP_X_AUTHENTICATED_USER_GROUP="Compras",
     )
     return client
+
+
+def _read_streaming_response(response) -> bytes:
+    return b"".join(response.streaming_content)
 
 
 @pytest.mark.django_db
@@ -57,13 +65,173 @@ def test_ninja_v1_create_and_list_suppliers():
 
     create_response = client.post("/api/v1/suppliers/", payload, format="json")
     assert create_response.status_code == status.HTTP_201_CREATED
-    assert create_response.json()["legalName"] == "Fornecedor Ninja"
+    create_data = create_response.json()
+    assert create_data["legalName"] == "Fornecedor Ninja"
+    assert create_data["responsibilityMatrix"] is not None
+    assert ResponsibilityMatrix.objects.filter(
+        supplier_id=create_data["id"],
+    ).exists()
 
     list_response = client.get("/api/v1/suppliers-list/")
     assert list_response.status_code == status.HTTP_200_OK
     list_data = list_response.json()
     assert list_data["count"] >= 1
     assert "results" in list_data
+
+
+@pytest.mark.django_db
+def test_ninja_v1_supplier_openapi_contract_is_explicit():
+    client = APIClient()
+
+    response = client.get("/api/v1/openapi.json")
+
+    assert response.status_code == status.HTTP_200_OK
+    spec = response.json()
+    supplier_collection = spec["paths"]["/api/v1/suppliers/"]
+    supplier_detail = spec["paths"]["/api/v1/suppliers/{pk}/"]
+    supplier_list = spec["paths"]["/api/v1/suppliers-list/"]
+
+    assert supplier_collection["post"]["operationId"] == "createSupplier"
+    assert (
+        spec["paths"]["/api/v1/domain/risk-levels/"]["get"]["operationId"]
+        == "listRiskLevels"
+    )
+    assert (
+        supplier_collection["post"]["responses"]["201"]["content"]["application/json"][
+            "schema"
+        ]["$ref"]
+        == "#/components/schemas/SupplierOut"
+    )
+    assert supplier_detail["patch"]["operationId"] == "patchSupplier"
+    assert (
+        supplier_detail["patch"]["responses"]["200"]["content"]["application/json"][
+            "schema"
+        ]["$ref"]
+        == "#/components/schemas/SupplierOut"
+    )
+    assert (
+        supplier_list["get"]["responses"]["200"]["content"]["application/json"][
+            "schema"
+        ]["$ref"]
+        == "#/components/schemas/PaginatedSupplierListOut"
+    )
+
+    create_schema = spec["components"]["schemas"]["SupplierCreateIn"]
+    out_schema = spec["components"]["schemas"]["SupplierOut"]
+    assert "riskLevel" in create_schema["properties"]
+    assert "riskLevel" in out_schema["properties"]
+    assert "paymentDetails" in out_schema["properties"]
+
+
+@pytest.mark.django_db
+def test_ninja_v1_supplier_create_and_patch_persist_select_fields_after_middleware():
+    baker.make(
+        ApprovalStep,
+        order=1,
+        name="Cadastro inicial",
+        description="Validação inicial",
+        department="Compras",
+        is_mandatory=True,
+    )
+
+    classification = baker.make(DomClassification, name="Fornecedor")
+    classification_2 = baker.make(DomClassification, name="Parceiro")
+    category = baker.make(DomCategory, name="Servico")
+    category_2 = baker.make(DomCategory, name="Produto")
+    risk_level_1 = baker.make(DomRiskLevel, name="Baixo")
+    risk_level_2 = baker.make(DomRiskLevel, name="Alto")
+    supplier_type = baker.make(DomTypeSupplier, name="Pessoa Juridica")
+    supplier_type_2 = baker.make(DomTypeSupplier, name="Pessoa Fisica")
+    business_sector = baker.make(DomBusinessSector, name="Tecnologia")
+    business_sector_2 = baker.make(DomBusinessSector, name="Consultoria")
+    company_size = baker.make(DomCompanySize, name="Grande")
+    company_size_2 = baker.make(DomCompanySize, name="Media")
+    payment_method = baker.make(DomPaymentMethod, name="PIX")
+    payment_method_2 = baker.make(DomPaymentMethod, name="Boleto")
+    pix_type = baker.make(DomPixType, name="CNPJ")
+    pix_type_2 = baker.make(DomPixType, name="E-mail")
+
+    client = _auth_client()
+    payload = {
+        "legalName": "Fornecedor Selects",
+        "taxId": "11122233344477",
+        "classification": classification.pk,
+        "category": category.pk,
+        "riskLevel": risk_level_1.pk,
+        "type": supplier_type.pk,
+        "organizationalDetails": {
+            "businessSector": business_sector.pk,
+        },
+        "companyInformation": {
+            "companySize": company_size.pk,
+        },
+        "paymentDetails": {
+            "paymentMethod": payment_method.pk,
+            "pixKeyType": pix_type.pk,
+        },
+    }
+
+    create_response = client.post("/api/v1/suppliers/", payload, format="json")
+    assert create_response.status_code == status.HTTP_201_CREATED
+    created_payload = create_response.json()
+    supplier_id = created_payload["id"]
+
+    assert created_payload["classification"]["id"] == classification.pk
+    assert created_payload["category"]["id"] == category.pk
+    assert created_payload["riskLevel"]["id"] == risk_level_1.pk
+    assert created_payload["type"]["id"] == supplier_type.pk
+    assert (
+        created_payload["organizationalDetails"]["businessSector"]
+        == business_sector.pk
+    )
+    assert created_payload["companyInformation"]["companySize"] == company_size.pk
+    assert created_payload["paymentDetails"]["paymentMethod"] == payment_method.pk
+    assert created_payload["paymentDetails"]["pixKeyType"] == pix_type.pk
+
+    patch_response = client.patch(
+        f"/api/v1/suppliers/{supplier_id}/",
+        {
+            "classification": classification_2.pk,
+            "category": category_2.pk,
+            "riskLevel": risk_level_2.pk,
+            "type": supplier_type_2.pk,
+            "organizationalDetails": {
+                "businessSector": business_sector_2.pk,
+            },
+            "companyInformation": {
+                "companySize": company_size_2.pk,
+            },
+            "paymentDetails": {
+                "paymentMethod": payment_method_2.pk,
+                "pixKeyType": pix_type_2.pk,
+            },
+        },
+        format="json",
+    )
+
+    assert patch_response.status_code == status.HTTP_200_OK
+    patched_payload = patch_response.json()
+    assert patched_payload["classification"]["id"] == classification_2.pk
+    assert patched_payload["category"]["id"] == category_2.pk
+    assert patched_payload["riskLevel"]["id"] == risk_level_2.pk
+    assert patched_payload["type"]["id"] == supplier_type_2.pk
+    assert (
+        patched_payload["organizationalDetails"]["businessSector"]
+        == business_sector_2.pk
+    )
+    assert patched_payload["companyInformation"]["companySize"] == company_size_2.pk
+    assert patched_payload["paymentDetails"]["paymentMethod"] == payment_method_2.pk
+    assert patched_payload["paymentDetails"]["pixKeyType"] == pix_type_2.pk
+
+    supplier = Supplier.objects.get(pk=supplier_id)
+    assert supplier.classification_id == classification_2.pk
+    assert supplier.category_id == category_2.pk
+    assert supplier.risk_level_id == risk_level_2.pk
+    assert supplier.type_id == supplier_type_2.pk
+    assert supplier.organizational_details.business_sector_id == business_sector_2.pk
+    assert supplier.company_information.company_size_id == company_size_2.pk
+    assert supplier.payment_details.payment_method_id == payment_method_2.pk
+    assert supplier.payment_details.pix_key_type_id == pix_type_2.pk
 
 
 @pytest.mark.django_db
@@ -144,13 +312,18 @@ def test_ninja_v1_attachment_history_by_type():
     versions = history_response.json()
     assert len(versions) == 2
     assert versions[0]["isCurrent"] is True
+    assert versions[0]["source"] == "current"
+    assert versions[0]["downloadId"] == versions[0]["id"]
     assert versions[0]["description"] == "Versao 2"
     assert versions[1]["isCurrent"] is False
+    assert versions[1]["source"] == "history"
+    assert versions[1]["downloadId"] == versions[1]["id"]
     assert versions[1]["description"] == "Versao 1"
 
     history_id = versions[1]["id"]
     history_download = client.get(f"/api/v1/attachments/history-download/{history_id}/")
     assert history_download.status_code == status.HTTP_200_OK
+    assert _read_streaming_response(history_download) == b"fake-content-v1"
 
 
 @pytest.mark.django_db
@@ -283,9 +456,20 @@ def test_ninja_v1_responsibility_matrix_crud_and_delete_blocked():
     )
     assert create_response.status_code == status.HTTP_201_CREATED
 
+    upsert_response = client.post(
+        "/api/v1/responsibility-matrix/",
+        {
+            "supplier": supplier.pk,
+            "contractRequestAdministrative": "C",
+        },
+        format="json",
+    )
+    assert upsert_response.status_code == status.HTTP_200_OK
+    assert upsert_response.json()["contractRequestAdministrative"] == "C"
+
     detail_response = client.get(f"/api/v1/responsibility-matrix/{supplier.pk}/")
     assert detail_response.status_code == status.HTTP_200_OK
-    assert detail_response.json()["contractRequestAdministrative"] == "R"
+    assert detail_response.json()["contractRequestAdministrative"] == "C"
 
     patch_response = client.patch(
         f"/api/v1/responsibility-matrix/{supplier.pk}/",

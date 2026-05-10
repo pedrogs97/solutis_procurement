@@ -43,21 +43,19 @@ def _update_matrix(instance: ResponsibilityMatrix, data: dict):
 
 @router.post("/responsibility-matrix/", url_name="responsibility-matrix-v1")
 def create_responsibility_matrix(request):
-    """Create a responsibility matrix for a supplier."""
+    """Create or update a responsibility matrix for a supplier."""
     raw_data = get_request_data(request)
     payload = ResponsibilityMatrixIn.model_validate(raw_data)
     if not payload.supplier:
         raise HttpError(400, "supplier: este campo e obrigatorio.")
 
     supplier = get_object_or_404(Supplier, pk=payload.supplier)
-    if hasattr(supplier, "responsibility_matrix") and supplier.responsibility_matrix:
-        raise HttpError(
-            400, "Matriz de responsabilidade já existe para este fornecedor."
-        )
-
-    matrix = ResponsibilityMatrix.objects.create(supplier=supplier)
+    matrix, created = ResponsibilityMatrix.objects.get_or_create(supplier=supplier)
     matrix = _update_matrix(matrix, raw_data)
-    return JsonResponse(serialize_responsibility_matrix(matrix), status=201)
+    return JsonResponse(
+        serialize_responsibility_matrix(matrix),
+        status=201 if created else 200,
+    )
 
 
 @router.get("/responsibility-matrix/{pk}/", url_name="responsibility-matrix-detail-v1")
