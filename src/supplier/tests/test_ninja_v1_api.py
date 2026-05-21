@@ -168,6 +168,7 @@ def test_ninja_v1_supplier_create_and_patch_persist_select_fields_after_middlewa
         "paymentDetails": {
             "paymentMethod": payment_method.pk,
             "pixKeyType": pix_type.pk,
+            "paymentDate": "05 de cada mês",
         },
     }
 
@@ -181,12 +182,12 @@ def test_ninja_v1_supplier_create_and_patch_persist_select_fields_after_middlewa
     assert created_payload["riskLevel"]["id"] == risk_level_1.pk
     assert created_payload["type"]["id"] == supplier_type.pk
     assert (
-        created_payload["organizationalDetails"]["businessSector"]
-        == business_sector.pk
+        created_payload["organizationalDetails"]["businessSector"] == business_sector.pk
     )
     assert created_payload["companyInformation"]["companySize"] == company_size.pk
     assert created_payload["paymentDetails"]["paymentMethod"] == payment_method.pk
     assert created_payload["paymentDetails"]["pixKeyType"] == pix_type.pk
+    assert created_payload["paymentDetails"]["paymentDate"] == "05 de cada mês"
 
     patch_response = client.patch(
         f"/api/v1/suppliers/{supplier_id}/",
@@ -204,6 +205,7 @@ def test_ninja_v1_supplier_create_and_patch_persist_select_fields_after_middlewa
             "paymentDetails": {
                 "paymentMethod": payment_method_2.pk,
                 "pixKeyType": pix_type_2.pk,
+                "paymentDate": "Dia 10",
             },
         },
         format="json",
@@ -222,6 +224,7 @@ def test_ninja_v1_supplier_create_and_patch_persist_select_fields_after_middlewa
     assert patched_payload["companyInformation"]["companySize"] == company_size_2.pk
     assert patched_payload["paymentDetails"]["paymentMethod"] == payment_method_2.pk
     assert patched_payload["paymentDetails"]["pixKeyType"] == pix_type_2.pk
+    assert patched_payload["paymentDetails"]["paymentDate"] == "Dia 10"
 
     supplier = Supplier.objects.get(pk=supplier_id)
     assert supplier.classification_id == classification_2.pk
@@ -232,6 +235,7 @@ def test_ninja_v1_supplier_create_and_patch_persist_select_fields_after_middlewa
     assert supplier.company_information.company_size_id == company_size_2.pk
     assert supplier.payment_details.payment_method_id == payment_method_2.pk
     assert supplier.payment_details.pix_key_type_id == pix_type_2.pk
+    assert supplier.payment_details.payment_date == "Dia 10"
 
 
 @pytest.mark.django_db
