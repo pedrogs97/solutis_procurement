@@ -132,6 +132,13 @@ class SupplierAttachmentHistory(TimestampedModel):
             return os.path.basename(self.file.name)
         return None
 
+    @property
+    def storage_path(self):
+        """Returns the full path of the file in storage."""
+        if self.file:
+            return self.file.path
+        return None
+
     class Meta(TimestampedModel.Meta):
         """Meta options for SupplierAttachmentHistory."""
 

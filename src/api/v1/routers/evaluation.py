@@ -3,6 +3,7 @@
 # pylint: disable=duplicate-code
 
 import json
+from datetime import date
 from typing import Optional
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -250,6 +251,8 @@ def list_evaluations(
     evaluation_year: Optional[int] = Query(None, alias="evaluationYear"),
     period_type: Optional[str] = Query(None, alias="periodType"),
     period_number: Optional[int] = Query(None, alias="periodNumber"),
+    start_period: Optional[date] = Query(None, alias="startPeriod"),
+    end_period: Optional[date] = Query(None, alias="endPeriod"),
 ):
     """List supplier evaluations with filters and pagination."""
     queryset = SupplierEvaluation.objects.select_related("supplier").all()
@@ -261,6 +264,10 @@ def list_evaluations(
         queryset = queryset.filter(period_type=period_type)
     if period_number is not None:
         queryset = queryset.filter(period_number=period_number)
+    if start_period is not None:
+        queryset = queryset.filter(evaluation_date__gte=start_period)
+    if end_period is not None:
+        queryset = queryset.filter(evaluation_date__lte=end_period)
     queryset = queryset.order_by(
         "-evaluation_year",
         "period_type",

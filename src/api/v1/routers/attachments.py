@@ -174,6 +174,9 @@ def download_attachment_history(request, pk: int):
     if not attachment.file:
         return JsonResponse({"detail": "Arquivo nao encontrado"}, status=404)
 
+    if attachment.storage_path and not os.path.exists(attachment.storage_path):
+        return JsonResponse({"detail": "Arquivo nao existe no servidor"}, status=404)
+
     try:
         content_type, _ = mimetypes.guess_type(attachment.file.name)
         if not content_type:

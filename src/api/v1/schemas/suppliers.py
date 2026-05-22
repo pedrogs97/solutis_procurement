@@ -5,6 +5,7 @@ from typing import Any, Optional
 from pydantic import AliasChoices, Field
 
 from src.api.v1.schemas.common import CamelSchema, DomainRefOut
+from src.api.v1.schemas.responsibility_matrix import serialize_responsibility_matrix
 from src.supplier.models.supplier import Supplier
 from src.utils.parse import to_camel_case
 
@@ -478,21 +479,9 @@ def serialize_supplier(instance: Supplier) -> dict[str, Any]:
         data["situation"] = None
 
     if hasattr(instance, "responsibility_matrix") and instance.responsibility_matrix:
-        matrix_data = {}
-        for (
-            field
-        ) in (
-            instance.responsibility_matrix._meta.fields
-        ):  # pylint: disable=protected-access
-            if field.name in {"supplier"}:
-                continue
-            value = getattr(instance.responsibility_matrix, field.name)
-            matrix_data[field.name] = (
-                value.isoformat() if hasattr(value, "isoformat") else value
-            )
-        data["responsibilityMatrix"] = CamelSchema.model_validate(
-            matrix_data
-        ).model_dump(by_alias=True)
+        data["responsibilityMatrix"] = serialize_responsibility_matrix(
+            instance.responsibility_matrix
+        )
     else:
         data["responsibilityMatrix"] = None
 
