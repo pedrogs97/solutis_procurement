@@ -42,6 +42,10 @@ DUPLICATE_PERIOD_ERROR = (
     "Já existe uma avaliação para este fornecedor no período selecionado."
 )
 INVALID_PERIOD_ERROR = "Combinação inválida para tipo e número do período."
+MASTER_GROUP_NAME = "MASTER"
+MASTER_ONLY_ERROR = (
+    "Apenas usuários do grupo Master podem editar ou excluir avaliações."
+)
 
 
 def _normalize_evaluation_data(data: dict) -> dict:
@@ -103,6 +107,15 @@ def _extract_json_payload(request) -> dict:
         raise HttpError(400, "Payload deve ser um objeto JSON.")
 
     return payload
+
+
+def _require_master_group(request) -> None:
+    """Require the authenticated proxy user to belong to the Master group."""
+    user = getattr(request, "user", None)
+    group = str(getattr(user, "group", "") or "").strip()
+
+    if group.upper() != MASTER_GROUP_NAME:
+        raise HttpError(403, MASTER_ONLY_ERROR)
 
 
 def _serialize_integrity_error(error: IntegrityError) -> str:
@@ -325,6 +338,7 @@ def get_evaluation(request, pk: int):
 @router.put("/evaluations/{pk}/", url_name="evaluation-update-v1")
 def put_evaluation(request, pk: int):
     """Update a supplier evaluation."""
+    _require_master_group(request)
     payload = _extract_json_payload(request)
     evaluation = get_object_or_404(SupplierEvaluation, pk=pk)
     validated_payload = _parse_supplier_evaluation_payload(payload)
@@ -364,6 +378,7 @@ def put_evaluation(request, pk: int):
 @router.patch("/evaluations/{pk}/", url_name="evaluation-partial-v1")
 def patch_evaluation(request, pk: int):
     """Partially update a supplier evaluation."""
+    _require_master_group(request)
     payload = _extract_json_payload(request)
     evaluation = get_object_or_404(SupplierEvaluation, pk=pk)
     validated_payload = _parse_supplier_evaluation_payload(payload, partial=True)
@@ -403,6 +418,7 @@ def patch_evaluation(request, pk: int):
 @router.delete("/evaluations/{pk}/", url_name="evaluation-delete-v1")
 def delete_evaluation(request, pk: int):
     """Delete a supplier evaluation."""
+    _require_master_group(request)
     evaluation = get_object_or_404(SupplierEvaluation, pk=pk)
     evaluation.delete()
     return HttpResponse(status=204)
@@ -439,6 +455,7 @@ def supplier_history(request, supplier: Optional[int] = None):
 )
 def add_criterion_scores(request, evaluation_id: int, payload: list[CriterionScoreIn]):
     """Append criterion scores to an existing evaluation."""
+    _require_master_group(request)
     evaluation = get_object_or_404(SupplierEvaluation, pk=evaluation_id)
     for score in payload:
         score_data = _normalize_score_data([score.model_dump(by_alias=False)])[0]

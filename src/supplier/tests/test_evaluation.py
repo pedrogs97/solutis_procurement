@@ -231,6 +231,13 @@ class SupplierEvaluationViewSetTestCase(BaseEvaluationViewTestCase):
         self.assertEqual(data["results"][0]["periodNumber"], 1)
 
     def test_add_criterion_scores_action(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer test-token",
+            HTTP_X_AUTHENTICATED_USER_ID="1",
+            HTTP_X_AUTHENTICATED_USER_EMAIL="tests@solutis.com.br",
+            HTTP_X_AUTHENTICATED_USER_FULL_NAME="Test User",
+            HTTP_X_AUTHENTICATED_USER_GROUP="MASTER",
+        )
         new_evaluation = SupplierEvaluation.objects.create(
             supplier=self.supplier,
             evaluation_year=2026,

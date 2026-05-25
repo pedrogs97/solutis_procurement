@@ -18,19 +18,19 @@ from src.supplier.models.domain import (
     DomRiskLevel,
     DomTypeSupplier,
 )
-from src.supplier.models.evaluation import EvaluationCriterion
+from src.supplier.models.evaluation import EvaluationCriterion, SupplierEvaluation
 from src.supplier.models.responsibility_matrix import ResponsibilityMatrix
 from src.supplier.models.supplier import Supplier
 
 
-def _auth_client() -> APIClient:
+def _auth_client(group: str = "Compras") -> APIClient:
     client = APIClient()
     client.credentials(
         HTTP_AUTHORIZATION="Bearer test-token",
         HTTP_X_AUTHENTICATED_USER_ID="1",
         HTTP_X_AUTHENTICATED_USER_EMAIL="tests@solutis.com.br",
         HTTP_X_AUTHENTICATED_USER_FULL_NAME="Test User",
-        HTTP_X_AUTHENTICATED_USER_GROUP="Compras",
+        HTTP_X_AUTHENTICATED_USER_GROUP=group,
     )
     return client
 
@@ -638,7 +638,7 @@ def test_ninja_v1_evaluation_put_with_evaluation_date_no_attribute_error():
         category=baker.make(DomCategory, name="Categoria PUT"),
         type=baker.make(DomTypeSupplier, name="Tipo PUT"),
     )
-    client = _auth_client()
+    client = _auth_client(group="MASTER")
 
     create_response = client.post(
         "/api/v1/evaluation/evaluations/",
@@ -680,7 +680,7 @@ def test_ninja_v1_evaluation_patch_with_evaluation_date_no_attribute_error():
         category=baker.make(DomCategory, name="Categoria PATCH"),
         type=baker.make(DomTypeSupplier, name="Tipo PATCH"),
     )
-    client = _auth_client()
+    client = _auth_client(group="MASTER")
 
     create_response = client.post(
         "/api/v1/evaluation/evaluations/",
@@ -703,6 +703,73 @@ def test_ninja_v1_evaluation_patch_with_evaluation_date_no_attribute_error():
     )
     assert patch_response.status_code == status.HTTP_200_OK
     assert patch_response.json()["evaluationDate"] == "2026-02-15"
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_update_requires_master_group():
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor Update Master",
+        tax_id="11122233300004",
+        category=baker.make(DomCategory, name="Categoria Update Master"),
+        type=baker.make(DomTypeSupplier, name="Tipo Update Master"),
+    )
+    evaluation = baker.make(
+        SupplierEvaluation,
+        supplier=supplier,
+        evaluation_year=2026,
+        period_type="QUADRIMESTER",
+        period_number=1,
+        evaluator_name="Avaliador",
+    )
+    client = _auth_client(group="Compras")
+
+    response = client.put(
+        f"/api/v1/evaluation/evaluations/{evaluation.pk}/",
+        {
+            "supplier": supplier.pk,
+            "evaluationYear": 2026,
+            "periodType": "QUADRIMESTER",
+            "periodNumber": 1,
+            "evaluatorName": "Avaliador sem master",
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    evaluation.refresh_from_db()
+    assert evaluation.evaluator_name == "Avaliador"
+
+
+@pytest.mark.django_db
+def test_ninja_v1_evaluation_delete_requires_master_group():
+    supplier = baker.make(
+        Supplier,
+        legal_name="Fornecedor Delete Master",
+        tax_id="11122233300005",
+        category=baker.make(DomCategory, name="Categoria Delete Master"),
+        type=baker.make(DomTypeSupplier, name="Tipo Delete Master"),
+    )
+    evaluation = baker.make(
+        SupplierEvaluation,
+        supplier=supplier,
+        evaluation_year=2026,
+        period_type="QUADRIMESTER",
+        period_number=1,
+        evaluator_name="Avaliador",
+    )
+
+    denied_response = _auth_client(group="Compras").delete(
+        f"/api/v1/evaluation/evaluations/{evaluation.pk}/"
+    )
+    assert denied_response.status_code == status.HTTP_403_FORBIDDEN
+    assert SupplierEvaluation.objects.filter(pk=evaluation.pk).exists()
+
+    allowed_response = _auth_client(group="MASTER").delete(
+        f"/api/v1/evaluation/evaluations/{evaluation.pk}/"
+    )
+    assert allowed_response.status_code == status.HTTP_204_NO_CONTENT
+    assert not SupplierEvaluation.objects.filter(pk=evaluation.pk).exists()
 
 
 @pytest.mark.django_db
